@@ -6,6 +6,9 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/AlbinoDrought/creamy-videos/files"
+	"github.com/AlbinoDrought/creamy-videos/streamers"
 )
 
 func main() {
@@ -13,12 +16,12 @@ func main() {
 	directory := flag.String("d", ".", "the directory of static file to host")
 	flag.Parse()
 
-	fileServer := http.FileServer(TransformedFileSystem{
-		fs: http.Dir(*directory),
-		transformer: func(file http.File) io.Reader {
-			return XorifyReader(file, 0x69)
+	fileServer := http.FileServer(files.TransformFileSystem(
+		http.Dir(*directory),
+		func(file http.File) io.Reader {
+			return streamers.XorifyReader(file, 0x69)
 		},
-	})
+	))
 	http.Handle("/statics/", http.StripPrefix(strings.TrimRight("/statics/", "/"), fileServer))
 
 	log.Printf("Serving %s on HTTP port: %s\n", *directory, *port)
