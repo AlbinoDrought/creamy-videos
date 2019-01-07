@@ -22,7 +22,7 @@ func main() {
 			return streamers.XorifyReader(file, 0x69)
 		},
 	))
-	http.Handle("/statics/", http.StripPrefix(strings.TrimRight("/statics/", "/"), fileServer))
+	http.Handle("/static/", http.StripPrefix(strings.TrimRight("/static/", "/"), fileServer))
 
 	log.Printf("Serving %s on HTTP port: %s\n", *directory, *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
