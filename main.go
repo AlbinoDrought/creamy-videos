@@ -7,18 +7,21 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
 	"github.com/AlbinoDrought/creamy-videos/streamers"
+
+	_ "net/http/pprof"
 )
-import _ "net/http/pprof"
 
 type UploadTransformer = func(io.Reader) io.Reader
 
-const maxMultipartFormSize = 1024 * 1024 // 1KB
+const maxMultipartFormSize = 1024 * 1024 // 1MB
 
 var videoRepo VideoRepo = NewDummyVideoRepo()
+var transformedFileSystem files.TransformedFileSystem
 
 func uploadFileHandler(uploadTransformer UploadTransformer) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -66,19 +69,58 @@ func uploadFileHandler(uploadTransformer UploadTransformer) http.HandlerFunc {
 	})
 }
 
+const videosPerPage = 30
+
+func listVideosHandler() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+
+		page := r.URL.Query().Get("page")
+		if len(page) <= 0 {
+			page = "1"
+		}
+		pageInt, err := strconv.Atoi(page)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		limit := videosPerPage
+		offset := videosPerPage * (pageInt - 1)
+		if offset < 0 {
+			offset = 0
+		}
+
+		videos, err := videoRepo.All(uint(limit), uint(offset))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(videos)
+	})
+}
+
 func main() {
 	port := flag.String("p", "3000", "port to serve on")
 	directory := flag.String("d", ".", "the directory of static file to host")
 	flag.Parse()
 
-	fileServer := http.FileServer(files.TransformFileSystem(
+	transformedFileSystem = files.TransformFileSystem(
 		http.Dir(*directory),
 		func(file http.File) io.Reader {
 			return streamers.XorifyReader(file, 0x69)
 		},
-	))
+	)
+
+	fileServer := http.FileServer(transformedFileSystem)
 
 	http.Handle("/static/", http.StripPrefix(strings.TrimRight("/static/", "/"), fileServer))
+	http.HandleFunc(
+		"/api/video",
+		listVideosHandler(),
+	)
 	http.HandleFunc(
 		"/api/upload",
 		uploadFileHandler(func(reader io.Reader) io.Reader {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -40,7 +41,7 @@ type dummyVideoRepo struct {
 
 func NewDummyVideoRepo() *dummyVideoRepo {
 	return &dummyVideoRepo{
-		videos: make([]Video, 32),
+		videos: make([]Video, 0),
 		id:     0,
 	}
 }
@@ -80,6 +81,7 @@ func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error)
 	}
 
 	video.Source = videoPath
+	go eventuallyMakeThumbnail(video)
 
 	return repo.Save(video)
 }
@@ -100,7 +102,7 @@ func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
 		return Video{}, ErrorVideoNotFound
 	}
 
-	repo.videos[video.ID] = video
+	repo.videos[video.ID-1] = video
 	return video, nil
 }
 
@@ -109,9 +111,23 @@ func (repo *dummyVideoRepo) FindById(video uint) (Video, error) {
 		return Video{}, ErrorVideoNotFound
 	}
 
-	return repo.videos[int(video)], nil
+	return repo.videos[int(video)-1], nil
 }
 
 func (repo *dummyVideoRepo) All(limit uint, offset uint) ([]Video, error) {
-	return repo.videos[offset:(limit + offset)], nil
+	fmt.Printf("videos: %+v\n", repo.videos)
+	max := uint(len(repo.videos))
+
+	start := offset
+	if start > max {
+		start = max
+	}
+
+	end := start + limit
+	if end > max {
+		end = max
+	}
+
+	fmt.Printf("listing from %+v to %+v", start, end)
+	return repo.videos[start:end], nil
 }
