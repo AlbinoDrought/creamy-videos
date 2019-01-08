@@ -16,14 +16,12 @@ import (
 	_ "net/http/pprof"
 )
 
-type UploadTransformer = func(io.Reader) io.Reader
-
 const maxMultipartFormSize = 1024 * 1024 // 1MB
 
 var videoRepo VideoRepo = NewDummyVideoRepo()
 var transformedFileSystem files.TransformedFileSystem
 
-func uploadFileHandler(uploadTransformer UploadTransformer) http.HandlerFunc {
+func uploadFileHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
@@ -48,8 +46,6 @@ func uploadFileHandler(uploadTransformer UploadTransformer) http.HandlerFunc {
 			return
 		}
 
-		stream := uploadTransformer(file)
-
 		video := Video{
 			Title:            r.FormValue("title"),
 			Description:      r.FormValue("description"),
@@ -57,7 +53,7 @@ func uploadFileHandler(uploadTransformer UploadTransformer) http.HandlerFunc {
 			Tags:             tags,
 		}
 
-		video, err = videoRepo.Upload(video, stream)
+		video, err = videoRepo.Upload(video, file)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -123,9 +119,7 @@ func main() {
 	)
 	http.HandleFunc(
 		"/api/upload",
-		uploadFileHandler(func(reader io.Reader) io.Reader {
-			return streamers.XorifyReader(reader, 0x69)
-		}),
+		uploadFileHandler(),
 	)
 
 	log.Printf("Serving %s on HTTP port: %s\n", *directory, *port)

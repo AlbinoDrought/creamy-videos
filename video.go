@@ -69,16 +69,7 @@ func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error)
 
 	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
 
-	file, err := os.Create(videoPath)
-	if err != nil {
-		return video, err
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, reader)
-	if err != nil {
-		return video, err
-	}
+	transformedFileSystem.PipeTo(videoPath, reader)
 
 	video.Source = videoPath
 	go eventuallyMakeThumbnail(video)
