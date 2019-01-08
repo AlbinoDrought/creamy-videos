@@ -10,7 +10,9 @@ import (
 )
 
 func makeThumbnailOfExistingFile(existingFile string, outputThumbnail string) error {
-	cmd := exec.Command("ffmpeg", "-i", existingFile, "-vframes", "1", outputThumbnail)
+	// takes first frame
+	// cmd := exec.Command("ffmpeg", "-i", existingFile, "-vframes", "1", outputThumbnail)
+	cmd := exec.Command("ffmpeg", "-i", existingFile, "-vf", "thumbnail,scale=640:-1", "-frames:v", "1", outputThumbnail)
 
 	return cmd.Run()
 }
