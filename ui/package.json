@@ -10,6 +10,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "semantic-ui-css": "^2.4.1",
     "vue": "^2.5.21",
     "vue-router": "^3.0.1",

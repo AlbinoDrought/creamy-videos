@@ -1,9 +1,15 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
+const axios = require('axios');
+
+const client = axios.create({
+  baseURL: 'http://localhost:3000/',
+});
+
 Vue.use(Vuex);
 
-
+/*
 const FakeVideoListing = [
   {
     id: 1,
@@ -56,23 +62,35 @@ const FakeVideoListing = [
   },
 ];
 
-const fakePromiseDelay = (delay = 1000) => new Promise((resolve) => {
+const fakePromiseDelay = (delay = 0) => new Promise((resolve) => {
   setTimeout(() => resolve(), delay);
 });
+*/
 
 export default new Vuex.Store({
   state: {
-    videos: FakeVideoListing,
+    videos: [],
   },
   mutations: {
-
+    setVideos(state, videos) {
+      state.videos = videos; // eslint-disable-line
+    },
   },
   actions: {
-    videos() {
-      return fakePromiseDelay().then(() => FakeVideoListing);
+    videos({ commit }) {
+      return client.get('/api/video')
+        .then(resp => resp.data)
+        .then((videos) => {
+          commit('setVideos', videos);
+          return videos;
+        });
     },
-    video(context, id) {
-      return fakePromiseDelay().then(() => FakeVideoListing.find(v => v.id === id));
+    video({ dispatch }, id) {
+      // todo: replace with actual /api/video/{id}
+      return dispatch('videos').then(videos => videos.find(v => v.id === id));
+    },
+    upload(context, formData) {
+      return client.post('/api/upload', formData);
     },
   },
 });

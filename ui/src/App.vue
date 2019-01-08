@@ -6,7 +6,12 @@
           <img class="logo" src="@/assets/icon.png">
           Creamy Videos
         </a>
-        <a href="/" class="item">Home</a>
+        <router-link :to="{ name: 'home' }" class="item">
+          Home
+        </router-link>
+        <router-link :to="{ name: 'upload' }" class="item">
+          Upload
+        </router-link>
       </div>
     </div>
 

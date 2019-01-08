@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import Home from './views/Home.vue';
 import Watch from './views/Watch.vue';
+import Upload from './views/Upload.vue';
 
 Vue.use(Router);
 
@@ -27,6 +28,11 @@ export default new Router({
       name: 'watch',
       component: Watch,
       props: true,
+    },
+    {
+      path: '/upload',
+      name: 'upload',
+      component: Upload,
     },
   ],
 });
