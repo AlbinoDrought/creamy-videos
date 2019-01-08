@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -40,9 +42,26 @@ type dummyVideoRepo struct {
 }
 
 func NewDummyVideoRepo() *dummyVideoRepo {
+	var videos []Video
+
+	storedDatabase, err := transformedFileSystem.Open("dummyvideos/dummy.json")
+	if err == nil {
+		defer storedDatabase.Close()
+		err = json.NewDecoder(storedDatabase).Decode(&videos)
+		fmt.Printf("videos: %+v %+v\n", videos, err)
+		// continue loading
+	}
+
+	if err != nil {
+		// create new video repo if:
+		// - dummy.json not found
+		// - failed to load dummy.json
+		videos = make([]Video, 0)
+	}
+
 	return &dummyVideoRepo{
-		videos: make([]Video, 0),
-		id:     0,
+		videos: videos,
+		id:     uint(len(videos)),
 	}
 }
 
@@ -94,6 +113,9 @@ func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
 	}
 
 	repo.videos[video.ID-1] = video
+	videoJSON, _ := json.Marshal(&repo.videos)
+	transformedFileSystem.PipeTo("dummyvideos/dummy.json", bytes.NewReader(videoJSON))
+
 	return video, nil
 }
 

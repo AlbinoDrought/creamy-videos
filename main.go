@@ -18,7 +18,7 @@ import (
 
 const maxMultipartFormSize = 1024 * 1024 // 1MB
 
-var videoRepo VideoRepo = NewDummyVideoRepo()
+var videoRepo VideoRepo
 var transformedFileSystem files.TransformedFileSystem
 
 func uploadFileHandler() http.HandlerFunc {
@@ -109,6 +109,8 @@ func main() {
 			return streamers.XorifyReader(reader, 0x69)
 		},
 	)
+
+	videoRepo = NewDummyVideoRepo()
 
 	fileServer := http.FileServer(transformedFileSystem)
 
