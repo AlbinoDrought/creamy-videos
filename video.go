@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path"
@@ -48,7 +47,6 @@ func NewDummyVideoRepo() *dummyVideoRepo {
 	if err == nil {
 		defer storedDatabase.Close()
 		err = json.NewDecoder(storedDatabase).Decode(&videos)
-		fmt.Printf("videos: %+v %+v\n", videos, err)
 		// continue loading
 	}
 
@@ -128,7 +126,6 @@ func (repo *dummyVideoRepo) FindById(video uint) (Video, error) {
 }
 
 func (repo *dummyVideoRepo) All(limit uint, offset uint) ([]Video, error) {
-	fmt.Printf("videos: %+v\n", repo.videos)
 	max := uint(len(repo.videos))
 
 	start := offset
@@ -141,6 +138,5 @@ func (repo *dummyVideoRepo) All(limit uint, offset uint) ([]Video, error) {
 		end = max
 	}
 
-	fmt.Printf("listing from %+v to %+v", start, end)
 	return repo.videos[start:end], nil
 }
