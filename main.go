@@ -17,12 +17,18 @@ import (
 )
 
 const maxMultipartFormSize = 1024 * 1024 // 1MB
+const appUrl = "http://localhost:3000"
 
 var videoRepo VideoRepo
 var transformedFileSystem files.TransformedFileSystem
 
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 func uploadFileHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		enableCors(&w)
 		defer r.Body.Close()
 
 		if err := r.ParseMultipartForm(maxMultipartFormSize); err != nil {
@@ -69,6 +75,7 @@ const videosPerPage = 30
 
 func listVideosHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		enableCors(&w)
 		defer r.Body.Close()
 
 		page := r.URL.Query().Get("page")
@@ -94,7 +101,16 @@ func listVideosHandler() http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(w).Encode(videos)
+		transformedVideos := make([]Video, len(videos))
+		for i, video := range videos {
+			video.Source = appUrl + "/static/" + video.Source
+			if len(video.Thumbnail) > 0 {
+				video.Thumbnail = appUrl + "/static/" + video.Thumbnail
+			}
+			transformedVideos[i] = video
+		}
+
+		json.NewEncoder(w).Encode(transformedVideos)
 	})
 }
 
@@ -111,6 +127,14 @@ func main() {
 	)
 
 	videoRepo = NewDummyVideoRepo()
+
+	// ghetto thumbnail regen
+	/*
+		videos, _ := videoRepo.All(1000, 0)
+		for _, video := range videos {
+			go eventuallyMakeThumbnail(video)
+		}
+	*/
 
 	fileServer := http.FileServer(transformedFileSystem)
 
