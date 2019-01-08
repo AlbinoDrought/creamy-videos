@@ -64,16 +64,9 @@ func eventuallyMakeThumbnail(video Video) {
 	// copy thumbnail to be beside video, save video
 	oldThumbnailPath := path.Join(path.Dir(video.Source), path.Base(newThumbnailPath))
 
-	oldThumbnail, err := os.Create(oldThumbnailPath)
+	err = transformedFileSystem.PipeTo(oldThumbnailPath, createdThumbnail)
 	if err != nil {
 		log.Printf("failed to make old thumbnail: %+v", err)
-		return
-	}
-	defer oldThumbnail.Close()
-
-	_, err = io.Copy(oldThumbnail, createdThumbnail)
-	if err != nil {
-		log.Printf("failed to copy thumbnail: %+v", err)
 		return
 	}
 

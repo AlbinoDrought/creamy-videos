@@ -109,8 +109,8 @@ func main() {
 
 	transformedFileSystem = files.TransformFileSystem(
 		http.Dir(*directory),
-		func(file http.File) io.Reader {
-			return streamers.XorifyReader(file, 0x69)
+		func(reader io.Reader) io.Reader {
+			return streamers.XorifyReader(reader, 0x69)
 		},
 	)
 

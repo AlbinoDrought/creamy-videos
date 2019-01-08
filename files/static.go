@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type FileTransformer = func(http.File) io.Reader
+type FileTransformer = func(io.Reader) io.Reader
 
 // TransformedFile implements http.File but supports
 // transforming the read stream
@@ -55,6 +55,18 @@ func TransformFileSystem(fs http.FileSystem, transformer FileTransformer) Transf
 		fs:          fs,
 		transformer: transformer,
 	}
+}
+
+func (fs TransformedFileSystem) PipeTo(path string, reader io.Reader) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(file, fs.transformer(reader))
+
+	return err
 }
 
 // Open opens file, prevents directory listing
