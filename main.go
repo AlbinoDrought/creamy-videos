@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/AlbinoDrought/creamy-videos/files"
 	"github.com/AlbinoDrought/creamy-videos/streamers"
+	packr "github.com/gobuffalo/packr/v2"
 
 	_ "net/http/pprof"
 )
@@ -19,6 +19,7 @@ import (
 const maxMultipartFormSize = 1024 * 1024 // 1MB
 const appUrl = "http://localhost:3000"
 
+var config Config
 var videoRepo VideoRepo
 var transformedFileSystem files.TransformedFileSystem
 
@@ -103,9 +104,9 @@ func listVideosHandler() http.HandlerFunc {
 
 		transformedVideos := make([]Video, len(videos))
 		for i, video := range videos {
-			video.Source = appUrl + "/static/" + video.Source
+			video.Source = config.AppUrl + config.HttpVideoDirectory + video.Source
 			if len(video.Thumbnail) > 0 {
-				video.Thumbnail = appUrl + "/static/" + video.Thumbnail
+				video.Thumbnail = config.AppUrl + config.HttpVideoDirectory + video.Thumbnail
 			}
 			transformedVideos[i] = video
 		}
@@ -115,12 +116,10 @@ func listVideosHandler() http.HandlerFunc {
 }
 
 func main() {
-	port := flag.String("p", "3000", "port to serve on")
-	directory := flag.String("d", ".", "the directory of static file to host")
-	flag.Parse()
+	config = FillFromEnv()
 
 	transformedFileSystem = files.TransformFileSystem(
-		http.Dir(*directory),
+		config.LocalVideoDirectory,
 		func(reader io.Reader) io.Reader {
 			return streamers.XorifyReader(reader, 0x69)
 		},
@@ -138,7 +137,17 @@ func main() {
 
 	fileServer := http.FileServer(transformedFileSystem)
 
-	http.Handle("/static/", http.StripPrefix(strings.TrimRight("/static/", "/"), fileServer))
+	box := packr.New("spa", "./ui/dist")
+
+	http.Handle("/", http.FileServer(box))
+
+	http.Handle(
+		config.HttpVideoDirectory,
+		http.StripPrefix(
+			strings.TrimRight(config.HttpVideoDirectory, "/"),
+			fileServer,
+		),
+	)
 	http.HandleFunc(
 		"/api/video",
 		listVideosHandler(),
@@ -148,6 +157,8 @@ func main() {
 		uploadFileHandler(),
 	)
 
-	log.Printf("Serving %s on HTTP port: %s\n", *directory, *port)
-	log.Fatal(http.ListenAndServe(":"+*port, nil))
+	log.Printf("Remote URL: %s\n", config.AppUrl)
+	log.Printf("Serving videos from %s on %s\n", config.LocalVideoDirectory, config.HttpVideoDirectory)
+	log.Printf("Listening on %s\n", config.Port)
+	log.Fatal(http.ListenAndServe(":"+config.Port, nil))
 }

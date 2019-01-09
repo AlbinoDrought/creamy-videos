@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -46,19 +47,29 @@ func (tf TransformedFile) Read(p []byte) (n int, err error) {
 // TransformedFileSystem custom file system handler
 type TransformedFileSystem struct {
 	fs          http.FileSystem
+	dir         string
 	transformer FileTransformer
 }
 
 // TransformFileSystem using given FileTransformer
-func TransformFileSystem(fs http.FileSystem, transformer FileTransformer) TransformedFileSystem {
+func TransformFileSystem(dir string, transformer FileTransformer) TransformedFileSystem {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.MkdirAll(dir, os.ModePerm)
+	}
+
 	return TransformedFileSystem{
-		fs:          fs,
+		fs:          http.Dir(dir),
+		dir:         dir,
 		transformer: transformer,
 	}
 }
 
-func (fs TransformedFileSystem) PipeTo(path string, reader io.Reader) error {
-	file, err := os.Create(path)
+func (fs TransformedFileSystem) MkdirAll(dirPath string, perm os.FileMode) error {
+	return os.MkdirAll(path.Join(fs.dir, dirPath), perm)
+}
+
+func (fs TransformedFileSystem) PipeTo(filePath string, reader io.Reader) error {
+	file, err := os.Create(path.Join(fs.dir, filePath))
 	if err != nil {
 		return err
 	}
@@ -67,6 +78,14 @@ func (fs TransformedFileSystem) PipeTo(path string, reader io.Reader) error {
 	_, err = io.Copy(file, fs.transformer(reader))
 
 	return err
+}
+
+func (fs TransformedFileSystem) Stat(name string) (os.FileInfo, error) {
+	return os.Stat(path.Join(fs.dir, name))
+}
+
+func (fs TransformedFileSystem) IsNotExist(err error) bool {
+	return os.IsNotExist(err)
 }
 
 // Open opens file, prevents directory listing

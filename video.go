@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"os"
 	"path"
 	"strconv"
 	"sync"
@@ -43,7 +42,7 @@ type dummyVideoRepo struct {
 func NewDummyVideoRepo() *dummyVideoRepo {
 	var videos []Video
 
-	storedDatabase, err := transformedFileSystem.Open("dummyvideos/dummy.json")
+	storedDatabase, err := transformedFileSystem.Open("dummy.json")
 	if err == nil {
 		defer storedDatabase.Close()
 		err = json.NewDecoder(storedDatabase).Decode(&videos)
@@ -79,9 +78,9 @@ func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error)
 		return video, err
 	}
 
-	rootDir := path.Join(".", "dummyvideos", strconv.Itoa(int(video.ID)))
-	if _, err := os.Stat(rootDir); os.IsNotExist(err) {
-		os.MkdirAll(rootDir, 0600)
+	rootDir := strconv.Itoa(int(video.ID))
+	if _, err := transformedFileSystem.Stat(rootDir); transformedFileSystem.IsNotExist(err) {
+		transformedFileSystem.MkdirAll(rootDir, 0600)
 	}
 
 	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
@@ -112,7 +111,7 @@ func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
 
 	repo.videos[video.ID-1] = video
 	videoJSON, _ := json.Marshal(&repo.videos)
-	transformedFileSystem.PipeTo("dummyvideos/dummy.json", bytes.NewReader(videoJSON))
+	transformedFileSystem.PipeTo("dummy.json", bytes.NewReader(videoJSON))
 
 	return video, nil
 }
