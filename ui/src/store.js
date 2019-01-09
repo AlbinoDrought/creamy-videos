@@ -4,7 +4,7 @@ import Vuex from 'vuex';
 const axios = require('axios');
 
 const client = axios.create({
-  baseURL: 'http://localhost:3000/',
+  baseURL: process.env.VUE_APP_API_URL,
 });
 
 Vue.use(Vuex);
