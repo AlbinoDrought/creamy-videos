@@ -50,7 +50,7 @@ export default {
   data() {
     return {
       title: '',
-      tags: '',
+      tags: 'home',
       description: '',
       file: null,
       loading: false,
@@ -59,6 +59,9 @@ export default {
   methods: {
     handleFileChange(e) {
       this.file = e.target.files[0];
+      if (!this.title) {
+        this.title = this.file.name;
+      }
     },
     upload() {
       this.loading = true;
