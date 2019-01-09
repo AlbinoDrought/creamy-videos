@@ -81,7 +81,7 @@ func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error)
 
 	rootDir := path.Join(".", "dummyvideos", strconv.Itoa(int(video.ID)))
 	if _, err := os.Stat(rootDir); os.IsNotExist(err) {
-		os.Mkdir(rootDir, os.ModePerm)
+		os.MkdirAll(rootDir, 0600)
 	}
 
 	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
