@@ -5,6 +5,10 @@
         <label>Title</label>
         <input type="text" placeholder="Title" v-model="title">
       </div>
+      <div class="ui field">
+        <label>Tags (separated by comma)</label>
+        <input type="text" placeholder="educational, computer science, wizardry" v-model="tags">
+      </div>
 
       <div class="field">
         <label>Description</label>
@@ -37,7 +41,7 @@ export default {
 
       formData.append('title', this.title);
       formData.append('description', this.description);
-      formData.append('tags', this.tags.join(','));
+      formData.append('tags', this.tags);
       formData.append('file', this.file);
 
       return formData;
@@ -46,8 +50,8 @@ export default {
   data() {
     return {
       title: '',
+      tags: '',
       description: '',
-      tags: [],
       file: null,
       loading: false,
     };

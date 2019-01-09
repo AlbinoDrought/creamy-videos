@@ -85,6 +85,10 @@ export default new Vuex.Store({
           return videos;
         });
     },
+    tagged({ dispatch }, tag) {
+      // todo: replace with actual api implementation
+      return dispatch('videos').then(videos => videos.filter(v => v.tags.includes(tag)));
+    },
     video({ dispatch }, id) {
       // todo: replace with actual /api/video/{id}
       return dispatch('videos').then(videos => videos.find(v => v.id === id));
