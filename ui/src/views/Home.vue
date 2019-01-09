@@ -20,7 +20,7 @@ export default {
     };
   },
   mounted() {
-    this.$store.dispatch('videos').then(videos => {
+    this.$store.dispatch('tagged', 'home').then(videos => {
       this.videos = videos;
       this.loading = false;
     });

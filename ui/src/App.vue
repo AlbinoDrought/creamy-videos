@@ -12,6 +12,15 @@
         <router-link :to="{ name: 'upload' }" class="item">
           Upload
         </router-link>
+
+        <div class="right menu">
+          <div class="borderless item">
+            <div class="ui inverted transparent icon input" @keypress.enter="search">
+              <input type="text" placeholder="Search..." v-model="searchText">
+              <i class="search link icon" @click.prevent="search" />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -20,6 +29,27 @@
     </div>
   </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      searchText: '',
+    };
+  },
+  
+  methods: {
+    search() {
+      this.$router.push({
+        name: 'search',
+        query: {
+          text: this.searchText,
+        },
+      });
+    },
+  },
+};
+</script>
 
 <style lang="scss">
 #app>.ui.main.container {
