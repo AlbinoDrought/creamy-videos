@@ -99,9 +99,10 @@ func (fs TransformedFileSystem) Open(path string) (http.File, error) {
 	s, err := f.Stat()
 	if s.IsDir() {
 		index := strings.TrimSuffix(path, "/") + "/index.html"
-		if _, err := fs.fs.Open(index); err != nil {
+		if _, err := fs.fs.Open(index); err != nil { // possible mem leak here?
 			return nil, err
 		}
+		// above fs.fs.Open file is never closed
 	}
 
 	return TransformedFile{
