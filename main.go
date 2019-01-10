@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"runtime/debug"
 	"strconv"
 	"strings"
 
@@ -67,6 +68,8 @@ func uploadFileHandler() http.HandlerFunc {
 			w.Write([]byte(fmt.Sprintf("error creating video: %+v", err)))
 			return
 		}
+
+		go debug.FreeOSMemory() // hack to request our memory back :'(
 
 		json.NewEncoder(w).Encode(video)
 	})
