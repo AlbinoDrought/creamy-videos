@@ -62,6 +62,7 @@ export default {
 .ui.video.container {
   background-color: #000;
   max-height: 100%;
+  margin: 0px !important;
 
   &>video {
     min-height: 60vh;
