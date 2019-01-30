@@ -64,8 +64,8 @@ export default {
   max-height: 100%;
 
   &>video {
-    min-height: 40em;
-    max-height: 60em;
+    min-height: 60vh;
+    max-height: 80vh;
     max-width: 100%;
   }
 }
