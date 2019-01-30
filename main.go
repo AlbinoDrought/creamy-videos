@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"runtime/debug"
@@ -11,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
-	"github.com/AlbinoDrought/creamy-videos/streamers"
 	packr "github.com/gobuffalo/packr/v2"
 
 	_ "net/http/pprof"
@@ -121,10 +119,13 @@ func listVideosHandler() http.HandlerFunc {
 func main() {
 	config = FillFromEnv()
 
+	key := byte(0x69)
 	transformedFileSystem = files.TransformFileSystem(
 		config.LocalVideoDirectory,
-		func(reader io.Reader) io.Reader {
-			return streamers.XorifyReader(reader, 0x69)
+		func(p []byte) {
+			for i := 0; i < len(p); i++ {
+				p[i] = p[i] ^ key
+			}
 		},
 	)
 
