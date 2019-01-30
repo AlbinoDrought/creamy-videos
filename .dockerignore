@@ -1,5 +1,6 @@
 .git
 ui/node_modules
+ui/dist
 dummyvideos
 packrd
 main-packr.go

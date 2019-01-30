@@ -12,11 +12,19 @@ FROM golang:alpine as builder
 
 RUN apk update && apk add git
 COPY . $GOPATH/src/github.com/AlbinoDrought/creamy-videos
-# copy built SPA
-COPY --from=SPA /ui/dist $GOPATH/src/github.com/AlbinoDrought/creamy-videos/ui/dist
 WORKDIR $GOPATH/src/github.com/AlbinoDrought/creamy-videos
 
+# compress source for later downloading
+RUN tar -zcvf /tmp/source.tar.gz .
+
+# copy built SPA
+COPY --from=SPA /ui/dist $GOPATH/src/github.com/AlbinoDrought/creamy-videos/ui/dist
+# shove compressed source into SPA dist
+RUN cp /tmp/source.tar.gz ui/dist
+
+# install dependencies
 RUN go get -d -v
+# install packr2 build too
 RUN go get -u github.com/gobuffalo/packr/v2/packr2
 
 # build with packr2 to embed SPA
