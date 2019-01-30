@@ -143,7 +143,7 @@ func main() {
 
 	box := packr.New("spa", "./ui/dist")
 
-	http.Handle("/", http.FileServer(box))
+	http.Handle("/", http.FileServer(files.CreateSPAFileSystem(box, "/index.html")))
 
 	http.Handle(
 		config.HttpVideoDirectory,
