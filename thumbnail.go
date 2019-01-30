@@ -37,7 +37,7 @@ func eventuallyMakeThumbnail(video Video) {
 	_, err = videoRepo.Save(video)
 
 	if err != nil {
-		log.Printf("faild to save video thumbnail: %+v", err)
+		log.Printf("failed to save video thumbnail: %+v", err)
 		return
 	}
 }
