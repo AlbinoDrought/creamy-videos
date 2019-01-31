@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/go-pg/pg"
+
 	"github.com/AlbinoDrought/creamy-videos/files"
 	packr "github.com/gobuffalo/packr/v2"
 
@@ -129,7 +131,21 @@ func main() {
 		},
 	)
 
-	videoRepo = NewDummyVideoRepo()
+	if config.UsePostgres {
+		db := pg.Connect(&pg.Options{
+			User:     config.PostgresUser,
+			Password: config.PostgresPassword,
+			Addr:     config.PostgresAddress,
+			Database: config.PostgresDatabase,
+		})
+		defer db.Close()
+
+		log.Println("Video Repo: Postgres")
+		videoRepo = NewPostgresVideoRepo(*db, transformedFileSystem)
+	} else {
+		log.Println("Video Repo: JSON")
+		videoRepo = NewDummyVideoRepo()
+	}
 
 	// ghetto thumbnail regen
 	/*
