@@ -24,7 +24,7 @@ CREAMY_APP_URL="https://videos.r.albinodrought.com" \
 CREAMY_VIDEO_DIR="/videos" \
 CREAMY_HTTP_VIDEO_DIR="/static/videos/" \
 CREAMY_HTTP_PORT=80 \
-./creamy-videos
+./creamy-videos serve
 ```
 
 - `CREAMY_APP_URL`: the externally-accessible URL this instance can be reached at, excluding trailing slash
