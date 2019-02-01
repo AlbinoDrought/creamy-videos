@@ -1,22 +1,24 @@
-package main
+package videostore
 
 import (
 	"log"
 	"os/exec"
 	"path"
+
+	"github.com/AlbinoDrought/creamy-videos/files"
 )
 
-func eventuallyMakeThumbnail(video Video) {
+func eventuallyMakeThumbnail(video Video, repo VideoRepo, fs files.TransformedFileSystem) {
 	thumbnailPath := path.Join(path.Dir(video.Source), "thumbnail.jpg")
 
-	videoStream, err := transformedFileSystem.Open(video.Source)
+	videoStream, err := fs.Open(video.Source)
 	if err != nil {
 		log.Printf("failed to open video: %+v", err)
 		return
 	}
 	defer videoStream.Close()
 
-	createdThumbnailStream, err := transformedFileSystem.Create(thumbnailPath)
+	createdThumbnailStream, err := fs.Create(thumbnailPath)
 	if err != nil {
 		log.Printf("failed to create thumbnail: %+v", err)
 		return
@@ -34,7 +36,7 @@ func eventuallyMakeThumbnail(video Video) {
 	}
 
 	video.Thumbnail = thumbnailPath
-	_, err = videoRepo.Save(video)
+	_, err = repo.Save(video)
 
 	if err != nil {
 		log.Printf("failed to save video thumbnail: %+v", err)

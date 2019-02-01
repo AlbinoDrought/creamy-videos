@@ -1,4 +1,4 @@
-package main
+package videostore
 
 import (
 	"bytes"
@@ -8,6 +8,8 @@ import (
 	"path"
 	"strconv"
 	"sync"
+
+	"github.com/AlbinoDrought/creamy-videos/files"
 )
 
 type Video struct {
@@ -37,16 +39,17 @@ var ErrorVideoNotFound = errors.New("video not found")
 
 type dummyVideoRepo struct {
 	VideoRepo
+	fs        files.TransformedFileSystem
 	videos    []Video
 	id        uint
 	idLock    sync.Mutex
 	videoLock sync.Mutex
 }
 
-func NewDummyVideoRepo() *dummyVideoRepo {
+func NewDummyVideoRepo(fs files.TransformedFileSystem) *dummyVideoRepo {
 	var videos []Video
 
-	storedDatabase, err := transformedFileSystem.Open("dummy.json")
+	storedDatabase, err := fs.Open("dummy.json")
 	if err == nil {
 		defer storedDatabase.Close()
 		err = json.NewDecoder(storedDatabase).Decode(&videos)
@@ -61,6 +64,7 @@ func NewDummyVideoRepo() *dummyVideoRepo {
 	}
 
 	return &dummyVideoRepo{
+		fs:     fs,
 		videos: videos,
 		id:     uint(len(videos)),
 	}
@@ -83,16 +87,16 @@ func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error)
 	}
 
 	rootDir := strconv.Itoa(int(video.ID))
-	if _, err := transformedFileSystem.Stat(rootDir); transformedFileSystem.IsNotExist(err) {
-		transformedFileSystem.MkdirAll(rootDir, 0600)
+	if _, err := repo.fs.Stat(rootDir); repo.fs.IsNotExist(err) {
+		repo.fs.MkdirAll(rootDir, 0600)
 	}
 
 	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
 
-	transformedFileSystem.PipeTo(videoPath, reader)
+	repo.fs.PipeTo(videoPath, reader)
 
 	video.Source = videoPath
-	go eventuallyMakeThumbnail(video)
+	go eventuallyMakeThumbnail(video, repo, repo.fs)
 
 	return repo.Save(video)
 }
@@ -115,7 +119,7 @@ func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
 
 	repo.videos[video.ID-1] = video
 	videoJSON, _ := json.Marshal(&repo.videos)
-	transformedFileSystem.PipeTo("dummy.json", bytes.NewReader(videoJSON))
+	repo.fs.PipeTo("dummy.json", bytes.NewReader(videoJSON))
 
 	return video, nil
 }

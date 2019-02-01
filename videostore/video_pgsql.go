@@ -1,4 +1,4 @@
-package main
+package videostore
 
 import (
 	"io"
@@ -84,7 +84,7 @@ func (repo *postgresVideoRepo) Upload(video Video, reader io.Reader) (Video, err
 	repo.fs.PipeTo(videoPath, reader)
 
 	video.Source = videoPath
-	go eventuallyMakeThumbnail(video)
+	go eventuallyMakeThumbnail(video, repo, repo.fs)
 
 	return repo.Save(video)
 }

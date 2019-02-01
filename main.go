@@ -12,6 +12,7 @@ import (
 	"github.com/go-pg/pg"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
+	"github.com/AlbinoDrought/creamy-videos/videostore"
 	packr "github.com/gobuffalo/packr/v2"
 
 	_ "net/http/pprof"
@@ -21,7 +22,7 @@ const maxMultipartFormSize = 1024 * 1024 // 1MB
 const appUrl = "http://localhost:3000"
 
 var config Config
-var videoRepo VideoRepo
+var videoRepo videostore.VideoRepo
 var transformedFileSystem files.TransformedFileSystem
 
 func enableCors(w *http.ResponseWriter) {
@@ -54,7 +55,7 @@ func uploadFileHandler() http.HandlerFunc {
 			return
 		}
 
-		video := Video{
+		video := videostore.Video{
 			Title:            r.FormValue("title"),
 			Description:      r.FormValue("description"),
 			OriginalFileName: header.Filename,
@@ -105,7 +106,7 @@ func listVideosHandler() http.HandlerFunc {
 			return
 		}
 
-		transformedVideos := make([]Video, len(videos))
+		transformedVideos := make([]videostore.Video, len(videos))
 		for i, video := range videos {
 			video.Source = config.AppUrl + config.HttpVideoDirectory + video.Source
 			if len(video.Thumbnail) > 0 {
@@ -141,7 +142,7 @@ func main() {
 		defer db.Close()
 
 		log.Println("Video Repo: Postgres")
-		videoRepo = NewPostgresVideoRepo(*db, transformedFileSystem)
+		videoRepo = videostore.NewPostgresVideoRepo(*db, transformedFileSystem)
 
 		// ghetto migrate from dummy repo
 		/*
@@ -160,7 +161,7 @@ func main() {
 		*/
 	} else {
 		log.Println("Video Repo: JSON")
-		videoRepo = NewDummyVideoRepo()
+		videoRepo = videostore.NewDummyVideoRepo(transformedFileSystem)
 	}
 
 	// ghetto thumbnail regen
