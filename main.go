@@ -142,6 +142,22 @@ func main() {
 
 		log.Println("Video Repo: Postgres")
 		videoRepo = NewPostgresVideoRepo(*db, transformedFileSystem)
+
+		// ghetto migrate from dummy repo
+		/*
+			dummyRepo := NewDummyVideoRepo()
+			videos, _ := dummyRepo.All(10000, 0)
+			for _, video := range videos {
+				videoID := video.ID
+				video.ID = 0
+				savedVideo, err := videoRepo.Save(video)
+				if err != nil {
+					panic(err)
+				}
+				video.ID = videoID
+				log.Printf("saved video %+v as %+v", video, savedVideo)
+			}
+		*/
 	} else {
 		log.Println("Video Repo: JSON")
 		videoRepo = NewDummyVideoRepo()
