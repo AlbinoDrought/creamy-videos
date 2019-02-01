@@ -22,6 +22,10 @@ type Video struct {
 	Tags             []string `json:"tags"`
 }
 
+func (video Video) Exists() bool {
+	return video.ID > 0
+}
+
 type VideoRepo interface {
 	Upload(video Video, reader io.Reader) (Video, error)
 	Save(video Video) (Video, error)
@@ -97,7 +101,7 @@ func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
 	repo.videoLock.Lock()
 	defer repo.videoLock.Unlock()
 
-	if video.ID == 0 {
+	if !video.Exists() {
 		// create
 		video.ID = repo.makeID()
 		repo.videos = append(repo.videos, video)
