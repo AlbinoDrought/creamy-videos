@@ -38,6 +38,10 @@ func (repo *postgresVideoRepo) FindById(id uint) (Video, error) {
 
 	err := repo.db.Select(&video)
 
+	if err == pg.ErrNoRows {
+		return video, ErrorVideoNotFound
+	}
+
 	return video, err
 }
 
