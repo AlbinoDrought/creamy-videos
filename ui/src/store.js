@@ -68,30 +68,16 @@ const fakePromiseDelay = (delay = 0) => new Promise((resolve) => {
 */
 
 export default new Vuex.Store({
-  state: {
-    videos: [],
-  },
-  mutations: {
-    setVideos(state, videos) {
-      state.videos = videos; // eslint-disable-line
-    },
-  },
   actions: {
-    videos({ commit }) {
-      return client.get('/api/video')
-        .then(resp => resp.data)
-        .then((videos) => {
-          commit('setVideos', videos);
-          return videos;
-        });
+    videos(context, params = {}) {
+      return client.get('/api/video', { params })
+        .then(resp => resp.data);
     },
     tagged({ dispatch }, tag) {
-      // todo: replace with actual api implementation
-      return dispatch('videos').then(videos => videos.filter(v => v.tags.includes(tag)));
+      return dispatch('videos', { tags: tag });
     },
-    video({ dispatch }, id) {
-      // todo: replace with actual /api/video/{id}
-      return dispatch('videos').then(videos => videos.find(v => v.id === id));
+    video(context, id) {
+      return client.get(`/api/video/${id}`).then(resp => resp.data);
     },
     upload(context, formData) {
       return client.post('/api/upload', formData);
