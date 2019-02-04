@@ -65,8 +65,11 @@ export default {
     },
     upload() {
       this.loading = true;
-      this.$store.dispatch('upload', this.formData).then(() => this.$router.push({
-        name: 'home',
+      this.$store.dispatch('upload', this.formData).then(({ id }) => this.$router.push({
+        name: 'watch',
+        params: {
+          id,
+        },
       })).catch(() => {
         this.loading = false;
       });

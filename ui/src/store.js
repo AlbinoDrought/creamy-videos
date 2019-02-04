@@ -83,7 +83,7 @@ export default new Vuex.Store({
       return client.get(`/api/video/${id}`).then(resp => resp.data);
     },
     upload(context, formData) {
-      return client.post('/api/upload', formData);
+      return client.post('/api/upload', formData).then(resp => resp.data);
     },
   },
 });
