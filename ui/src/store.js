@@ -76,6 +76,9 @@ export default new Vuex.Store({
     tagged({ dispatch }, tag) {
       return dispatch('videos', { tags: tag });
     },
+    filtered({ dispatch }, text) {
+      return dispatch('videos', { filter: text });
+    },
     video(context, id) {
       return client.get(`/api/video/${id}`).then(resp => resp.data);
     },
