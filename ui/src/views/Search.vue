@@ -23,7 +23,7 @@ export default {
     fetchVideos() {
       this.loading = true;
       this.videos = [];
-      this.$store.dispatch('tagged', this.text).then(videos => {
+      this.$store.dispatch('filtered', this.text).then(videos => {
         this.videos = videos;
         this.loading = false;
       });

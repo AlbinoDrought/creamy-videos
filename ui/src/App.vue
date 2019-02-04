@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div class="ui fixed inverted menu">
+    <div class="ui fixed inverted main menu">
       <div class="ui container">
         <a href="#" class="header item">
           <img class="logo" src="@/assets/icon.png">
@@ -13,13 +13,41 @@
           Upload
         </router-link>
 
-        <div class="right menu">
+        <!-- this search menu is hidden in mobile view -->
+        <div class="not-small right menu">
           <div class="borderless item">
             <div class="ui inverted transparent icon input" @keypress.enter="search">
-              <input type="text" placeholder="Search..." v-model="searchText">
+              <!-- not using v-model because of https://github.com/vuejs/vue/issues/8231 -->
+              <!-- `searchText` was not properly updating when pressing enter on mobile -->
+              <input
+                type="text"
+                placeholder="Search..."
+                :value="searchText"
+                @input="searchText = $event.target.value"
+                @keypress.enter="search"
+              >
               <i class="search link icon" @click.prevent="search" />
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- separate search menu for mobile -->
+    <!-- design inspired from one of my favorite sites ;) -->
+    <div class="ui only-small fluid fixed inverted menu search">
+      <div class="borderless item">
+        <div class="ui inverted transparent icon input">
+          <!-- not using v-model because of https://github.com/vuejs/vue/issues/8231 -->
+          <!-- `searchText` was not properly updating when pressing enter on mobile -->
+          <input
+            type="text"
+            placeholder="Search..."
+            :value="searchText"
+            @input="searchText = $event.target.value"
+            @keypress.enter="search"
+          >
+          <i class="search link icon" @click.prevent="search" />
         </div>
       </div>
     </div>
@@ -52,7 +80,58 @@ export default {
 </script>
 
 <style lang="scss">
+// grabbed during runtime
+$main-menu-height: 53px;
+$mobile-search-menu-height: 40px;
+$base-top-margin: $main-menu-height + 6px;
+$mobile-top-margin: $base-top-margin + $mobile-search-menu-height;
+
+#app .main.menu {
+  height: $main-menu-height;
+}
+
 #app>.ui.main.container {
-  margin-top: 4em;
+  // the fixed semantic-ui menu doesn't
+  // pad the contents below it.
+  // without this margin-top, some contents
+  // would be obscured
+  margin-top: $base-top-margin;
+}
+
+#app .only-small {
+  display: none;
+}
+
+#app .search.menu {
+  top: $main-menu-height;
+  height: $mobile-search-menu-height;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+@media only screen and (max-width: 767px) {
+  #app .main.menu .item::before {
+    // disable semantic-ui "pseudo-borders" in mobile
+    background: none;
+  }
+
+  #app .main.menu .header.item {
+    // align menu items to the right in mobile
+    flex-grow: 1;
+  }
+
+  #app>.ui.main.container {
+    // when we show the mobile search menu,
+    // offset main container contents even more
+    // so nothing is obscured
+    margin-top: $mobile-top-margin;
+  }
+
+  #app .only-small {
+    display: block;
+  }
+
+  #app .not-small {
+    display: none;
+  }
 }
 </style>

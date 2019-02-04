@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -70,6 +71,67 @@ func uploadFileHandler(instance application) http.HandlerFunc {
 
 const videosPerPage = 30
 
+type stringDict interface {
+	Get(key string) string
+}
+
+func videoFilterFromDict(dict stringDict) videostore.VideoFilter {
+	// don't do strings.Split("", ",")
+	// that would give us a slice with length=1,
+	// containing an empty string
+	rawTags := dict.Get("tags")
+	var tags []string
+	if len(rawTags) > 0 {
+		tags = strings.Split(rawTags, ",")
+	} else {
+		tags = make([]string, 0)
+	}
+
+	return videostore.VideoFilter{
+		Title: dict.Get("title"),
+		Tags:  tags,
+		Any:   dict.Get("filter"),
+	}
+}
+
+func transformVideo(instance application, video videostore.Video) videostore.Video {
+	video.Source = instance.config.AppURL + instance.config.HTTPVideoDirectory + video.Source
+	if len(video.Thumbnail) > 0 {
+		video.Thumbnail = instance.config.AppURL + instance.config.HTTPVideoDirectory + video.Thumbnail
+	}
+
+	return video
+}
+
+func showVideoHandler(instance application) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		enableCors(&w)
+		defer r.Body.Close()
+
+		rawID := path.Base(r.URL.Path)
+		id, err := strconv.Atoi(rawID)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		video, err := instance.repo.FindById(uint(id))
+		if err == videostore.ErrorVideoNotFound {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("error while retrieving video: %+v", err)
+			return
+		}
+
+		json.NewEncoder(w).Encode(transformVideo(instance, video))
+	})
+}
+
 func listVideosHandler(instance application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		enableCors(&w)
@@ -92,19 +154,18 @@ func listVideosHandler(instance application) http.HandlerFunc {
 			offset = 0
 		}
 
-		videos, err := instance.repo.All(uint(limit), uint(offset))
+		filter := videoFilterFromDict(r.URL.Query())
+
+		videos, err := instance.repo.All(filter, uint(limit), uint(offset))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("error listing videos: %+v", err)
 			return
 		}
 
 		transformedVideos := make([]videostore.Video, len(videos))
 		for i, video := range videos {
-			video.Source = instance.config.AppURL + instance.config.HTTPVideoDirectory + video.Source
-			if len(video.Thumbnail) > 0 {
-				video.Thumbnail = instance.config.AppURL + instance.config.HTTPVideoDirectory + video.Thumbnail
-			}
-			transformedVideos[i] = video
+			transformedVideos[i] = transformVideo(instance, video)
 		}
 
 		json.NewEncoder(w).Encode(transformedVideos)
@@ -132,6 +193,10 @@ var serveCmd = &cobra.Command{
 		http.HandleFunc(
 			"/api/video",
 			listVideosHandler(app),
+		)
+		http.HandleFunc(
+			"/api/video/",
+			showVideoHandler(app),
 		)
 		http.HandleFunc(
 			"/api/upload",

@@ -11,6 +11,7 @@ import (
 	"github.com/go-pg/pg/orm"
 )
 
+// postgresVideoRepo stores models to a Postgres DB
 type postgresVideoRepo struct {
 	db pg.DB
 	fs files.TransformedFileSystem
@@ -37,13 +38,37 @@ func (repo *postgresVideoRepo) FindById(id uint) (Video, error) {
 
 	err := repo.db.Select(&video)
 
+	if err == pg.ErrNoRows {
+		return video, ErrorVideoNotFound
+	}
+
 	return video, err
 }
 
-func (repo *postgresVideoRepo) All(limit uint, offset uint) ([]Video, error) {
+func (repo *postgresVideoRepo) All(filter VideoFilter, limit uint, offset uint) ([]Video, error) {
 	var videos []Video
 
 	query := repo.db.Model(&videos)
+
+	if !filter.Empty() {
+		query = query.Apply(func(q *orm.Query) (*orm.Query, error) {
+			if len(filter.Title) > 0 {
+				q = q.Where("LOWER(title) LIKE LOWER(?)", "%"+filter.Title+"%")
+			}
+
+			if len(filter.Tags) > 0 {
+				q = q.Where("tags \\?& ?", pg.Array(filter.Tags))
+			}
+
+			if len(filter.Any) > 0 {
+				q = q.WhereOr("LOWER(title) LIKE LOWER(?)", "%"+filter.Any+"%")
+				q = q.WhereOr("tags \\?& ?", pg.Array([]string{filter.Any}))
+			}
+
+			return q, nil
+		})
+	}
+
 	query = query.Apply(func(q *orm.Query) (*orm.Query, error) {
 		return q.Limit(int(limit)).Offset(int(offset)), nil
 	})

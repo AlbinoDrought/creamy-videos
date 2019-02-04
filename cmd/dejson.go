@@ -3,6 +3,7 @@ package cmd
 import (
 	"log"
 
+	"github.com/AlbinoDrought/creamy-videos/videostore"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +14,7 @@ var dejsonCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		dummyRepo := app.makeDummyRepo()
 
-		videos, err := dummyRepo.All(10000, 0)
+		videos, err := dummyRepo.All(videostore.VideoFilter{}, 10000, 0)
 		if err != nil {
 			log.Fatalf("error fetching all videos from JSON repo: %+v", err)
 		}
