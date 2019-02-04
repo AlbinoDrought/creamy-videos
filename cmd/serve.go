@@ -70,6 +70,29 @@ func uploadFileHandler(instance application) http.HandlerFunc {
 
 const videosPerPage = 30
 
+type stringDict interface {
+	Get(key string) string
+}
+
+func videoFilterFromDict(dict stringDict) videostore.VideoFilter {
+	// don't do strings.Split("", ",")
+	// that would give us a slice with length=1,
+	// containing an empty string
+	rawTags := dict.Get("tags")
+	var tags []string
+	if len(rawTags) > 0 {
+		tags = strings.Split(rawTags, ",")
+	} else {
+		tags = make([]string, 0)
+	}
+
+	return videostore.VideoFilter{
+		Title: dict.Get("title"),
+		Tags:  tags,
+		Any:   dict.Get("filter"),
+	}
+}
+
 func listVideosHandler(instance application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		enableCors(&w)
@@ -92,9 +115,12 @@ func listVideosHandler(instance application) http.HandlerFunc {
 			offset = 0
 		}
 
-		videos, err := instance.repo.All(uint(limit), uint(offset))
+		filter := videoFilterFromDict(r.URL.Query())
+
+		videos, err := instance.repo.All(filter, uint(limit), uint(offset))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("error listing videos: %+v", err)
 			return
 		}
 

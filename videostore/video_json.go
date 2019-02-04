@@ -6,6 +6,7 @@ import (
 	"io"
 	"path"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
@@ -107,8 +108,8 @@ func (repo *dummyVideoRepo) FindById(video uint) (Video, error) {
 	return repo.videos[int(video)-1], nil
 }
 
-func (repo *dummyVideoRepo) All(limit uint, offset uint) ([]Video, error) {
-	max := uint(len(repo.videos))
+func (repo *dummyVideoRepo) limitVideoSlice(videos []Video, limit uint, offset uint) []Video {
+	max := uint(len(videos))
 
 	start := offset
 	if start > max {
@@ -120,5 +121,59 @@ func (repo *dummyVideoRepo) All(limit uint, offset uint) ([]Video, error) {
 		end = max
 	}
 
-	return repo.videos[start:end], nil
+	return videos[start:end]
+}
+
+func videoHasAllTags(video Video, tags []string) bool {
+	if len(video.Tags) == 0 {
+		return false
+	}
+
+	for _, tag := range tags {
+		hasTag := false
+		for _, videoTag := range video.Tags {
+			if videoTag == tag {
+				hasTag = true
+				break
+			}
+		}
+
+		if !hasTag {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (repo *dummyVideoRepo) All(filter VideoFilter, limit uint, offset uint) ([]Video, error) {
+	var videos []Video
+
+	if filter.Empty() {
+		videos = repo.videos
+	} else {
+		videos = make([]Video, 0)
+		// a very inefficient filter
+		// accepting PRs ;)
+		for _, video := range repo.videos {
+			if len(filter.Title) > 0 && strings.Contains(video.Title, filter.Title) {
+				videos = append(videos, video)
+				continue
+			}
+
+			if len(filter.Tags) > 0 && videoHasAllTags(video, filter.Tags) {
+				videos = append(videos, video)
+				continue
+			}
+
+			if len(filter.Any) > 0 {
+				if strings.Contains(video.Title, filter.Any) || videoHasAllTags(video, []string{filter.Any}) {
+					videos = append(videos, video)
+					continue
+				}
+			}
+		}
+	}
+
+	return repo.limitVideoSlice(videos, limit, offset), nil
 }
