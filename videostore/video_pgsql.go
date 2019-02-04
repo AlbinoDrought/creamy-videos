@@ -11,6 +11,7 @@ import (
 	"github.com/go-pg/pg/orm"
 )
 
+// postgresVideoRepo stores models to a Postgres DB
 type postgresVideoRepo struct {
 	db pg.DB
 	fs files.TransformedFileSystem
