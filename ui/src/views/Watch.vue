@@ -77,6 +77,7 @@ div.watch {
   & .header {
     font-weight: bold;
     font-size: 3em;
+    word-wrap: break-word;
   }
 
   & .description {
