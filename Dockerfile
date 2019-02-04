@@ -41,4 +41,4 @@ COPY --from=builder /go/bin/creamy-videos /go/bin/creamy-videos
 
 # clear ffmpeg dockerfile cmd
 CMD []
-ENTRYPOINT ["/go/bin/creamy-videos"]
+ENTRYPOINT ["/go/bin/creamy-videos", "serve"]
