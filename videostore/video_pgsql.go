@@ -51,10 +51,9 @@ func (repo *postgresVideoRepo) All(filter VideoFilter, limit uint, offset uint) 
 	query := repo.db.Model(&videos)
 
 	if !filter.Empty() {
-		log.Printf("filter not empty: %+v", filter)
 		query = query.Apply(func(q *orm.Query) (*orm.Query, error) {
 			if len(filter.Title) > 0 {
-				q = q.Where("title LIKE ?", "%"+filter.Title+"%")
+				q = q.Where("LOWER(title) LIKE LOWER(?)", "%"+filter.Title+"%")
 			}
 
 			if len(filter.Tags) > 0 {
@@ -62,7 +61,7 @@ func (repo *postgresVideoRepo) All(filter VideoFilter, limit uint, offset uint) 
 			}
 
 			if len(filter.Any) > 0 {
-				q = q.WhereOr("title LIKE ?", "%"+filter.Any+"%")
+				q = q.WhereOr("LOWER(title) LIKE LOWER(?)", "%"+filter.Any+"%")
 				q = q.WhereOr("tags \\?& ?", pg.Array([]string{filter.Any}))
 			}
 
