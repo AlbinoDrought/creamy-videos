@@ -65,6 +65,12 @@ export default {
       searchText: '',
     };
   },
+
+  metaInfo: {
+    titleTemplate: (titleChunk) => {
+      return titleChunk ? `${titleChunk} | creamy-videos` : 'creamy-videos';
+    },
+  },
   
   methods: {
     search() {

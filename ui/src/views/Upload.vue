@@ -47,6 +47,9 @@ export default {
       return formData;
     },
   },
+  metaInfo: {
+    title: 'Upload',
+  },
   data() {
     return {
       title: '',

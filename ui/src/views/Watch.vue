@@ -42,6 +42,17 @@ export default {
       loading: true,
     };
   },
+  metaInfo() {
+    if (this.loading) {
+      return {
+        title: `Video ${this.id}`,
+      };
+    }
+
+    return {
+      title: this.video.title,
+    };
+  },
   methods: {
     loadVideo() {
       if (!this.id) {

@@ -1,11 +1,13 @@
 import Vue from 'vue';
 import Router from 'vue-router';
+import Meta from 'vue-meta';
 import Home from './views/Home.vue';
 import Watch from './views/Watch.vue';
 import Search from './views/Search.vue';
 import Upload from './views/Upload.vue';
 
 Vue.use(Router);
+Vue.use(Meta);
 
 export default new Router({
   mode: 'history',

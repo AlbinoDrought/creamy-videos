@@ -19,6 +19,23 @@ export default {
       loading: true,
     };
   },
+  metaInfo() {
+    if (this.mode === 'tags' && this.tags) {
+      return {
+        title: `Tag Search: ${this.tags}`,
+      };
+    }
+
+    if (this.mode === 'text' && this.text) {
+      return {
+        title: `Search: ${this.text}`,
+      };
+    }
+
+    return {
+      title: 'Search',
+    };
+  },
   methods: {
     fetchVideos() {
       this.loading = true;

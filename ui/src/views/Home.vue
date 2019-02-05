@@ -19,6 +19,9 @@ export default {
       loading: true,
     };
   },
+  metaInfo: {
+    title: 'Home',
+  }, 
   mounted() {
     this.$store.dispatch('tagged', 'home').then(videos => {
       this.videos = videos;
