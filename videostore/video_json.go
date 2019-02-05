@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
 )
@@ -85,6 +86,8 @@ func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
 		// create
 		video.ID = repo.makeID()
 		repo.videos = append(repo.videos, video)
+		video.TimeCreated = time.Now().Format(time.RFC3339)
+		video.TimeUpdated = time.Now().Format(time.RFC3339)
 
 		return video, nil
 	}
@@ -93,6 +96,7 @@ func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
 		return Video{}, ErrorVideoNotFound
 	}
 
+	video.TimeUpdated = time.Now().Format(time.RFC3339)
 	repo.videos[video.ID-1] = video
 	videoJSON, _ := json.Marshal(&repo.videos)
 	repo.fs.PipeTo("dummy.json", bytes.NewReader(videoJSON))
