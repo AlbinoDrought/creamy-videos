@@ -23,7 +23,12 @@ export default {
     fetchVideos() {
       this.loading = true;
       this.videos = [];
-      this.$store.dispatch('filtered', this.text).then(videos => {
+
+      const promise = this.mode === 'tags'
+        ? this.$store.dispatch('tagged', this.tags)
+        : this.$store.dispatch('filtered', this.text);
+
+      promise.then(videos => {
         this.videos = videos;
         this.loading = false;
       });
@@ -36,9 +41,29 @@ export default {
     text() {
       this.fetchVideos();
     },
+    tags() {
+      this.fetchVideos();
+    },
+    mode() {
+      this.fetchVideos();
+    },
   },
   props: {
+    mode: {
+      type: String,
+      required: false,
+      default() {
+        return 'text';
+      },
+    },
     text: {
+      type: String,
+      required: false,
+      default() {
+        return 'home';
+      },
+    },
+    tags: {
       type: String,
       required: false,
       default() {
