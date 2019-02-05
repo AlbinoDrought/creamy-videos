@@ -99,6 +99,13 @@ export default {
 div.watch {
   color: rgb(171, 171, 171);
 
+  &>.ui.segment:first-child {
+    // force remove semantic-ui segment padding.
+    // without this, top of video does not
+    // match up with top of content on other pages.
+    padding-top: 0px;
+  }
+
   & .header {
     font-weight: bold;
     font-size: 3em;
