@@ -94,6 +94,10 @@ $mobile-top-margin: $base-top-margin + $mobile-search-menu-height;
 
 #app .main.menu {
   height: $main-menu-height;
+
+  .header.item img {
+    margin-right: 10px;
+  }
 }
 
 #app>.ui.main.container {
