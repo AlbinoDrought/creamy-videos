@@ -4,7 +4,7 @@
     <template v-else>
       <div class="ui vertical segment">
         <div class="ui center aligned fluid video container">
-          <video :src="video.source" controls autoplay />
+          <video ref="video" :src="video.source" controls autoplay />
         </div>
       </div>
       <div class="ui vertical segment">
@@ -66,6 +66,11 @@ export default {
         this.loading = false;
       });
     },
+  },
+  beforeDestroy() {
+    // attempt to unload video to free browser socket
+    this.$refs.video.pause();
+    this.$refs.video.src = '';
   },
   mounted() {
     this.loadVideo();
