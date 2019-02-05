@@ -39,6 +39,7 @@ export default {
 
   & .header {
     color: rgb(171, 171, 171);
+    word-wrap: break-word;
   }
 
   &>.ui.image {
