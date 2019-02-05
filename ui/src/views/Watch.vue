@@ -15,6 +15,15 @@
 
         <span class="header" v-text="video.title" />
         <p class="description" v-text="video.description" />
+        <div class="tags">
+          <router-link
+            v-for="(tag, i) in video.tags"
+            :key="i"
+            class="ui label"
+            v-text="tag"
+            :to="{ name: 'search', query: { mode: 'tags', tags: tag } }"
+          />
+        </div>
       </div>
     </template>
   </div>
