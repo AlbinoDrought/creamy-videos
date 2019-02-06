@@ -49,10 +49,20 @@ func GenerateThumbnail(video Video, repo VideoRepo, fs files.TransformedFileSyst
 		// with this method :)
 	}
 
-	_, err = repo.Save(video)
+	freshVideo, err := repo.FindById(video.ID)
+	if err != nil {
+		return video, errors.Wrap(err, "failed to fetch video after thumbnail generation")
+	}
+
+	// race condition here (dataloss)
+	// may overwrite changes made from other areas
+	// (transcoding, editing)
+	// todo: fix
+	freshVideo.Thumbnail = video.Thumbnail
+	_, err = repo.Save(freshVideo)
 
 	if err != nil {
-		return video, errors.Wrap(err, "failed to save video thumbnail to disk")
+		return video, errors.Wrap(err, "failed to save video thumbnail to db")
 	}
 
 	return video, nil
@@ -120,8 +130,11 @@ func generateThumbnailUsingTemporaryFile(video Video, fs files.TransformedFileSy
 }
 
 func eventuallyMakeThumbnail(video Video, repo VideoRepo, fs files.TransformedFileSystem) {
+	log.Printf("generating thumbnail for %+v", video.ID)
 	_, err := GenerateThumbnail(video, repo, fs)
-	if err != nil {
+	if err == nil {
+		log.Printf("generated thumbnail for %+v", video.ID)
+	} else {
 		log.Printf("failed to make thumbnail: %+v", err)
 	}
 }
