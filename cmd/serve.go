@@ -19,13 +19,15 @@ import (
 
 const maxMultipartFormSize = 1024 * 1024 // 1MB
 
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		next.ServeHTTP(w, r)
+	})
 }
 
 func uploadFileHandler(instance application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		enableCors(&w)
 		defer r.Body.Close()
 
 		if err := r.ParseMultipartForm(maxMultipartFormSize); err != nil {
@@ -106,7 +108,6 @@ func transformVideo(instance application, video videostore.Video) videostore.Vid
 
 func showVideoHandler(instance application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		enableCors(&w)
 		defer r.Body.Close()
 
 		vars := mux.Vars(r)
@@ -136,7 +137,6 @@ func showVideoHandler(instance application) http.HandlerFunc {
 
 func listVideosHandler(instance application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		enableCors(&w)
 		defer r.Body.Close()
 
 		page := r.URL.Query().Get("page")
@@ -205,6 +205,8 @@ var serveCmd = &cobra.Command{
 			),
 		)
 		r.PathPrefix("/").Handler(http.FileServer(files.CreateSPAFileSystem(box, "/index.html")))
+
+		r.Use(corsMiddleware)
 
 		http.Handle("/", r)
 
