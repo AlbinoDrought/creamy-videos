@@ -8,7 +8,7 @@
         </div>
       </div>
       <div class="ui vertical segment">
-        <a class="ui basic inverted right floated icon button" download :href="video.source">
+        <a class="ui basic inverted right floated icon button" :download="video.original_file_name" :href="video.source">
           <i class="download icon" />
           Download
         </a>
