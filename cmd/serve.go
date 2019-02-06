@@ -68,6 +68,10 @@ func uploadFileHandler(instance application) http.HandlerFunc {
 			return
 		}
 
+		if app.config.Transcode {
+			go eventuallyTranscode(video.ID)
+		}
+
 		go debug.FreeOSMemory() // hack to request our memory back :'(
 
 		json.NewEncoder(w).Encode(video)
@@ -303,6 +307,12 @@ var serveCmd = &cobra.Command{
 
 		log.Printf("Remote URL: %s\n", app.config.AppURL)
 		log.Printf("Serving videos from %s on %s\n", app.config.LocalVideoDirectory, app.config.HTTPVideoDirectory)
+
+		log.Printf("Transcoding: %+v\n", app.config.Transcode)
+		if app.config.Transcode {
+			go workTrancodeQueue(app)
+		}
+
 		log.Printf("Listening on %s\n", app.config.Port)
 		log.Fatal(http.ListenAndServe(":"+app.config.Port, nil))
 	},
