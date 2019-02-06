@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/AlbinoDrought/creamy-videos/files"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
@@ -92,6 +94,33 @@ func (repo *postgresVideoRepo) Save(video Video) (Video, error) {
 	}
 
 	return video, err
+}
+
+func (repo *postgresVideoRepo) Delete(video Video) error {
+	err := repo.db.Delete(&video)
+	if err != nil {
+		return errors.Wrap(err, "failed to delete from db")
+	}
+
+	_, err = repo.fs.Stat(video.Source)
+	if !repo.fs.IsNotExist(err) {
+		// video exists, attempt to delete
+		err = repo.fs.Remove(video.Source)
+		if err != nil {
+			log.Print(errors.Wrap(err, "failed to remove video from disk"))
+		}
+	}
+
+	_, err = repo.fs.Stat(video.Thumbnail)
+	if !repo.fs.IsNotExist(err) {
+		// thumbnail exists, attempt to delete
+		err = repo.fs.Remove(video.Source)
+		if err != nil {
+			log.Print(errors.Wrap(err, "failed to remove thumbnail from disk"))
+		}
+	}
+
+	return nil
 }
 
 func (repo *postgresVideoRepo) Upload(video Video, reader io.Reader) (Video, error) {

@@ -8,13 +8,22 @@
         </div>
       </div>
       <div class="ui vertical segment">
-        <a class="ui basic inverted right floated icon button" :download="video.original_file_name" :href="video.source">
-          <i class="download icon" />
-          Download
-        </a>
-
         <span class="header" v-text="video.title" />
         <p class="description" v-text="video.description" />
+        <div class="ui right floated buttons">
+          <a class="ui basic inverted icon button" :download="video.original_file_name" :href="video.source">
+            <i class="download icon" />
+            Download
+          </a>
+          <confirm-button class="ui basic red icon button" @confirm="deleteVideo">
+            <i class="trash icon" />
+            Delete
+          </confirm-button>
+          <router-link class="ui basic yellow icon button" :to="{ name: 'edit', params: { id: video.id } }">
+            <i class="edit icon" />
+            Edit
+          </router-link>
+        </div>
         <div class="tags">
           <router-link
             v-for="(tag, i) in video.tags"
@@ -30,18 +39,16 @@
 </template>
 
 <script>
+import ConfirmButton from '@/components/ConfirmButton';
+import loadVideoById from './loadVideoById';
+
 export default {
-  props: {
-    id: {
-      required: true,
-    },
+  components: {
+    ConfirmButton,
   },
-  data() {
-    return {
-      video: {},
-      loading: true,
-    };
-  },
+  mixins: [
+    loadVideoById,
+  ],
   metaInfo() {
     if (this.loading) {
       return {
@@ -54,31 +61,19 @@ export default {
     };
   },
   methods: {
-    loadVideo() {
-      if (!this.id) {
-        return;
-      }
-
+    deleteVideo() {
       this.loading = true;
-      this.video = {};
-      this.$store.dispatch('video', parseInt(this.id, 10)).then(video => {
-        this.video = video;
-        this.loading = false;
+      this.$store.dispatch('delete', parseInt(this.id, 10)).then(() => {
+        this.$router.push({ name: 'home' });
       });
     },
   },
   beforeDestroy() {
     // attempt to unload video to free browser socket
-    this.$refs.video.pause();
-    this.$refs.video.src = '';
-  },
-  mounted() {
-    this.loadVideo();
-  },
-  watch: {
-    id() {
-      this.loadVideo();
-    },
+    if (this.$refs.video) {
+      this.$refs.video.pause();
+      this.$refs.video.src = '';
+    }
   },
 };
 </script>

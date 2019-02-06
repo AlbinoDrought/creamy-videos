@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"path"
 	"strconv"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
+	"github.com/pkg/errors"
 )
 
 // dummyVideoRepo stores models to a local JSON file
@@ -78,6 +80,11 @@ func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error)
 	return repo.Save(video)
 }
 
+func (repo *dummyVideoRepo) dumpToDisk() {
+	videoJSON, _ := json.Marshal(&repo.videos)
+	repo.fs.PipeTo("dummy.json", bytes.NewReader(videoJSON))
+}
+
 func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
 	repo.videoLock.Lock()
 	defer repo.videoLock.Unlock()
@@ -98,10 +105,41 @@ func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
 
 	video.TimeUpdated = time.Now().Format(time.RFC3339)
 	repo.videos[video.ID-1] = video
-	videoJSON, _ := json.Marshal(&repo.videos)
-	repo.fs.PipeTo("dummy.json", bytes.NewReader(videoJSON))
+	repo.dumpToDisk()
 
 	return video, nil
+}
+
+func (repo *dummyVideoRepo) Delete(video Video) error {
+	// we can't actually delete videos because of
+	// the way we store them :'(
+	repo.videoLock.Lock()
+	defer repo.videoLock.Unlock()
+
+	index := video.ID - 1
+	// soft delete
+	repo.videos[index] = Video{}
+	repo.dumpToDisk()
+
+	_, err := repo.fs.Stat(video.Source)
+	if !repo.fs.IsNotExist(err) {
+		// video exists, attempt to delete
+		err = repo.fs.Remove(video.Source)
+		if err != nil {
+			log.Print(errors.Wrap(err, "failed to remove video from disk"))
+		}
+	}
+
+	_, err = repo.fs.Stat(video.Thumbnail)
+	if !repo.fs.IsNotExist(err) {
+		// thumbnail exists, attempt to delete
+		err = repo.fs.Remove(video.Source)
+		if err != nil {
+			log.Print(errors.Wrap(err, "failed to remove thumbnail from disk"))
+		}
+	}
+
+	return nil
 }
 
 func (repo *dummyVideoRepo) FindById(video uint) (Video, error) {
@@ -109,7 +147,13 @@ func (repo *dummyVideoRepo) FindById(video uint) (Video, error) {
 		return Video{}, ErrorVideoNotFound
 	}
 
-	return repo.videos[int(video)-1], nil
+	// ignore soft deleted videos
+	videoInstance := repo.videos[int(video)-1]
+	if !videoInstance.Exists() {
+		return Video{}, ErrorVideoNotFound
+	}
+
+	return videoInstance, nil
 }
 
 func (repo *dummyVideoRepo) limitVideoSlice(videos []Video, limit uint, offset uint) []Video {
@@ -179,5 +223,13 @@ func (repo *dummyVideoRepo) All(filter VideoFilter, limit uint, offset uint) ([]
 		}
 	}
 
-	return repo.limitVideoSlice(videos, limit, offset), nil
+	// filter soft-deleted videos
+	existingVideos := make([]Video, 0)
+	for _, video := range videos {
+		if video.Exists() {
+			existingVideos = append(existingVideos, video)
+		}
+	}
+
+	return repo.limitVideoSlice(existingVideos, limit, offset), nil
 }
