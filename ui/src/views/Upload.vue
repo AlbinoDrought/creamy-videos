@@ -28,13 +28,8 @@
 </template>
 
 <script>
-import VideoGrid from '@/components/Video/VideoGrid';
-
 export default {
   name: 'upload',
-  components: {
-    VideoGrid,
-  },
   computed: {
     formData() {
       const formData = new FormData();
