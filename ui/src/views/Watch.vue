@@ -109,6 +109,9 @@ div.watch {
 
   & .description {
     margin-top: 1em;
+    // retain original description spacing and linebreaks,
+    // but wrap if required
+    white-space: pre-wrap;
   }
 }
 </style>
