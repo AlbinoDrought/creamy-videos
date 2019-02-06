@@ -40,6 +40,7 @@ type VideoRepo interface {
 	Save(video Video) (Video, error)
 	FindById(id uint) (Video, error)
 	All(filter VideoFilter, limit uint, offset uint) ([]Video, error)
+	Delete(video Video) error
 }
 
 var ErrorVideoNotFound = errors.New("video not found")
