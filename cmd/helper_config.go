@@ -9,6 +9,7 @@ type appConfig struct {
 	LocalVideoDirectory string
 	HTTPVideoDirectory  string
 	Port                string
+	Transcode           bool
 	UsePostgres         bool
 	PostgresUser        string
 	PostgresPassword    string
@@ -31,6 +32,7 @@ func makeConfig() appConfig {
 		LocalVideoDirectory: envDefault("CREAMY_VIDEO_DIR", "dummyvideos"),
 		HTTPVideoDirectory:  envDefault("CREAMY_HTTP_VIDEO_DIR", "/static/videos/"),
 		Port:                envDefault("CREAMY_HTTP_PORT", "3000"),
+		Transcode:           envDefault("CREAMY_TRANSCODE", "False") == "true",
 		UsePostgres:         envDefault("CREAMY_POSTGRES", "false") == "true",
 		PostgresUser:        envDefault("CREAMY_POSTGRES_USER", "postgres"),
 		PostgresPassword:    envDefault("CREAMY_POSTGRES_PASSWORD", "postgres"),
