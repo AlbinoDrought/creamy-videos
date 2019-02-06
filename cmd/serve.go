@@ -23,6 +23,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		next.ServeHTTP(w, r)
 	})
 }
@@ -144,6 +145,48 @@ func deleteVideoHandler(instance application) http.HandlerFunc {
 	})
 }
 
+func editVideoHandler(instance application) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+
+		vars := mux.Vars(r)
+		rawID := vars["id"]
+		id, err := strconv.Atoi(rawID)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		video, err := instance.repo.FindById(uint(id))
+		if err == videostore.ErrorVideoNotFound {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		postedVideo := videostore.Video{}
+		err = json.NewDecoder(r.Body).Decode(&postedVideo)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		video.Title = postedVideo.Title
+		video.Description = postedVideo.Description
+		video.Tags = postedVideo.Tags
+
+		video, err = instance.repo.Save(video)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("error updating video: %+v", err)
+			return
+		}
+
+		json.NewEncoder(w).Encode(transformVideo(instance, video))
+	})
+}
+
 func showVideoHandler(instance application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
@@ -232,6 +275,10 @@ var serveCmd = &cobra.Command{
 			"/api/video/{id:[0-9]+}",
 			showVideoHandler(app),
 		).Methods("GET")
+		r.HandleFunc(
+			"/api/video/{id:[0-9]+}",
+			editVideoHandler(app),
+		).Methods("POST")
 		r.HandleFunc(
 			"/api/video/{id:[0-9]+}",
 			deleteVideoHandler(app),
