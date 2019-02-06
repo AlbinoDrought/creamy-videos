@@ -46,6 +46,6 @@ func GenerateThumbnail(video Video, repo VideoRepo, fs files.TransformedFileSyst
 func eventuallyMakeThumbnail(video Video, repo VideoRepo, fs files.TransformedFileSystem) {
 	_, err := GenerateThumbnail(video, repo, fs)
 	if err != nil {
-		log.Printf("failed to make thumbnail thumbnail: %+v", err)
+		log.Printf("failed to make thumbnail: %+v", err)
 	}
 }
