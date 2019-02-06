@@ -11,7 +11,12 @@
         <span class="header" v-text="video.title" />
         <p class="description" v-text="video.description" />
         <div class="ui right floated buttons">
-          <a class="ui basic inverted icon button" :download="video.original_file_name" :href="video.source">
+          <!-- 
+            `download` attribute is not using original_file_name
+            because, if the video is transcoded, the extension from
+            the original_file_name may no longer match up.
+          -->
+          <a class="ui basic inverted icon button" download :href="video.source">
             <i class="download icon" />
             Download
           </a>
