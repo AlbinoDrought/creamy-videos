@@ -8,17 +8,22 @@
         </div>
       </div>
       <div class="ui vertical segment">
-        <a class="ui basic inverted right floated icon button" :download="video.original_file_name" :href="video.source">
-          <i class="download icon" />
-          Download
-        </a>
-        <confirm-button class="ui basic red right floated icon button" @confirm="deleteVideo">
-          <i class="trash icon" />
-          Delete
-        </confirm-button>
-
         <span class="header" v-text="video.title" />
         <p class="description" v-text="video.description" />
+        <div class="ui right floated buttons">
+          <a class="ui basic inverted icon button" :download="video.original_file_name" :href="video.source">
+            <i class="download icon" />
+            Download
+          </a>
+          <confirm-button class="ui basic red icon button" @confirm="deleteVideo">
+            <i class="trash icon" />
+            Delete
+          </confirm-button>
+          <router-link class="ui basic yellow icon button" :to="{ name: 'edit', params: { id: video.id } }">
+            <i class="edit icon" />
+            Edit
+          </router-link>
+        </div>
         <div class="tags">
           <router-link
             v-for="(tag, i) in video.tags"
@@ -35,22 +40,15 @@
 
 <script>
 import ConfirmButton from '@/components/ConfirmButton';
+import loadVideoById from './loadVideoById';
 
 export default {
   components: {
     ConfirmButton,
   },
-  props: {
-    id: {
-      required: true,
-    },
-  },
-  data() {
-    return {
-      video: {},
-      loading: true,
-    };
-  },
+  mixins: [
+    loadVideoById,
+  ],
   metaInfo() {
     if (this.loading) {
       return {
@@ -63,18 +61,6 @@ export default {
     };
   },
   methods: {
-    loadVideo() {
-      if (!this.id) {
-        return;
-      }
-
-      this.loading = true;
-      this.video = {};
-      this.$store.dispatch('video', parseInt(this.id, 10)).then(video => {
-        this.video = video;
-        this.loading = false;
-      });
-    },
     deleteVideo() {
       this.loading = true;
       this.$store.dispatch('delete', parseInt(this.id, 10)).then(() => {
@@ -88,14 +74,6 @@ export default {
       this.$refs.video.pause();
       this.$refs.video.src = '';
     }
-  },
-  mounted() {
-    this.loadVideo();
-  },
-  watch: {
-    id() {
-      this.loadVideo();
-    },
   },
 };
 </script>

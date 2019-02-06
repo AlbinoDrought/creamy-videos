@@ -5,6 +5,7 @@ import Home from './views/Home.vue';
 import Watch from './views/Watch.vue';
 import Search from './views/Search.vue';
 import Upload from './views/Upload.vue';
+import Edit from './views/Edit.vue';
 
 Vue.use(Router);
 Vue.use(Meta);
@@ -29,6 +30,12 @@ export default new Router({
       path: '/watch/:id',
       name: 'watch',
       component: Watch,
+      props: true,
+    },
+    {
+      path: '/edit/:id',
+      name: 'edit',
+      component: Edit,
       props: true,
     },
     {

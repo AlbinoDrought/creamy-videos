@@ -85,6 +85,9 @@ export default new Vuex.Store({
     upload(context, formData) {
       return client.post('/api/upload', formData).then(resp => resp.data);
     },
+    edit(context, video) {
+      return client.post(`/api/video/${video.id}`, video).then(resp => resp.data);
+    },
     delete(context, id) {
       return client.delete(`/api/video/${id}`);
     },
