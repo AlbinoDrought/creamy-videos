@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"path"
 	"runtime/debug"
 	"strconv"
 	"strings"
+
+	"github.com/gorilla/mux"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
 	"github.com/AlbinoDrought/creamy-videos/videostore"
@@ -18,13 +19,15 @@ import (
 
 const maxMultipartFormSize = 1024 * 1024 // 1MB
 
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		next.ServeHTTP(w, r)
+	})
 }
 
 func uploadFileHandler(instance application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		enableCors(&w)
 		defer r.Body.Close()
 
 		if err := r.ParseMultipartForm(maxMultipartFormSize); err != nil {
@@ -105,10 +108,10 @@ func transformVideo(instance application, video videostore.Video) videostore.Vid
 
 func showVideoHandler(instance application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		enableCors(&w)
 		defer r.Body.Close()
 
-		rawID := path.Base(r.URL.Path)
+		vars := mux.Vars(r)
+		rawID := vars["id"]
 		id, err := strconv.Atoi(rawID)
 
 		if err != nil {
@@ -134,7 +137,6 @@ func showVideoHandler(instance application) http.HandlerFunc {
 
 func listVideosHandler(instance application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		enableCors(&w)
 		defer r.Body.Close()
 
 		page := r.URL.Query().Get("page")
@@ -181,27 +183,32 @@ var serveCmd = &cobra.Command{
 
 		box := packr.New("spa", "./../ui/dist")
 
-		http.Handle("/", http.FileServer(files.CreateSPAFileSystem(box, "/index.html")))
+		r := mux.NewRouter()
 
-		http.Handle(
-			app.config.HTTPVideoDirectory,
+		r.HandleFunc(
+			"/api/video",
+			listVideosHandler(app),
+		)
+		r.HandleFunc(
+			"/api/video/{id:[0-9]+}",
+			showVideoHandler(app),
+		)
+		r.HandleFunc(
+			"/api/upload",
+			uploadFileHandler(app),
+		)
+
+		r.PathPrefix(app.config.HTTPVideoDirectory).Handler(
 			http.StripPrefix(
 				strings.TrimRight(app.config.HTTPVideoDirectory, "/"),
 				fileServer,
 			),
 		)
-		http.HandleFunc(
-			"/api/video",
-			listVideosHandler(app),
-		)
-		http.HandleFunc(
-			"/api/video/",
-			showVideoHandler(app),
-		)
-		http.HandleFunc(
-			"/api/upload",
-			uploadFileHandler(app),
-		)
+		r.PathPrefix("/").Handler(http.FileServer(files.CreateSPAFileSystem(box, "/index.html")))
+
+		r.Use(corsMiddleware)
+
+		http.Handle("/", r)
 
 		log.Printf("Remote URL: %s\n", app.config.AppURL)
 		log.Printf("Serving videos from %s on %s\n", app.config.LocalVideoDirectory, app.config.HTTPVideoDirectory)
