@@ -12,6 +12,10 @@
           <i class="download icon" />
           Download
         </a>
+        <confirm-button class="ui basic red right floated icon button" @confirm="deleteVideo">
+          <i class="trash icon" />
+          Delete
+        </confirm-button>
 
         <span class="header" v-text="video.title" />
         <p class="description" v-text="video.description" />
@@ -30,7 +34,12 @@
 </template>
 
 <script>
+import ConfirmButton from '@/components/ConfirmButton';
+
 export default {
+  components: {
+    ConfirmButton,
+  },
   props: {
     id: {
       required: true,
@@ -66,11 +75,19 @@ export default {
         this.loading = false;
       });
     },
+    deleteVideo() {
+      this.loading = true;
+      this.$store.dispatch('delete', parseInt(this.id, 10)).then(() => {
+        this.$router.push({ name: 'home' });
+      });
+    },
   },
   beforeDestroy() {
     // attempt to unload video to free browser socket
-    this.$refs.video.pause();
-    this.$refs.video.src = '';
+    if (this.$refs.video) {
+      this.$refs.video.pause();
+      this.$refs.video.src = '';
+    }
   },
   mounted() {
     this.loadVideo();
