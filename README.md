@@ -24,6 +24,7 @@ CREAMY_APP_URL="https://videos.r.albinodrought.com" \
 CREAMY_VIDEO_DIR="/videos" \
 CREAMY_HTTP_VIDEO_DIR="/static/videos/" \
 CREAMY_HTTP_PORT=80 \
+CREAMY_TRANSCODE=true \
 CREAMY_POSTGRES=true \
 CREAMY_POSTGRES_USER=postgres \
 CREAMY_POSTGRES_PASSWORD=postgres \
@@ -39,6 +40,8 @@ CREAMY_POSTGRES_ADDRESS=localhost:5432 \
 - `CREAMY_HTTP_VIDEO_DIR`: where to serve persisted video data
 
 - `CREAMY_HTTP_PORT`: port to listen on
+
+- `CREAMY_TRANSCODE`: if `true`, automatically transcode videos to streamable mp4 when uploaded. Defaults to `false`.
 
 - `CREAMY_POSTGRES`: if `true`, use Postgres instead of JSON store
 
@@ -65,3 +68,13 @@ Regenerate all:
 Regenerate videos with IDs 3, 4, and 5:
 
 `./creamy-videos thumbnail 3 4 5`
+
+### Manually transcoding videos
+
+Transcode all:
+
+`./creamy-videos transcode -a`
+
+Transcode videos with IDs 3, 4, and 5:
+
+`./creamy-videos transcode 3 4 5`
