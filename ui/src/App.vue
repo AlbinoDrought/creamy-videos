@@ -2,10 +2,10 @@
   <div id="app">
     <div class="ui fixed inverted main menu">
       <div class="ui container">
-        <a href="#" class="header item">
+        <router-link :to="{ name: 'home' }" class="header item">
           <img class="logo" src="@/assets/icon.png">
           Creamy Videos
-        </a>
+        </router-link>
         <router-link :to="{ name: 'home' }" class="item">
           Home
         </router-link>
