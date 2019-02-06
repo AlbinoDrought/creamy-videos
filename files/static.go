@@ -108,6 +108,10 @@ func (fs TransformedFileSystem) PipeTo(filePath string, reader io.Reader) error 
 	return err
 }
 
+func (fs TransformedFileSystem) Remove(name string) error {
+	return os.Remove(path.Join(fs.dir, name))
+}
+
 func (fs TransformedFileSystem) Stat(name string) (os.FileInfo, error) {
 	return os.Stat(path.Join(fs.dir, name))
 }
