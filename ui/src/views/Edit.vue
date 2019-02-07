@@ -3,16 +3,30 @@
     <div class="ui inverted form">
       <div class="ui field">
         <label>Title</label>
-        <input type="text" placeholder="Title" v-model="video.title">
+        <input
+          type="text"
+          name="title"
+          placeholder="Title"
+          v-model="video.title"
+        >
       </div>
       <div class="ui field">
         <label>Tags (separated by comma)</label>
-        <input type="text" placeholder="educational, computer science, wizardry" v-model="stringTags">
+        <input
+          type="text"
+          name="tags"
+          placeholder="educational, computer science, wizardry"
+          v-model="stringTags"
+        >
       </div>
 
       <div class="field">
         <label>Description</label>
-        <textarea placeholder="Description" v-model="video.description" />
+        <textarea
+          name="description"
+          placeholder="Description"
+          v-model="video.description"
+        />
       </div>
 
       <div class="ui submit button" @click.prevent="edit" :class="{ loading }">
