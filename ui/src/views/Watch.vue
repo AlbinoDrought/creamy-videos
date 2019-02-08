@@ -8,23 +8,23 @@
         </div>
       </div>
       <div class="ui vertical segment">
-        <span class="header" v-text="video.title" />
-        <p class="description" v-text="video.description" />
+        <span aria-label="Video Title" class="header" v-text="video.title" />
+        <p aria-label="Video Description" class="description" v-text="video.description" />
         <div class="ui right floated buttons">
-          <a class="ui basic inverted icon button" :download="video.original_file_name" :href="video.source">
+          <a class="ui basic inverted icon download button" :download="video.original_file_name" :href="video.source">
             <i class="download icon" />
             Download
           </a>
-          <confirm-button class="ui basic red icon button" @confirm="deleteVideo">
+          <confirm-button class="ui basic red icon delete button" @confirm="deleteVideo">
             <i class="trash icon" />
             Delete
           </confirm-button>
-          <router-link class="ui basic yellow icon button" :to="{ name: 'edit', params: { id: video.id } }">
+          <router-link class="ui basic yellow icon edit button" :to="{ name: 'edit', params: { id: video.id } }">
             <i class="edit icon" />
             Edit
           </router-link>
         </div>
-        <div class="tags">
+        <div aria-label="Video Tags" class="tags">
           <router-link
             v-for="(tag, i) in video.tags"
             :key="i"

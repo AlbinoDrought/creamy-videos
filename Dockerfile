@@ -4,7 +4,7 @@ FROM albinodrought/node-alpine-gcc-make-ssh as SPA
 COPY ./ui /ui
 WORKDIR /ui
 
-RUN npm install
+RUN npm install --no-optional
 RUN npm run build
 
 # Build binary

@@ -3,21 +3,39 @@
     <div class="ui inverted form">
       <div class="ui field">
         <label>Title</label>
-        <input type="text" placeholder="Title" v-model="title">
+        <input
+          type="text"
+          name="title"
+          placeholder="Title"
+          v-model="title"
+        >
       </div>
       <div class="ui field">
         <label>Tags (separated by comma)</label>
-        <input type="text" placeholder="educational, computer science, wizardry" v-model="tags">
+        <input
+          type="text"
+          name="tags"
+          placeholder="educational, computer science, wizardry"
+          v-model="tags"
+        >
       </div>
 
       <div class="field">
         <label>Description</label>
-        <textarea placeholder="Description" v-model="description" />
+        <textarea
+          name="description"
+          placeholder="Description"
+          v-model="description"
+        />
       </div>
 
       <div class="field">
         <label>File</label>
-        <input type="file" @change="handleFileChange">
+        <input
+          type="file"
+          name="file"
+          @change="handleFileChange"
+        >
       </div>
 
       <div class="ui submit button" @click.prevent="upload" :class="{ loading }">
