@@ -20,6 +20,7 @@
               <!-- not using v-model because of https://github.com/vuejs/vue/issues/8231 -->
               <!-- `searchText` was not properly updating when pressing enter on mobile -->
               <input
+                aria-label="Search"
                 type="text"
                 placeholder="Search..."
                 :value="searchText"

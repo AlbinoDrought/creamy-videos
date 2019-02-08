@@ -1,5 +1,5 @@
 <template>
-  <router-link :to="{ name: 'watch', params: { id: value.id } }" class="ui fluid video card">
+  <router-link :to="{ name: 'watch', params: { id: value.id } }" class="ui fluid video card" aria-label="Video Thumbnail">
     <div class="ui image">
       <img :src="value.thumbnail">
     </div>
