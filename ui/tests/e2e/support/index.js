@@ -19,9 +19,9 @@ import './commands';
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
-Cypress.on('uncaught:exception', (err, runnable) => {
+Cypress.on('uncaught:exception', (err) => {
   if (err.message.indexOf('ResizeObserver') !== -1) {
     // stop it from failing the test
     return false;
   }
-})
+});

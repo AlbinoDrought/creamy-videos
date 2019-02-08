@@ -31,7 +31,7 @@ describe('Full Video CRUD Flow', () => {
       cy.get('.edit.button').click();
 
       cy.url().should('contain', '/edit');
-      
+
       // assert ui
       cy.get('[name="title"]').invoke('val').should('eq', 'doggo_waddling.mp4');
       cy.get('[name="tags"]').invoke('val').should('eq', 'home');

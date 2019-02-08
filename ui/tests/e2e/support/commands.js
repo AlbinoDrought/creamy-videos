@@ -25,8 +25,8 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 Cypress.Commands.add('upload', { prevSubject: 'element' }, (subject, file, fileName, mimeType) => {
-  cy.window().then(window => {
-    Cypress.Blob.base64StringToBlob(file, mimeType).then(blob => {
+  cy.window().then((window) => {
+    Cypress.Blob.base64StringToBlob(file, mimeType).then((blob) => {
       const testFile = new window.File([blob], fileName, { type: mimeType });
       // hack to force set file
       Object.defineProperties(subject[0], {
