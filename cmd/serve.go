@@ -74,7 +74,7 @@ func uploadFileHandler(instance application) http.HandlerFunc {
 	})
 }
 
-const videosPerPage = 30
+const videosPerPage = 32
 
 type stringDict interface {
 	Get(key string) string

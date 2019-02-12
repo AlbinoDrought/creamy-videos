@@ -1,7 +1,11 @@
 <template>
   <div class="search">
     <div v-if="loading" class="ui active centered inline loader" />
-    <video-grid :values="videos" />
+    <video-grid
+      :loadable="true"
+      :values="videos"
+      @infinite="handleInfinite"
+    />
   </div>
 </template>
 
@@ -13,9 +17,15 @@ export default {
   components: {
     VideoGrid,
   },
+  computed: {
+    pageToFetch() {
+      return this.page + this.infinitePage;
+    },
+  },
   data() {
     return {
       videos: [],
+      infinitePage: 0,
       loading: true,
     };
   },
@@ -40,15 +50,36 @@ export default {
     fetchVideos() {
       this.loading = true;
       this.videos = [];
+      this.infinitePage = 0;
 
-      const promise = this.mode === 'tags'
-        ? this.$store.dispatch('tagged', this.tags)
-        : this.$store.dispatch('filtered', this.text);
+      const promise = this.actuallyGetVideos();
 
-      promise.then(videos => {
+      promise.then((videos) => {
         this.videos = videos;
         this.loading = false;
       });
+    },
+    infinitelyLoadVideos() {
+      this.infinitePage += 1;
+      return this.actuallyGetVideos()
+        .then((videos) => {
+          this.videos = this.videos.concat(videos);
+          return videos;
+        });
+    },
+    actuallyGetVideos() {
+      return this.mode === 'tags'
+        ? this.$store.dispatch('tagged', { tags: this.tags, page: this.pageToFetch })
+        : this.$store.dispatch('filtered', { filter: this.text, page: this.pageToFetch });
+    },
+    handleInfinite(state) {
+      this.infinitelyLoadVideos().then((newVideos) => {
+        if (newVideos.length > 0) {
+          state.loaded();
+        } else {
+          state.complete();
+        }
+      }).catch(() => state.error());
     },
   },
   mounted() {
@@ -66,6 +97,13 @@ export default {
     },
   },
   props: {
+    page: {
+      type: Number,
+      rquired: false,
+      default() {
+        return 1;
+      },
+    },
     mode: {
       type: String,
       required: false,
