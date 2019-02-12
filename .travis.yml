@@ -15,7 +15,7 @@ install:
   - cd ui && npm install && cd ..
 
 before_script:
-  - go lint
+  - go vet
   - cd ui && npm run lint && cd ..
 
 script:
