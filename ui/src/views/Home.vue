@@ -23,7 +23,7 @@ export default {
     title: 'Home',
   }, 
   mounted() {
-    this.$store.dispatch('tagged', 'home').then(videos => {
+    this.$store.dispatch('tagged', { tags: 'home' }).then(videos => {
       this.videos = videos;
       this.loading = false;
     });

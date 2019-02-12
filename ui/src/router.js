@@ -48,6 +48,7 @@ export default new Router({
       name: 'search',
       component: Search,
       props: route => ({
+        page: parseInt(route.query.page, 10) || 1,
         mode: route.query.mode || 'text',
         text: route.query.text,
         tags: route.query.tags,
@@ -56,7 +57,7 @@ export default new Router({
     {
       path: '*',
       name: 'not-found',
-      component: () => import(/* webpackChunkName: "about" */ './views/NotFound.vue'),
-    }
+      component: () => import(/* webpackChunkName: "not-found" */ './views/NotFound.vue'),
+    },
   ],
 });

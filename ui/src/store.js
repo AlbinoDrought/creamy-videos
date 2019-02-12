@@ -73,11 +73,11 @@ export default new Vuex.Store({
       return client.get('/api/video', { params })
         .then(resp => resp.data);
     },
-    tagged({ dispatch }, tag) {
-      return dispatch('videos', { tags: tag });
+    tagged({ dispatch }, { tags, page = 1 }) {
+      return dispatch('videos', { tags, page });
     },
-    filtered({ dispatch }, text) {
-      return dispatch('videos', { filter: text });
+    filtered({ dispatch }, { filter, page = 1 }) {
+      return dispatch('videos', { filter, page });
     },
     video(context, id) {
       return client.get(`/api/video/${id}`).then(resp => resp.data);
