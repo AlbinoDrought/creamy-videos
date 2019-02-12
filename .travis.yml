@@ -23,4 +23,4 @@ script:
   - packr2 build
   - ./creamy-videos serve &
   - sleep 2 # give it time to start
-  - cd ui && npm run test:e2e --headless --url http://localhost:3000/
+  - cd ui && npm run test:e2e -- --headless --url http://localhost:3000/
