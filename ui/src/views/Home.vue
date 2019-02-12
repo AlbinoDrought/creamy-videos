@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import VideoGrid from '@/components/Video/VideoGrid';
+import VideoGrid from '@/components/Video/VideoGrid.vue';
 
 export default {
   name: 'home',
@@ -21,9 +21,9 @@ export default {
   },
   metaInfo: {
     title: 'Home',
-  }, 
+  },
   mounted() {
-    this.$store.dispatch('tagged', { tags: 'home' }).then(videos => {
+    this.$store.dispatch('tagged', { tags: 'home' }).then((videos) => {
       this.videos = videos;
       this.loading = false;
     });

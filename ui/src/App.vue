@@ -33,7 +33,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- separate search menu for mobile -->
     <!-- design inspired from one of my favorite sites ;) -->
     <div class="ui only-small fluid fixed inverted menu search">
@@ -68,11 +68,9 @@ export default {
   },
 
   metaInfo: {
-    titleTemplate: (titleChunk) => {
-      return titleChunk ? `${titleChunk} | creamy-videos` : 'creamy-videos';
-    },
+    titleTemplate: titleChunk => (titleChunk ? `${titleChunk} | creamy-videos` : 'creamy-videos'),
   },
-  
+
   methods: {
     search() {
       this.$router.push({

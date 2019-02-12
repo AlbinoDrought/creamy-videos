@@ -24,7 +24,7 @@ export default {
       timeoutHandle: false,
     };
   },
-  
+
   methods: {
     handleClick() {
       clearInterval(this.timeoutHandle);

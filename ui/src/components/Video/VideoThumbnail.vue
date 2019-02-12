@@ -1,5 +1,9 @@
 <template>
-  <router-link :to="{ name: 'watch', params: { id: value.id } }" class="ui fluid video card" aria-label="Video Thumbnail">
+  <router-link
+    :to="{ name: 'watch', params: { id: value.id } }"
+    class="ui fluid video card"
+    aria-label="Video Thumbnail"
+  >
     <div class="ui image">
       <img :src="value.thumbnail">
     </div>
@@ -15,12 +19,12 @@ export default {
     value: {
       type: Object,
       required: true,
-      validator: v => v &&
-        v.id &&
-        v.title &&
-        v.thumbnail &&
-        v.tags,
-    }
+      validator: v => v
+        && v.id
+        && v.title
+        && v.thumbnail
+        && v.tags,
+    },
   },
 };
 </script>
