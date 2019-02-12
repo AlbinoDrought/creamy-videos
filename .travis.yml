@@ -1,0 +1,26 @@
+language: go
+
+go:
+  - 1.11.x
+
+# install node
+before_install:
+  - . $HOME/.nvm/nvm.sh # https://stackoverflow.com/a/43106527/3649573
+  - nvm install stable
+  - nvm use stable
+
+install:
+  - go get -u github.com/gobuffalo/packr/v2/packr2
+  - cd ui && npm install && cd ..
+
+before_script:
+  - go lint
+  - cd ui && npm run lint && cd ..
+
+script:
+  - cd ui && npm run build && cd ..
+  - packr2 build
+  - ./creamy-videos serve &
+  - sleep 2 # give it time to start
+  - cd ui && npm run test:e2e --headless --url http://localhost:3000/
+  
