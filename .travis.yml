@@ -3,10 +3,8 @@ language: go
 go:
   - 1.11.x
 
-dist: xenial
-
 addons:
-  postgresql: "11"
+  postgresql: "9.6"
 
 services:
   - postgresql
