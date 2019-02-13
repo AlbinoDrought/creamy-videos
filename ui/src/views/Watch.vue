@@ -11,7 +11,11 @@
         <span aria-label="Video Title" class="header" v-text="video.title" />
         <p aria-label="Video Description" class="description" v-text="video.description" />
         <div class="ui right floated buttons">
-          <a class="ui basic inverted icon download button" :download="video.original_file_name" :href="video.source">
+          <a
+            class="ui basic inverted icon download button"
+            :download="video.original_file_name"
+            :href="video.source"
+          >
             <i class="download icon" />
             Download
           </a>
@@ -19,7 +23,10 @@
             <i class="trash icon" />
             Delete
           </confirm-button>
-          <router-link class="ui basic yellow icon edit button" :to="{ name: 'edit', params: { id: video.id } }">
+          <router-link
+            class="ui basic yellow icon edit button"
+            :to="{ name: 'edit', params: { id: video.id } }"
+          >
             <i class="edit icon" />
             Edit
           </router-link>
@@ -39,7 +46,7 @@
 </template>
 
 <script>
-import ConfirmButton from '@/components/ConfirmButton';
+import ConfirmButton from '@/components/ConfirmButton.vue';
 import loadVideoById from './loadVideoById';
 
 export default {

@@ -1,6 +1,6 @@
 // https://docs.cypress.io/api/introduction/api.html
 
-const uploadVideo = (title, tags, description = 'not an empty string', originalFileName = 'doggo_waddling.mp4') => new Promise((resolve) => {
+const uploadVideo = (title, tags, description = 'not an empty string', originalFileName = 'doggo_waddling.mp4') => cy.wrap(new Promise((resolve) => {
   cy.visit('/upload');
   cy.contains('.submit.button', 'Upload');
   cy.get('[name="title"]').invoke('val').should('be.empty');
@@ -18,7 +18,7 @@ const uploadVideo = (title, tags, description = 'not an empty string', originalF
     cy.url().should('contain', '/watch/');
     resolve();
   });
-});
+}));
 
 const assertVideoIsSeen = (title) => {
   cy.contains('[aria-label="Video Thumbnail"]', title);
@@ -56,7 +56,7 @@ describe('Video Search Flow', () => {
     ];
 
     // create all the videos
-    let uploadPromise = Promise.resolve();
+    let uploadPromise = cy.wrap(Promise.resolve());
     videos.forEach((video) => {
       uploadPromise = uploadPromise.then(() => uploadVideo(video.title, video.tags));
     });

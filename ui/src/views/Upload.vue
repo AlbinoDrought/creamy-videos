@@ -74,7 +74,7 @@ export default {
   },
   methods: {
     handleFileChange(e) {
-      this.file = e.target.files[0];
+      [this.file] = e.target.files;
       if (!this.title) {
         this.title = this.file.name;
       }

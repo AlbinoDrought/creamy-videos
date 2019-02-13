@@ -24,4 +24,6 @@ Cypress.on('uncaught:exception', (err) => {
     // stop it from failing the test
     return false;
   }
+
+  return true;
 });

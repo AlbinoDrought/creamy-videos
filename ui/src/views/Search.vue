@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import VideoGrid from '@/components/Video/VideoGrid';
+import VideoGrid from '@/components/Video/VideoGrid.vue';
 
 export default {
   name: 'search',

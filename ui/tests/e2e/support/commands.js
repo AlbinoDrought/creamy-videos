@@ -27,15 +27,12 @@
 Cypress.Commands.add('upload', { prevSubject: 'element' }, (subject, file, fileName, mimeType) => {
   cy.window().then((window) => {
     Cypress.Blob.base64StringToBlob(file, mimeType).then((blob) => {
+      const element = subject[0];
       const testFile = new window.File([blob], fileName, { type: mimeType });
-      // hack to force set file
-      Object.defineProperties(subject[0], {
-        files: {
-          configurable: true,
-          value: [testFile],
-        },
-      });
-      cy.wrap(subject).trigger('change');
+      const dataTransfer = new window.DataTransfer();
+      dataTransfer.items.add(testFile);
+      element.files = dataTransfer.files;
+      subject.trigger('change');
     });
   });
 });

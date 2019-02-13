@@ -13,7 +13,7 @@
 
 <script>
 import InfiniteLoading from 'vue-infinite-loading';
-import VideoThumbnail from './VideoThumbnail';
+import VideoThumbnail from './VideoThumbnail.vue';
 
 export default {
   components: {
