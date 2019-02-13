@@ -7,11 +7,13 @@ services:
   - postgresql
 
 env:
-  - CREAMY_POSTGRES_USER=creamy
-  - CREAMY_POSTGRES_PASSWORD=videos
-  - CREAMY_POSTGRES_DATABASE=creamy-videos
-  - CREAMY_POSTGRES=true
-  - CREAMY_POSTGRES=false
+  global:
+    - CREAMY_POSTGRES_USER=creamy
+    - CREAMY_POSTGRES_PASSWORD=videos
+    - CREAMY_POSTGRES_DATABASE=creamy-videos
+  matrix:
+    - CREAMY_POSTGRES=true
+    - CREAMY_POSTGRES=false
 
 # install node
 before_install:
