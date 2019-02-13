@@ -10,7 +10,7 @@ env:
   global:
     - CREAMY_POSTGRES_USER=creamy
     - CREAMY_POSTGRES_PASSWORD=videos
-    - CREAMY_POSTGRES_DATABASE=creamy-videos
+    - CREAMY_POSTGRES_DATABASE=creamy_videos
   matrix:
     - CREAMY_POSTGRES=true
     - CREAMY_POSTGRES=false
@@ -20,7 +20,7 @@ before_install:
   - . $HOME/.nvm/nvm.sh # https://stackoverflow.com/a/43106527/3649573
   - nvm install stable
   - nvm use stable
-  - psql -c "CREATE DATABASE creamy-videos;" -U postgres
+  - psql -c "CREATE DATABASE creamy_videos;" -U postgres
   - psql -c "CREATE USER creamy WITH PASSWORD 'videos';" -U postgres
 
 install:
