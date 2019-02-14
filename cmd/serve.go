@@ -260,7 +260,7 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Provide videos, UI, and API over HTTP",
 	Run: func(cmd *cobra.Command, args []string) {
-		fileServer := http.FileServer(app.fs)
+		fileServer := http.FileServer(files.AdaptToHTTPFileSystem(app.fs, false))
 
 		box := packr.New("spa", "./../ui/dist")
 

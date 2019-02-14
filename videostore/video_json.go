@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -18,14 +19,14 @@ import (
 // dummyVideoRepo stores models to a local JSON file
 type dummyVideoRepo struct {
 	VideoRepo
-	fs        files.TransformedFileSystem
+	fs        files.FileSystem
 	videos    []Video
 	id        uint
 	idLock    sync.Mutex
 	videoLock sync.Mutex
 }
 
-func NewDummyVideoRepo(fs files.TransformedFileSystem) *dummyVideoRepo {
+func NewDummyVideoRepo(fs files.FileSystem) *dummyVideoRepo {
 	var videos []Video
 
 	storedDatabase, err := fs.Open("dummy.json")
@@ -67,12 +68,12 @@ func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error)
 
 	rootDir := strconv.Itoa(int(video.ID))
 	if _, err := repo.fs.Stat(rootDir); repo.fs.IsNotExist(err) {
-		repo.fs.MkdirAll(rootDir, 0600)
+		repo.fs.MkdirAll(rootDir, os.ModePerm)
 	}
 
 	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
 
-	repo.fs.PipeTo(videoPath, reader)
+	files.PipeTo(repo.fs, videoPath, reader)
 
 	video.Source = videoPath
 	go eventuallyMakeThumbnail(video, repo, repo.fs)
@@ -82,7 +83,7 @@ func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error)
 
 func (repo *dummyVideoRepo) dumpToDisk() {
 	videoJSON, _ := json.Marshal(&repo.videos)
-	repo.fs.PipeTo("dummy.json", bytes.NewReader(videoJSON))
+	files.PipeTo(repo.fs, "dummy.json", bytes.NewReader(videoJSON))
 }
 
 func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
@@ -133,7 +134,7 @@ func (repo *dummyVideoRepo) Delete(video Video) error {
 	_, err = repo.fs.Stat(video.Thumbnail)
 	if !repo.fs.IsNotExist(err) {
 		// thumbnail exists, attempt to delete
-		err = repo.fs.Remove(video.Source)
+		err = repo.fs.Remove(video.Thumbnail)
 		if err != nil {
 			log.Print(errors.Wrap(err, "failed to remove thumbnail from disk"))
 		}

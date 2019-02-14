@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func GenerateThumbnail(video Video, repo VideoRepo, fs files.TransformedFileSystem) (Video, error) {
+func GenerateThumbnail(video Video, repo VideoRepo, fs files.FileSystem) (Video, error) {
 	thumbnailPath := path.Join(path.Dir(video.Source), "thumbnail.jpg")
 
 	videoStream, err := fs.Open(video.Source)
@@ -58,7 +58,7 @@ func GenerateThumbnail(video Video, repo VideoRepo, fs files.TransformedFileSyst
 	return video, nil
 }
 
-func generateThumbnailUsingTemporaryFile(video Video, fs files.TransformedFileSystem) (Video, error) {
+func generateThumbnailUsingTemporaryFile(video Video, fs files.FileSystem) (Video, error) {
 	// create a temporary directory to store our junk
 	tempDir, err := ioutil.TempDir("", "eventual-thumbnail-"+strconv.Itoa(int(video.ID)))
 	if err != nil {
@@ -109,7 +109,7 @@ func generateThumbnailUsingTemporaryFile(video Video, fs files.TransformedFileSy
 
 	// copy thumbnail to be beside video
 	finalThumbnailPath := path.Join(path.Dir(video.Source), path.Base(temporaryThumbnailPath))
-	err = fs.PipeTo(finalThumbnailPath, temporaryThumbnailStream)
+	err = files.PipeTo(fs, finalThumbnailPath, temporaryThumbnailStream)
 	if err != nil {
 		return video, errors.Wrap(err, "failed to upload temporary thumbnail")
 	}
@@ -119,7 +119,7 @@ func generateThumbnailUsingTemporaryFile(video Video, fs files.TransformedFileSy
 	return video, nil
 }
 
-func eventuallyMakeThumbnail(video Video, repo VideoRepo, fs files.TransformedFileSystem) {
+func eventuallyMakeThumbnail(video Video, repo VideoRepo, fs files.FileSystem) {
 	_, err := GenerateThumbnail(video, repo, fs)
 	if err != nil {
 		log.Printf("failed to make thumbnail: %+v", err)

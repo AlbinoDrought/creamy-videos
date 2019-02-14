@@ -16,6 +16,10 @@ const uploadVideo = (title, tags, description = 'not an empty string', originalF
     cy.get('.submit.button').click();
 
     cy.url().should('contain', '/watch/');
+    cy.get('video')
+      .should('have.prop', 'duration')
+      .and('be.greaterThan', '0');
+
     resolve();
   });
 }));
