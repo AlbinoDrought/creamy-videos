@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -67,7 +68,7 @@ func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error)
 
 	rootDir := strconv.Itoa(int(video.ID))
 	if _, err := repo.fs.Stat(rootDir); repo.fs.IsNotExist(err) {
-		repo.fs.MkdirAll(rootDir, 0600)
+		repo.fs.MkdirAll(rootDir, os.ModePerm)
 	}
 
 	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
