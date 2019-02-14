@@ -22,9 +22,20 @@ type WriteableFile interface {
 type FileSystem interface {
 	MkdirAll(dirPath string, perm os.FileMode) error
 	Create(name string) (WriteableFile, error)
-	PipeTo(filePath string, reader io.Reader) error
 	Remove(name string) error
 	Stat(name string) (os.FileInfo, error)
 	IsNotExist(err error) bool
 	Open(path string) (ReadableFile, error)
+}
+
+func PipeTo(fs FileSystem, filePath string, reader io.Reader) error {
+	file, err := fs.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(file, reader)
+
+	return err
 }

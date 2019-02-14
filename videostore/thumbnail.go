@@ -109,7 +109,7 @@ func generateThumbnailUsingTemporaryFile(video Video, fs files.FileSystem) (Vide
 
 	// copy thumbnail to be beside video
 	finalThumbnailPath := path.Join(path.Dir(video.Source), path.Base(temporaryThumbnailPath))
-	err = fs.PipeTo(finalThumbnailPath, temporaryThumbnailStream)
+	err = files.PipeTo(fs, finalThumbnailPath, temporaryThumbnailStream)
 	if err != nil {
 		return video, errors.Wrap(err, "failed to upload temporary thumbnail")
 	}

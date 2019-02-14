@@ -139,7 +139,7 @@ func (repo *postgresVideoRepo) Upload(video Video, reader io.Reader) (Video, err
 
 	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
 
-	repo.fs.PipeTo(videoPath, reader)
+	files.PipeTo(repo.fs, videoPath, reader)
 
 	video.Source = videoPath
 	go eventuallyMakeThumbnail(video, repo, repo.fs)

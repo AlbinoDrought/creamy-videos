@@ -72,7 +72,7 @@ func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error)
 
 	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
 
-	repo.fs.PipeTo(videoPath, reader)
+	files.PipeTo(repo.fs, videoPath, reader)
 
 	video.Source = videoPath
 	go eventuallyMakeThumbnail(video, repo, repo.fs)
@@ -82,7 +82,7 @@ func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error)
 
 func (repo *dummyVideoRepo) dumpToDisk() {
 	videoJSON, _ := json.Marshal(&repo.videos)
-	repo.fs.PipeTo("dummy.json", bytes.NewReader(videoJSON))
+	files.PipeTo(repo.fs, "dummy.json", bytes.NewReader(videoJSON))
 }
 
 func (repo *dummyVideoRepo) Save(video Video) (Video, error) {

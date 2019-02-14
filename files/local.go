@@ -1,7 +1,6 @@
 package files
 
 import (
-	"io"
 	"os"
 	"path"
 )
@@ -32,18 +31,6 @@ func (fs localFileSystem) MkdirAll(dirPath string, perm os.FileMode) error {
 
 func (fs localFileSystem) Create(name string) (WriteableFile, error) {
 	return os.Create(fs.localize(name))
-}
-
-func (fs localFileSystem) PipeTo(filePath string, reader io.Reader) error {
-	file, err := fs.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, reader)
-
-	return err
 }
 
 func (fs localFileSystem) Remove(name string) error {
