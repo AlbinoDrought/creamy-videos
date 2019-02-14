@@ -27,6 +27,13 @@ describe('Full Video CRUD Flow', () => {
       cy.contains('.edit.button', 'Edit');
       cy.contains('.delete.button', 'Delete');
 
+      // check that the video has at least kinda loaded
+      // the duration of the loaded video is something like 4.43343453515351
+      cy.get('video')
+        .should('have.prop', 'duration')
+        .and('be.greaterThan', '4')
+        .and('be.lessThan', '5');
+
       // edit video
       cy.get('.edit.button').click();
 
