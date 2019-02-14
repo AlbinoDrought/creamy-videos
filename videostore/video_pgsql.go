@@ -17,10 +17,10 @@ import (
 // postgresVideoRepo stores models to a Postgres DB
 type postgresVideoRepo struct {
 	db pg.DB
-	fs files.TransformedFileSystem
+	fs files.FileSystem
 }
 
-func NewPostgresVideoRepo(db pg.DB, fs files.TransformedFileSystem) *postgresVideoRepo {
+func NewPostgresVideoRepo(db pg.DB, fs files.FileSystem) *postgresVideoRepo {
 	err := db.CreateTable((*Video)(nil), &orm.CreateTableOptions{
 		IfNotExists: true,
 	})

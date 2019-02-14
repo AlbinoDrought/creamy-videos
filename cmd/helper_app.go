@@ -10,7 +10,7 @@ import (
 
 type application struct {
 	config appConfig
-	fs     files.TransformedFileSystem
+	fs     files.FileSystem
 	repo   videostore.VideoRepo
 }
 
@@ -34,7 +34,7 @@ func makeApp(cfg appConfig) (instance application) {
 	instance.config = cfg
 
 	instance.fs = files.TransformFileSystem(
-		instance.config.LocalVideoDirectory,
+		files.LocalFileSystem(instance.config.LocalVideoDirectory),
 		func(p []byte) {
 			for i := 0; i < len(p); i++ {
 				p[i] = p[i] ^ instance.config.FilesystemKey

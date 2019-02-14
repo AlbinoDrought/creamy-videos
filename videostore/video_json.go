@@ -18,14 +18,14 @@ import (
 // dummyVideoRepo stores models to a local JSON file
 type dummyVideoRepo struct {
 	VideoRepo
-	fs        files.TransformedFileSystem
+	fs        files.FileSystem
 	videos    []Video
 	id        uint
 	idLock    sync.Mutex
 	videoLock sync.Mutex
 }
 
-func NewDummyVideoRepo(fs files.TransformedFileSystem) *dummyVideoRepo {
+func NewDummyVideoRepo(fs files.FileSystem) *dummyVideoRepo {
 	var videos []Video
 
 	storedDatabase, err := fs.Open("dummy.json")
