@@ -114,7 +114,7 @@ func (repo *postgresVideoRepo) Delete(video Video) error {
 	_, err = repo.fs.Stat(video.Thumbnail)
 	if !repo.fs.IsNotExist(err) {
 		// thumbnail exists, attempt to delete
-		err = repo.fs.Remove(video.Source)
+		err = repo.fs.Remove(video.Thumbnail)
 		if err != nil {
 			log.Print(errors.Wrap(err, "failed to remove thumbnail from disk"))
 		}
