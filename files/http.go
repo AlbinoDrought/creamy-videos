@@ -13,7 +13,7 @@ type httpCompatibleFileSystem struct {
 func (fs httpCompatibleFileSystem) Open(name string) (http.File, error) {
 	file, err := fs.fs.Open(name)
 
-	if err == nil && fs.directoryListings {
+	if err == nil && !fs.directoryListings {
 		stat, err := file.Stat()
 		if err != nil {
 			return nil, err
