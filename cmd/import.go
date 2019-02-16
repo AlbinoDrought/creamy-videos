@@ -77,6 +77,7 @@ var importCmd = &cobra.Command{
 			r := req.New()
 
 			log.Printf("streaming upload to %+v", creamyVideosHost.String())
+			r.SetTimeout(0)
 			resp, err := r.Post(creamyVideosHost.String(), req.Param{
 				"title":       importVideo.Title,
 				"description": importVideo.Description,
