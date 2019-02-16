@@ -64,6 +64,7 @@ var importCmd = &cobra.Command{
 
 		youtubeDl = goydl.NewYoutubeDl()
 		youtubeDl.Options.Output.Value = "-" // stdout
+		youtubeDl.Options.Format.Value = "best[ext=mp4]/best[ext=webm]/best"
 
 		done := make(chan error, 1)
 
