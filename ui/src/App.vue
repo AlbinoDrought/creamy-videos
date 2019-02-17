@@ -54,7 +54,7 @@
     </div>
 
     <div class="ui main container">
-      <router-view />
+      <router-view :key="searchKey" />
     </div>
   </div>
 </template>
@@ -64,6 +64,7 @@ export default {
   data() {
     return {
       searchText: '',
+      searchKey: 0,
     };
   },
 
@@ -79,6 +80,11 @@ export default {
           text: this.searchText,
         },
       });
+      // increment the searchKey so it is unique,
+      // and anything that uses it gets remounted.
+      // this is a semi-hack to force multiple searches
+      // of the same search term to actually search again.
+      this.searchKey += 1;
     },
   },
 };
