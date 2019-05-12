@@ -34,6 +34,10 @@ export default {
     };
   },
   metaInfo() {
+    if (this.title) {
+      return { title: this.title };
+    }
+
     if (this.mode === 'tags' && this.tags) {
       return {
         title: `Tag Search: ${this.tags}`,
@@ -152,6 +156,10 @@ export default {
       default() {
         return sortOptions[0].key;
       },
+    },
+    title: {
+      type: String,
+      required: false,
     },
   },
 };

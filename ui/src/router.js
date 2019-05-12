@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Meta from 'vue-meta';
-import Home from './views/Home.vue';
 import Watch from './views/Watch.vue';
 import Search from './views/Search.vue';
 import Upload from './views/Upload.vue';
@@ -24,7 +23,14 @@ export default new Router({
     {
       path: '/',
       name: 'home',
-      component: Home,
+      component: Search,
+      props: route => ({
+        page: parseInt(route.query.page, 10) || 1,
+        mode: 'tags',
+        tags: 'home',
+        sort: route.query.sort,
+        title: 'Home',
+      }),
     },
     {
       path: '/watch/:id',
