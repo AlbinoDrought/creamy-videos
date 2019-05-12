@@ -92,10 +92,23 @@ func videoFilterFromDict(dict stringDict) videostore.VideoFilter {
 		tags = make([]string, 0)
 	}
 
+	sortDirection := dict.Get("sort_direction")
+	sortField := dict.Get("sort_field")
+
+	hasSortDirection := sortDirection != ""
+	hasSortField := sortField != ""
+
+	if hasSortField && !hasSortDirection {
+		sortDirection = videostore.SortDirectionAscending
+	}
+
 	return videostore.VideoFilter{
 		Title: dict.Get("title"),
 		Tags:  tags,
 		Any:   dict.Get("filter"),
+
+		SortDirection: sortDirection,
+		SortField:     sortField,
 	}
 }
 

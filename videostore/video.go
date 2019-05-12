@@ -5,6 +5,19 @@ import (
 	"io"
 )
 
+const SortDirectionAscending = "asc"
+const SortDirectionDescending = "desc"
+
+const SortFieldTitle = "title"
+const SortFieldTimeCreated = "time_created"
+const SortFieldTimeUpdated = "time_updated"
+
+var SortFields = []string{
+	SortFieldTitle,
+	SortFieldTimeCreated,
+	SortFieldTimeUpdated,
+}
+
 // VideoFilter represents a "filter" used for
 // querying stored videos.
 // It's eventually shoved into the `WHERE` part of a query,
@@ -13,10 +26,31 @@ type VideoFilter struct {
 	Title string
 	Tags  []string
 	Any   string
+
+	SortDirection string
+	SortField     string
+}
+
+func (filter VideoFilter) Sort() bool {
+	return len(filter.SortDirection)+len(filter.SortField) > 0
 }
 
 func (filter VideoFilter) Empty() bool {
 	return len(filter.Title)+len(filter.Tags)+len(filter.Any) == 0
+}
+
+func (filter VideoFilter) ValidSortDirection() bool {
+	return filter.SortDirection == SortDirectionAscending || filter.SortDirection == SortDirectionDescending
+}
+
+func (filter VideoFilter) ValidSortField() bool {
+	for _, field := range SortFields {
+		if filter.SortField == field {
+			return true
+		}
+	}
+
+	return false
 }
 
 type Video struct {
