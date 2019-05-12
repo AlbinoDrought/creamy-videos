@@ -16,6 +16,10 @@
         <!-- this search menu is hidden in mobile view -->
         <div class="not-small right menu">
           <div class="borderless item">
+            <sort-dropdown v-model="sortKey" />
+          </div>
+
+          <div class="borderless item">
             <div class="ui inverted transparent icon input" @keypress.enter="search">
               <!-- not using v-model because of https://github.com/vuejs/vue/issues/8231 -->
               <!-- `searchText` was not properly updating when pressing enter on mobile -->
@@ -60,7 +64,32 @@
 </template>
 
 <script>
+import SortDropdown from '@/components/SortDropdown.vue';
+import sortOptions from '@/sortOptions';
+
 export default {
+  components: {
+    SortDropdown,
+  },
+
+  computed: {
+    sortKey: {
+      get() {
+        return this.$route.query.sort || sortOptions[0].key;
+      },
+
+      set(sortKey) {
+        this.$router.push({
+          name: this.$route.name,
+          query: {
+            ...this.$route.query,
+            sort: sortKey,
+          },
+        });
+      },
+    },
+  },
+
   data() {
     return {
       searchText: '',
@@ -78,6 +107,7 @@ export default {
         name: 'search',
         query: {
           text: this.searchText,
+          sort: this.sortKey,
         },
       });
       // increment the searchKey so it is unique,
@@ -86,6 +116,12 @@ export default {
       // of the same search term to actually search again.
       this.searchKey += 1;
     },
+  },
+
+  mounted() {
+    if (this.$route.query.text) {
+      this.searchText = this.$route.query.text;
+    }
   },
 };
 </script>

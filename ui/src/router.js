@@ -52,6 +52,7 @@ export default new Router({
         mode: route.query.mode || 'text',
         text: route.query.text,
         tags: route.query.tags,
+        sort: route.query.sort,
       }),
     },
     {
