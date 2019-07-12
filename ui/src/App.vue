@@ -9,7 +9,7 @@
         <router-link :to="{ name: 'home' }" class="item">
           Home
         </router-link>
-        <router-link :to="{ name: 'upload' }" class="item">
+        <router-link v-if="!readOnly" :to="{ name: 'upload' }" class="item">
           Upload
         </router-link>
 
@@ -61,6 +61,12 @@
 
 <script>
 export default {
+  computed: {
+    readOnly() {
+      return this.$store.getters.readOnly;
+    },
+  },
+
   data() {
     return {
       searchText: '',

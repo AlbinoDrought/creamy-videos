@@ -4,11 +4,28 @@ import Meta from 'vue-meta';
 import Home from './views/Home.vue';
 import Watch from './views/Watch.vue';
 import Search from './views/Search.vue';
-import Upload from './views/Upload.vue';
-import Edit from './views/Edit.vue';
+const Upload = () => import('./views/Upload.vue');
+const Edit = () => import('./views/Edit.vue');
 
 Vue.use(Router);
 Vue.use(Meta);
+
+// impactful routes should be disabled if the app is built in read-only mode.
+const impactfulRoutes = process.env.VUE_APP_READ_ONLY
+  ? []
+  : [
+      {
+        path: '/edit/:id',
+        name: 'edit',
+        component: Edit,
+        props: true,
+      },
+      {
+        path: '/upload',
+        name: 'upload',
+        component: Upload,
+      },
+    ];
 
 export default new Router({
   mode: 'history',
@@ -32,17 +49,7 @@ export default new Router({
       component: Watch,
       props: true,
     },
-    {
-      path: '/edit/:id',
-      name: 'edit',
-      component: Edit,
-      props: true,
-    },
-    {
-      path: '/upload',
-      name: 'upload',
-      component: Upload,
-    },
+    ...impactfulRoutes,
     {
       path: '/search',
       name: 'search',
