@@ -22,16 +22,19 @@ COPY --from=SPA /ui/dist $GOPATH/src/github.com/AlbinoDrought/creamy-videos/ui/d
 # shove compressed source into SPA dist
 RUN cp /tmp/source.tar.gz ui/dist
 
+ENV CGO_ENABLED=0 \
+  GOOS=linux \
+  GOARCH=amd64
+
 # install dependencies
 RUN go get -d -v
-# install packr2 build too
-RUN go get -u github.com/gobuffalo/packr/v2/packr2
+# install go.rice buildtool
+RUN go get github.com/GeertJohan/go.rice/rice
 
-# build with packr2 to embed SPA
-RUN CGO_ENABLED=0 \
-  GOOS=linux \
-  GOARCH=amd64 \
-  packr2 build -a -installsuffix cgo -o /go/bin/creamy-videos
+# create embedded SPA files
+RUN cd cmd && rice embed-go
+# build full binary
+RUN go build -a -installsuffix cgo -o /go/bin/creamy-videos
 
 # start from ffmpeg for thumbnail gen
 FROM jrottenberg/ffmpeg:4.0-alpine

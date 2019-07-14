@@ -4,18 +4,27 @@ The creamiest selfhosted tubesite
 
 ## Building
 
+### Without Docker
+
 ```
 # build SPA
 cd ui && npm install && npm run build
 
 # install go deps
 go get -d -v
-# install packr2 binary
-go get -u github.com/gobuffalo/packr/v2/packr2
+# install go.rice buildtool for asset embedding
+go get github.com/GeertJohan/go.rice/rice
 
-# build binary
-packr2 build
+# pack SPA for embedding
+cd cmd && rice embed-go && cd ..
+
+# build single-file creamy-videos.exe
+go build
 ```
+
+### With Docker
+
+`docker build -t albinodrought/creamy-videos .`
 
 ## Usage
 

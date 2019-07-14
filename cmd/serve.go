@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"strings"
 
+	rice "github.com/GeertJohan/go.rice"
 	"github.com/gorilla/mux"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
 	"github.com/AlbinoDrought/creamy-videos/videostore"
-	packr "github.com/gobuffalo/packr/v2"
 	"github.com/spf13/cobra"
 )
 
@@ -262,8 +262,6 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fileServer := http.FileServer(files.AdaptToHTTPFileSystem(app.fs, false))
 
-		box := packr.New("spa", "./../ui/dist")
-
 		r := mux.NewRouter()
 
 		r.HandleFunc(
@@ -295,7 +293,13 @@ var serveCmd = &cobra.Command{
 				fileServer,
 			),
 		)
-		r.PathPrefix("/").Handler(http.FileServer(files.CreateSPAFileSystem(box, "/index.html")))
+
+		box, boxError := rice.FindBox("./../ui/dist")
+		if boxError != nil {
+			log.Printf("failed to find SPA box, running in API-only mode: %+v", boxError)
+		} else {
+			r.PathPrefix("/").Handler(http.FileServer(files.CreateSPAFileSystem(box.HTTPBox(), "/index.html")))
+		}
 
 		r.Use(corsMiddleware)
 
