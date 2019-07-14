@@ -68,6 +68,11 @@ const fakePromiseDelay = (delay = 0) => new Promise((resolve) => {
 */
 
 export default new Vuex.Store({
+  getters: {
+    readOnly() {
+      return process.env.VUE_APP_READ_ONLY;
+    },
+  },
   actions: {
     videos(context, params = {}) {
       return client.get('/api/video', { params })

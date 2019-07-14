@@ -15,6 +15,7 @@ type appConfig struct {
 	PostgresAddress     string
 	PostgresDatabase    string
 	FilesystemKey       byte
+	ReadOnly            bool
 }
 
 func envDefault(name string, backup string) string {
@@ -37,5 +38,6 @@ func makeConfig() appConfig {
 		PostgresDatabase:    envDefault("CREAMY_POSTGRES_DATABASE", "postgres"),
 		PostgresAddress:     envDefault("CREAMY_POSTGRES_ADDRESS", "localhost:5432"),
 		FilesystemKey:       0x69, // hardcoded for now
+		ReadOnly:            envDefault("CREAMY_READ_ONLY", "false") == "true",
 	}
 }

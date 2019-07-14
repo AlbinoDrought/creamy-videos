@@ -273,19 +273,24 @@ var serveCmd = &cobra.Command{
 			"/api/video/{id:[0-9]+}",
 			showVideoHandler(app),
 		).Methods("GET")
-		r.HandleFunc(
-			"/api/video/{id:[0-9]+}",
-			editVideoHandler(app),
-		).Methods("POST")
-		r.HandleFunc(
-			"/api/video/{id:[0-9]+}",
-			deleteVideoHandler(app),
-		).Methods("DELETE")
 
-		r.HandleFunc(
-			"/api/upload",
-			uploadFileHandler(app),
-		)
+		// disable impactful routes if in read-only mode
+		if !app.config.ReadOnly {
+			r.HandleFunc(
+				"/api/video/{id:[0-9]+}",
+				editVideoHandler(app),
+			).Methods("POST")
+
+			r.HandleFunc(
+				"/api/video/{id:[0-9]+}",
+				deleteVideoHandler(app),
+			).Methods("DELETE")
+
+			r.HandleFunc(
+				"/api/upload",
+				uploadFileHandler(app),
+			)
+		}
 
 		r.PathPrefix(app.config.HTTPVideoDirectory).Handler(
 			http.StripPrefix(
