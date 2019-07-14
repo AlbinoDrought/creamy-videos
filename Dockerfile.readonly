@@ -26,8 +26,7 @@ RUN cp /tmp/source.tar.gz ui/dist
 
 ENV CGO_ENABLED=0 \
   GOOS=linux \
-  GOARCH=amd64 \
-  CREAMY_READ_ONLY=true
+  GOARCH=amd64
 
 # install dependencies
 RUN go get -d -v
@@ -44,6 +43,8 @@ FROM jrottenberg/ffmpeg:4.0-alpine
 
 # Copy our static executable
 COPY --from=builder /go/bin/creamy-videos /go/bin/creamy-videos
+
+ENV CREAMY_READ_ONLY=true
 
 # clear ffmpeg dockerfile cmd
 CMD []
