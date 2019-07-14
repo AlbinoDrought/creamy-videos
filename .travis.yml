@@ -25,6 +25,8 @@ before_install:
   - nvm use --lts
   - psql -c "CREATE DATABASE creamy_videos;" -U postgres
   - psql -c "CREATE USER creamy WITH PASSWORD 'videos';" -U postgres
+  # install cypress dependencies
+  - sudo apt-get install -y xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2
 
 install:
   - go get -u github.com/gobuffalo/packr/v2/packr2
