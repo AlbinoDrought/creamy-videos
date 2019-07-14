@@ -21,8 +21,8 @@ env:
 # install node
 before_install:
   - . $HOME/.nvm/nvm.sh # https://stackoverflow.com/a/43106527/3649573
-  - nvm install stable
-  - nvm use stable
+  - nvm install --lts
+  - nvm use --lts
   - psql -c "CREATE DATABASE creamy_videos;" -U postgres
   - psql -c "CREATE USER creamy WITH PASSWORD 'videos';" -U postgres
 
