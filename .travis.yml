@@ -29,7 +29,7 @@ before_install:
   - sudo apt-get install -y xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2
 
 install:
-  - go get -u github.com/gobuffalo/packr/v2/packr2
+  - go get github.com/GeertJohan/go.rice/rice
   - go get
   - cd ui && npm install && cd ..
 
@@ -39,7 +39,8 @@ before_script:
 
 script:
   - cd ui && npm run build && cd ..
-  - packr2 build
+  - cd cmd && rice embed-go && cd ..
+  - go build
   - ./creamy-videos serve &
   - sleep 2 # give it time to start
   - cd ui && npm run test:e2e -- --headless --url http://localhost:3000/
