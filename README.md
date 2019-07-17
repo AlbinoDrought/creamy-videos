@@ -1,4 +1,6 @@
 # Creamy Videos
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FAlbinoDrought%2Fcreamy-videos.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FAlbinoDrought%2Fcreamy-videos?ref=badge_shield)
+
 
 The creamiest selfhosted tubesite 
 
@@ -76,3 +78,7 @@ Regenerate all:
 Regenerate videos with IDs 3, 4, and 5:
 
 `./creamy-videos thumbnail 3 4 5`
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FAlbinoDrought%2Fcreamy-videos.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FAlbinoDrought%2Fcreamy-videos?ref=badge_large)
