@@ -2,6 +2,8 @@
 
 The creamiest selfhosted tubesite 
 
+![Screenshot of Video Listing](./screenshot_videos.png)
+
 ## Building
 
 ### Without Docker
