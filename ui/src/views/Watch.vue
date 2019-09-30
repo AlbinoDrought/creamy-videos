@@ -19,17 +19,19 @@
             <i class="download icon" />
             Download
           </a>
-          <confirm-button class="ui basic red icon delete button" @confirm="deleteVideo">
-            <i class="trash icon" />
-            Delete
-          </confirm-button>
-          <router-link
-            class="ui basic yellow icon edit button"
-            :to="{ name: 'edit', params: { id: video.id } }"
-          >
-            <i class="edit icon" />
-            Edit
-          </router-link>
+          <template v-if="!readOnly">
+            <confirm-button class="ui basic red icon delete button" @confirm="deleteVideo">
+              <i class="trash icon" />
+              Delete
+            </confirm-button>
+            <router-link
+              class="ui basic yellow icon edit button"
+              :to="{ name: 'edit', params: { id: video.id } }"
+            >
+              <i class="edit icon" />
+              Edit
+            </router-link>
+          </template>
         </div>
         <div aria-label="Video Tags" class="tags">
           <router-link
@@ -52,6 +54,11 @@ import loadVideoById from './loadVideoById';
 export default {
   components: {
     ConfirmButton,
+  },
+  computed: {
+    readOnly() {
+      return this.$store.getters.readOnly;
+    },
   },
   mixins: [
     loadVideoById,

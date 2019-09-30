@@ -9,7 +9,7 @@
         <router-link :to="{ name: 'home' }" class="item">
           Home
         </router-link>
-        <router-link :to="{ name: 'upload' }" class="item">
+        <router-link v-if="!readOnly" :to="{ name: 'upload' }" class="item">
           Upload
         </router-link>
 
@@ -73,6 +73,10 @@ export default {
   },
 
   computed: {
+    readOnly() {
+      return this.$store.getters.readOnly;
+    },
+
     sortKey: {
       get() {
         return this.$route.query.sort || sortOptions[0].key;
