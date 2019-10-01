@@ -1,8 +1,15 @@
 # Creamy Videos
 
-The creamiest selfhosted tubesite 
+<p align="center">
+    <img src="./logo.png" alt="Creamy Videos Cat Logo" />
+    <p align="center">The creamiest selfhosted tubesite</p>
+</p>
+
+## Screenshots
 
 ![Screenshot of Video Listing](./screenshot_videos.png)
+
+![Screenshot of Video Playing](./screenshot_watch.png)
 
 ## Building
 
