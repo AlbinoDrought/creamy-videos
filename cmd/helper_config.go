@@ -28,7 +28,7 @@ func envDefault(name string, backup string) string {
 
 func makeConfig() appConfig {
 	return appConfig{
-		AppURL:              envDefault("CREAMY_APP_URL", "http://localhost:3000"),
+		AppURL:              envDefault("CREAMY_APP_URL", ""),
 		LocalVideoDirectory: envDefault("CREAMY_VIDEO_DIR", "dummyvideos"),
 		HTTPVideoDirectory:  envDefault("CREAMY_HTTP_VIDEO_DIR", "/static/videos/"),
 		Port:                envDefault("CREAMY_HTTP_PORT", "3000"),
