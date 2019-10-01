@@ -37,6 +37,14 @@
           @change="handleFileChange"
         >
       </div>
+      
+      <semantic-progress-bar
+        v-if="loading && progressMax > 0"
+        class="inverted active"
+        label-text="Uploading Video"
+        :progress-current="progressCurrent"
+        :progress-max="progressMax"
+      />
 
       <div class="ui submit button" @click.prevent="upload" :class="{ loading }">
         Upload
@@ -46,8 +54,13 @@
 </template>
 
 <script>
+import SemanticProgressBar from '@/components/SemanticProgressBar.vue';
+
 export default {
   name: 'upload',
+  components: {
+    SemanticProgressBar,
+  },
   computed: {
     formData() {
       const formData = new FormData();
@@ -70,6 +83,8 @@ export default {
       description: '',
       file: null,
       loading: false,
+      progressCurrent: 0,
+      progressMax: 0,
     };
   },
   methods: {
@@ -79,16 +94,36 @@ export default {
         this.title = this.file.name;
       }
     },
-    upload() {
+    async upload() {
       this.loading = true;
-      this.$store.dispatch('upload', this.formData).then(({ id }) => this.$router.push({
-        name: 'watch',
-        params: {
-          id,
-        },
-      })).catch(() => {
+      this.progressCurrent = 0;
+      this.progressMax = 0;
+
+      try {
+        const { id } = await this.$store.dispatch('upload', {
+          formData: this.formData,
+          config: {
+            onUploadProgress: (progressEvent) => {
+              if (!progressEvent.lengthComputable) {
+                return;
+              }
+
+              this.progressCurrent = progressEvent.loaded;
+              this.progressMax = progressEvent.total;
+            },
+          },
+        });
+        
+        this.$router.push({
+          name: 'watch',
+          params: {
+            id,
+          },
+        });
+      } catch (ex) {
         this.loading = false;
-      });
+        console.error(ex);
+      }
     },
   },
 };
