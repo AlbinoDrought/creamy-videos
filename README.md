@@ -1,8 +1,15 @@
 # Creamy Videos
 
 <p align="center">
-    <img src="./logo.png" alt="Creamy Videos Cat Logo" />
+    <img src="./logo.png" alt="Creamy Videos Cat Logo">
     <p align="center">The creamiest selfhosted tubesite</p>
+    <p align="center">
+        <a href="https://travis-ci.org/AlbinoDrought/creamy-videos"><img alt="Travis build status" src="https://img.shields.io/travis/AlbinoDrought/creamy-videos.svg?maxAge=360"></a>
+        <a href="https://hub.docker.com/r/albinodrought/creamy-videos">
+        <img alt="albinodrought/creamy-videos Docker Pulls" src="https://img.shields.io/docker/pulls/albinodrought/creamy-videos">
+        </a>
+        <a href="https://github.com/AlbinoDrought/creamy-videos/blob/master/LICENSE"><img alt="AGPL-3.0 License" src="https://img.shields.io/github/license/AlbinoDrought/creamy-videos"></a>
+    </p>
 </p>
 
 ## Screenshots
