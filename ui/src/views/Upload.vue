@@ -1,6 +1,6 @@
 <template>
   <div class="upload ui text container">
-    <div class="ui inverted form">
+    <div class="ui form">
       <div class="ui field">
         <label>Title</label>
         <input
@@ -130,11 +130,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-div.upload {
-  color: rgb(171, 171, 171);
+$form-text-color: rgb(171, 171, 171);
 
-  & .field>label {
-    color: rgb(171, 171, 171);
+div.upload {
+  color: $form-text-color;
+
+  & .field {
+    &>input, &>textarea {
+      // intended to override semantic-ui defaults:
+      @at-root &, &:focus {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+    }
+
+    &>label {
+      color: $form-text-color;
+    }
   }
 }
 </style>
