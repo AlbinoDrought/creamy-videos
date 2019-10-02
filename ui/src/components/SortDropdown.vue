@@ -65,4 +65,16 @@ select {
     width: 100%;
   }
 }
+
+// Chrome (at least the mobile version) does not support
+// right-aligned selects or select options as of 2019-10-01.
+// These worked fine in Firefox and I assumed it worked everywhere.
+
+// This is a semi-hack to force right-aligned selects:
+select {
+  direction: rtl;
+  option {
+    direction: ltr;
+  }
+}
 </style>
