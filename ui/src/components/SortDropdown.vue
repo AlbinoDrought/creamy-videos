@@ -1,5 +1,5 @@
 <template>
-  <select v-model="sortOption">
+  <select v-model="sortOption" :class="{ fluid }">
     <option
       v-for="option in sortOptions"
       :key="option.key"
@@ -35,7 +35,11 @@ export default {
       default: () => {
         return sortOptions[0].key;
       },
-    },  
+    },
+    fluid: {
+      type: Boolean,
+      default: false,
+    },
   },
 };
 </script>
@@ -55,6 +59,10 @@ select {
   option {
     color: black;
     background-color: white;
+  }
+
+  &.fluid {
+    width: 100%;
   }
 }
 </style>

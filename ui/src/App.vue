@@ -58,6 +58,10 @@
     </div>
 
     <div class="ui main container">
+      <div class="only-small mobile-sort-controls" v-if="$route.meta.sortable">
+        <sort-dropdown :fluid="true" v-model="sortKey" />
+      </div>
+
       <router-view :key="searchKey" />
     </div>
   </div>
@@ -155,6 +159,10 @@ $mobile-top-margin: $base-top-margin + $mobile-search-menu-height;
 
 #app .only-small {
   display: none;
+}
+
+#app .mobile-sort-controls {
+  margin: 1em 0;
 }
 
 #app .search.menu {
