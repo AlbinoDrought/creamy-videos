@@ -79,7 +79,7 @@ export default {
 
     sortKey: {
       get() {
-        return this.$route.query.sort || sortOptions[0].key;
+        return this.$route.query.sort || this.lastSortKey;
       },
 
       set(sortKey) {
@@ -96,6 +96,7 @@ export default {
 
   data() {
     return {
+      lastSortKey: sortOptions[0].key,
       searchText: '',
       searchKey: 0,
     };
@@ -120,12 +121,25 @@ export default {
       // of the same search term to actually search again.
       this.searchKey += 1;
     },
+    syncSortKey() {
+      const sortKey = this.$route.query.sort;
+      if (sortKey && sortOptions.some(o => o.key === sortKey)) {
+        this.lastSortKey = sortKey;
+      }
+    },
   },
 
   mounted() {
     if (this.$route.query.text) {
       this.searchText = this.$route.query.text;
     }
+    this.syncSortKey();
+  },
+
+  watch: {
+    '$route.query.sort'() {
+      this.syncSortKey();
+    },
   },
 };
 </script>
