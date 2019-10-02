@@ -15,6 +15,10 @@
 
         <!-- this search menu is hidden in mobile view -->
         <div class="not-small right menu">
+          <div class="borderless item" v-if="$route.meta.sortable">
+            <sort-dropdown v-model="sortKey" />
+          </div>
+
           <div class="borderless item">
             <div class="ui inverted transparent icon input" @keypress.enter="search">
               <!-- not using v-model because of https://github.com/vuejs/vue/issues/8231 -->
@@ -54,16 +58,43 @@
     </div>
 
     <div class="ui main container">
+      <div class="only-small mobile-sort-controls" v-if="$route.meta.sortable">
+        <sort-dropdown :fluid="true" v-model="sortKey" />
+      </div>
+
       <router-view :key="searchKey" />
     </div>
   </div>
 </template>
 
 <script>
+import SortDropdown from '@/components/SortDropdown.vue';
+import sortOptions from '@/sortOptions';
+
 export default {
+  components: {
+    SortDropdown,
+  },
+
   computed: {
     readOnly() {
       return this.$store.getters.readOnly;
+    },
+
+    sortKey: {
+      get() {
+        return this.$route.query.sort || sortOptions[0].key;
+      },
+
+      set(sortKey) {
+        this.$router.push({
+          name: this.$route.name,
+          query: {
+            ...this.$route.query,
+            sort: sortKey,
+          },
+        });
+      },
     },
   },
 
@@ -84,6 +115,7 @@ export default {
         name: 'search',
         query: {
           text: this.searchText,
+          sort: this.sortKey,
         },
       });
       // increment the searchKey so it is unique,
@@ -92,6 +124,12 @@ export default {
       // of the same search term to actually search again.
       this.searchKey += 1;
     },
+  },
+
+  mounted() {
+    if (this.$route.query.text) {
+      this.searchText = this.$route.query.text;
+    }
   },
 };
 </script>
@@ -121,6 +159,10 @@ $mobile-top-margin: $base-top-margin + $mobile-search-menu-height;
 
 #app .only-small {
   display: none;
+}
+
+#app .mobile-sort-controls {
+  margin: 1em 0;
 }
 
 #app .search.menu {

@@ -1,6 +1,7 @@
 package videostore
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -68,6 +69,22 @@ func (repo *postgresVideoRepo) All(filter VideoFilter, limit uint, offset uint) 
 				q = q.WhereOr("LOWER(title) LIKE LOWER(?)", "%"+filter.Any+"%")
 				q = q.WhereOr("tags \\?& ?", pg.Array([]string{filter.Any}))
 			}
+
+			return q, nil
+		})
+	}
+
+	if filter.Sort() {
+		query = query.Apply(func(q *orm.Query) (*orm.Query, error) {
+			if !filter.ValidSortField() {
+				return nil, fmt.Errorf("invalid sort field %v", filter.SortField)
+			}
+
+			if !filter.ValidSortDirection() {
+				return nil, fmt.Errorf("invalid sort direction %v", filter.SortDirection)
+			}
+
+			q = q.Order(fmt.Sprintf("%v %v", filter.SortField, filter.SortDirection))
 
 			return q, nil
 		})

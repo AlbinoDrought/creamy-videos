@@ -11,6 +11,7 @@
 
 <script>
 import VideoGrid from '@/components/Video/VideoGrid.vue';
+import sortOptions from '@/sortOptions';
 
 export default {
   name: 'search',
@@ -21,6 +22,9 @@ export default {
     pageToFetch() {
       return this.page + this.infinitePage;
     },
+    sortOption() {
+      return sortOptions.find(option => option.key === this.sort) || sortOptions[0];
+    },
   },
   data() {
     return {
@@ -30,6 +34,10 @@ export default {
     };
   },
   metaInfo() {
+    if (this.title) {
+      return { title: this.title };
+    }
+
     if (this.mode === 'tags' && this.tags) {
       return {
         title: `Tag Search: ${this.tags}`,
@@ -69,8 +77,22 @@ export default {
     },
     actuallyGetVideos() {
       return this.mode === 'tags'
-        ? this.$store.dispatch('tagged', { tags: this.tags, page: this.pageToFetch })
-        : this.$store.dispatch('filtered', { filter: this.text, page: this.pageToFetch });
+        ? this.$store.dispatch(
+            'tagged', 
+            {
+              tags: this.tags,
+              page: this.pageToFetch,
+              sortOption: this.sortOption,
+            }
+          )
+        : this.$store.dispatch(
+          'filtered', 
+          { 
+            filter: this.text, 
+            page: this.pageToFetch,
+            sortOption: this.sortOption,
+          }
+        );
     },
     handleInfinite(state) {
       this.infinitelyLoadVideos().then((newVideos) => {
@@ -93,6 +115,9 @@ export default {
       this.fetchVideos();
     },
     mode() {
+      this.fetchVideos();
+    },
+    sort() {
       this.fetchVideos();
     },
   },
@@ -124,6 +149,17 @@ export default {
       default() {
         return 'home';
       },
+    },
+    sort: {
+      type: String,
+      required: false,
+      default() {
+        return sortOptions[0].key;
+      },
+    },
+    title: {
+      type: String,
+      required: false,
     },
   },
 };

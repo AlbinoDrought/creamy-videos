@@ -3,10 +3,12 @@ package videostore
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -230,6 +232,43 @@ func (repo *dummyVideoRepo) All(filter VideoFilter, limit uint, offset uint) ([]
 		if video.Exists() {
 			existingVideos = append(existingVideos, video)
 		}
+	}
+
+	if filter.Sort() {
+		var sortFunction func(i, j int) bool
+
+		if filter.SortField == SortFieldTitle {
+			sortFunction = func(i, j int) bool {
+				return strings.Compare(existingVideos[i].Title, existingVideos[j].Title) < 0
+			}
+		} else if filter.SortField == SortFieldTimeCreated {
+			sortFunction = func(i, j int) bool {
+				iTime, _ := time.Parse(time.RFC3339, existingVideos[i].TimeCreated)
+				jTime, _ := time.Parse(time.RFC3339, existingVideos[i].TimeCreated)
+
+				return iTime.Before(jTime)
+			}
+		} else if filter.SortField == SortFieldTimeUpdated {
+			sortFunction = func(i, j int) bool {
+				iTime, _ := time.Parse(time.RFC3339, existingVideos[i].TimeUpdated)
+				jTime, _ := time.Parse(time.RFC3339, existingVideos[i].TimeUpdated)
+
+				return iTime.Before(jTime)
+			}
+		} else {
+			return []Video{}, fmt.Errorf("unsupported sort field %v", filter.SortField)
+		}
+
+		if filter.SortDirection == SortDirectionDescending {
+			oldSortFunction := sortFunction
+			sortFunction = func(i, j int) bool {
+				return !oldSortFunction(i, j)
+			}
+		} else if filter.SortDirection != SortDirectionAscending {
+			return []Video{}, fmt.Errorf("unsupported sort direction %v", filter.SortDirection)
+		}
+
+		sort.Slice(existingVideos, sortFunction)
 	}
 
 	return repo.limitVideoSlice(existingVideos, limit, offset), nil
