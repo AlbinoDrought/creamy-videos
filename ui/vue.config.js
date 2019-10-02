@@ -10,6 +10,12 @@ if (!process.env.VUE_APP_READ_ONLY) {
 }
 
 module.exports = {
+  devServer: {
+    proxy: {
+      '^/api': { target: 'http://localhost:3000/' },
+      '^/static/videos': { target: 'http://localhost:3000/' },
+    },
+  },
   pwa: {
     name: 'Creamy Videos',
     themeColor: '#1b1b1b',
