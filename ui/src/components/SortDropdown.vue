@@ -30,7 +30,7 @@ export default {
 
   props: {
     value: {
-      type: Object,
+      type: String,
       required: false,
       default: () => {
         return sortOptions[0].key;
