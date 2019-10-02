@@ -60,6 +60,9 @@ export default new Router({
       path: '/search',
       name: 'search',
       component: Search,
+      meta: {
+        sortable: true,
+      },
       props: route => ({
         page: parseInt(route.query.page, 10) || 1,
         mode: route.query.mode || 'text',

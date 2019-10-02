@@ -15,7 +15,7 @@
 
         <!-- this search menu is hidden in mobile view -->
         <div class="not-small right menu">
-          <div class="borderless item">
+          <div class="borderless item" v-if="$route.meta.sortable">
             <sort-dropdown v-model="sortKey" />
           </div>
 
