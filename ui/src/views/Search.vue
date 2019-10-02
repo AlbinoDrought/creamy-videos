@@ -76,23 +76,19 @@ export default {
         });
     },
     actuallyGetVideos() {
-      return this.mode === 'tags'
-        ? this.$store.dispatch(
-            'tagged', 
-            {
-              tags: this.tags,
-              page: this.pageToFetch,
-              sortOption: this.sortOption,
-            }
-          )
-        : this.$store.dispatch(
-          'filtered', 
-          { 
-            filter: this.text, 
-            page: this.pageToFetch,
-            sortOption: this.sortOption,
-          }
-        );
+      if (this.mode === 'tags') {
+        return this.$store.dispatch('tagged', {
+          tags: this.tags,
+          page: this.pageToFetch,
+          sortOption: this.sortOption,
+        });
+      }
+
+      return this.$store.dispatch('filtered', {
+        filter: this.text,
+        page: this.pageToFetch,
+        sortOption: this.sortOption,
+      });
     },
     handleInfinite(state) {
       this.infinitelyLoadVideos().then((newVideos) => {

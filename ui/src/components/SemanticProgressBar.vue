@@ -18,7 +18,7 @@ export default {
       return (this.progressCurrent / this.progressMax) * 100;
     },
     humanizedProgressPercentage() {
-      return Math.round(this.progressPercentage) + '%';
+      return `${Math.round(this.progressPercentage)}%`;
     },
   },
 

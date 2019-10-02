@@ -79,10 +79,20 @@ export default new Vuex.Store({
         .then(resp => resp.data);
     },
     tagged({ dispatch }, { tags, page = 1, sortOption = {} }) {
-      return dispatch('videos', { tags, page, sort_field: sortOption.sortField, sort_direction: sortOption.sortDirection });
+      return dispatch('videos', {
+        tags,
+        page,
+        sort_field: sortOption.sortField,
+        sort_direction: sortOption.sortDirection,
+      });
     },
     filtered({ dispatch }, { filter, page = 1, sortOption = {} }) {
-      return dispatch('videos', { filter, page, sort_field: sortOption.sortField, sort_direction: sortOption.sortDirection });
+      return dispatch('videos', {
+        filter,
+        page,
+        sort_field: sortOption.sortField,
+        sort_direction: sortOption.sortDirection,
+      });
     },
     video(context, id) {
       return client.get(`/api/video/${id}`).then(resp => resp.data);
