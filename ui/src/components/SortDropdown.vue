@@ -32,9 +32,7 @@ export default {
     value: {
       type: String,
       required: false,
-      default: () => {
-        return sortOptions[0].key;
-      },
+      default: () => sortOptions[0].key,
     },
     fluid: {
       type: Boolean,

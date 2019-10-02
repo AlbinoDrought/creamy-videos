@@ -24,7 +24,7 @@ module.exports = {
     appleMobileWebAppStatusBarStyle: 'black',
     iconPaths: {
       appleTouchIcon: 'icons/icon-152x152.png',
-      msTileImage: 'icons/icon-144x144.png'
+      msTileImage: 'icons/icon-144x144.png',
     },
     workboxOptions: {
       skipWaiting: true,
@@ -44,5 +44,5 @@ module.exports = {
         },
       }],
     },
-  }
+  },
 };

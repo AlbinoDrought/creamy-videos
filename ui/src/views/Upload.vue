@@ -37,7 +37,7 @@
           @change="handleFileChange"
         >
       </div>
-      
+
       <semantic-progress-bar
         v-if="loading && progressMax > 0"
         class="inverted active"
@@ -113,7 +113,7 @@ export default {
             },
           },
         });
-        
+
         this.$router.push({
           name: 'watch',
           params: {

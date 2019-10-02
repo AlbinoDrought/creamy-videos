@@ -35,7 +35,7 @@ install:
 
 before_script:
   - go vet
-  - cd ui && npm run lint && cd ..
+  - cd ui && npm run lint -- --no-fix && cd ..
 
 script:
   - cd ui && npm run build && cd ..
