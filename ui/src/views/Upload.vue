@@ -144,6 +144,11 @@ div.upload {
       }
     }
 
+    &>textarea {
+      // fix a weird issue where the drag-to-resize component was appearing with a white background:
+      appearance: textarea;
+    }
+
     &>label {
       color: $form-text-color;
     }
