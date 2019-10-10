@@ -39,9 +39,10 @@ RUN go build -a -installsuffix cgo -o /go/bin/creamy-videos
 # start from ffmpeg for thumbnail gen
 FROM jrottenberg/ffmpeg:4.0-alpine
 
+RUN apk add --no-cache tini
+
 # Copy our static executable
 COPY --from=builder /go/bin/creamy-videos /go/bin/creamy-videos
 
-# clear ffmpeg dockerfile cmd
-CMD []
-ENTRYPOINT ["/go/bin/creamy-videos", "serve"]
+ENTRYPOINT ["/sbin/tini"]
+CMD ["/go/bin/creamy-videos", "serve"]
