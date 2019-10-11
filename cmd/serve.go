@@ -53,7 +53,7 @@ func uploadFileHandler(instance application) http.HandlerFunc {
 			return
 		}
 
-		video := videostore.Video{
+		video := &videostore.Video{
 			Title:            r.FormValue("title"),
 			Description:      r.FormValue("description"),
 			OriginalFileName: header.Filename,
@@ -80,7 +80,7 @@ type stringDict interface {
 	Get(key string) string
 }
 
-func videoFilterFromDict(dict stringDict) videostore.VideoFilter {
+func videoFilterFromDict(dict stringDict) *videostore.VideoFilter {
 	// don't do strings.Split("", ",")
 	// that would give us a slice with length=1,
 	// containing an empty string
@@ -102,7 +102,7 @@ func videoFilterFromDict(dict stringDict) videostore.VideoFilter {
 		sortDirection = videostore.SortDirectionAscending
 	}
 
-	return videostore.VideoFilter{
+	return &videostore.VideoFilter{
 		Title: dict.Get("title"),
 		Tags:  tags,
 		Any:   dict.Get("filter"),
@@ -154,7 +154,7 @@ func deleteVideoHandler(instance application) http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(w).Encode(transformVideo(instance, video))
+		json.NewEncoder(w).Encode(transformVideo(instance, *video))
 	})
 }
 
@@ -196,7 +196,7 @@ func editVideoHandler(instance application) http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(w).Encode(transformVideo(instance, video))
+		json.NewEncoder(w).Encode(transformVideo(instance, *video))
 	})
 }
 
@@ -225,7 +225,7 @@ func showVideoHandler(instance application) http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(w).Encode(transformVideo(instance, video))
+		json.NewEncoder(w).Encode(transformVideo(instance, *video))
 	})
 }
 
@@ -261,7 +261,7 @@ func listVideosHandler(instance application) http.HandlerFunc {
 
 		transformedVideos := make([]videostore.Video, len(videos))
 		for i, video := range videos {
-			transformedVideos[i] = transformVideo(instance, video)
+			transformedVideos[i] = transformVideo(instance, *video)
 		}
 
 		json.NewEncoder(w).Encode(transformedVideos)

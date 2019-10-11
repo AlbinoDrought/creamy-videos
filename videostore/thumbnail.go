@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func GenerateThumbnail(video Video, repo VideoRepo, fs files.FileSystem) (Video, error) {
+func GenerateThumbnail(video *Video, repo VideoRepo, fs files.FileSystem) (*Video, error) {
 	thumbnailPath := path.Join(path.Dir(video.Source), "thumbnail.jpg")
 
 	videoStream, err := fs.Open(video.Source)
@@ -58,7 +58,7 @@ func GenerateThumbnail(video Video, repo VideoRepo, fs files.FileSystem) (Video,
 	return video, nil
 }
 
-func generateThumbnailUsingTemporaryFile(video Video, fs files.FileSystem) (Video, error) {
+func generateThumbnailUsingTemporaryFile(video *Video, fs files.FileSystem) (*Video, error) {
 	// create a temporary directory to store our junk
 	tempDir, err := ioutil.TempDir("", "eventual-thumbnail-"+strconv.Itoa(int(video.ID)))
 	if err != nil {
@@ -119,7 +119,7 @@ func generateThumbnailUsingTemporaryFile(video Video, fs files.FileSystem) (Vide
 	return video, nil
 }
 
-func eventuallyMakeThumbnail(video Video, repo VideoRepo, fs files.FileSystem) {
+func eventuallyMakeThumbnail(video *Video, repo VideoRepo, fs files.FileSystem) {
 	_, err := GenerateThumbnail(video, repo, fs)
 	if err != nil {
 		log.Printf("failed to make thumbnail: %+v", err)

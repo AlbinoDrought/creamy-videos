@@ -36,12 +36,12 @@ func NewPostgresVideoRepo(db pg.DB, fs files.FileSystem) *postgresVideoRepo {
 	}
 }
 
-func (repo *postgresVideoRepo) FindById(id uint) (Video, error) {
-	video := Video{
+func (repo *postgresVideoRepo) FindById(id uint) (*Video, error) {
+	video := &Video{
 		ID: id,
 	}
 
-	err := repo.db.Select(&video)
+	err := repo.db.Select(video)
 
 	if err == pg.ErrNoRows {
 		return video, ErrorVideoNotFound
@@ -50,8 +50,8 @@ func (repo *postgresVideoRepo) FindById(id uint) (Video, error) {
 	return video, err
 }
 
-func (repo *postgresVideoRepo) All(filter VideoFilter, limit uint, offset uint) ([]Video, error) {
-	var videos []Video
+func (repo *postgresVideoRepo) All(filter *VideoFilter, limit uint, offset uint) ([]*Video, error) {
+	var videos []*Video
 
 	query := repo.db.Model(&videos)
 
@@ -99,7 +99,7 @@ func (repo *postgresVideoRepo) All(filter VideoFilter, limit uint, offset uint) 
 	return videos, err
 }
 
-func (repo *postgresVideoRepo) Save(video Video) (Video, error) {
+func (repo *postgresVideoRepo) Save(video *Video) (*Video, error) {
 	var err error
 
 	if video.Exists() {
@@ -114,8 +114,8 @@ func (repo *postgresVideoRepo) Save(video Video) (Video, error) {
 	return video, err
 }
 
-func (repo *postgresVideoRepo) Delete(video Video) error {
-	err := repo.db.Delete(&video)
+func (repo *postgresVideoRepo) Delete(video *Video) error {
+	err := repo.db.Delete(video)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete from db")
 	}
@@ -141,7 +141,7 @@ func (repo *postgresVideoRepo) Delete(video Video) error {
 	return nil
 }
 
-func (repo *postgresVideoRepo) Upload(video Video, reader io.Reader) (Video, error) {
+func (repo *postgresVideoRepo) Upload(video *Video, reader io.Reader) (*Video, error) {
 	video.Thumbnail = ""
 	video.Source = ""
 	video, err := repo.Save(video)

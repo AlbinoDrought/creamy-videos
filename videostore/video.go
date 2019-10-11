@@ -65,16 +65,16 @@ type Video struct {
 	Tags             []string `json:"tags"`
 }
 
-func (video Video) Exists() bool {
+func (video *Video) Exists() bool {
 	return video.ID > 0
 }
 
 type VideoRepo interface {
-	Upload(video Video, reader io.Reader) (Video, error)
-	Save(video Video) (Video, error)
-	FindById(id uint) (Video, error)
-	All(filter VideoFilter, limit uint, offset uint) ([]Video, error)
-	Delete(video Video) error
+	Upload(video *Video, reader io.Reader) (*Video, error)
+	Save(video *Video) (*Video, error)
+	FindById(id uint) (*Video, error)
+	All(filter *VideoFilter, limit uint, offset uint) ([]*Video, error)
+	Delete(video *Video) error
 }
 
 var ErrorVideoNotFound = errors.New("video not found")

@@ -22,14 +22,14 @@ import (
 type dummyVideoRepo struct {
 	VideoRepo
 	fs        files.FileSystem
-	videos    []Video
+	videos    []*Video
 	id        uint
 	idLock    sync.Mutex
 	videoLock sync.Mutex
 }
 
 func NewDummyVideoRepo(fs files.FileSystem) *dummyVideoRepo {
-	var videos []Video
+	var videos []*Video
 
 	storedDatabase, err := fs.Open("dummy.json")
 	if err == nil {
@@ -42,7 +42,7 @@ func NewDummyVideoRepo(fs files.FileSystem) *dummyVideoRepo {
 		// create new video repo if:
 		// - dummy.json not found
 		// - failed to load dummy.json
-		videos = make([]Video, 0)
+		videos = make([]*Video, 0)
 	}
 
 	return &dummyVideoRepo{
@@ -59,7 +59,7 @@ func (repo *dummyVideoRepo) makeID() uint {
 	return repo.id
 }
 
-func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error) {
+func (repo *dummyVideoRepo) Upload(video *Video, reader io.Reader) (*Video, error) {
 	video.Thumbnail = ""
 	video.Source = ""
 	video, err := repo.Save(video)
@@ -88,7 +88,7 @@ func (repo *dummyVideoRepo) dumpToDisk() {
 	files.PipeTo(repo.fs, "dummy.json", bytes.NewReader(videoJSON))
 }
 
-func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
+func (repo *dummyVideoRepo) Save(video *Video) (*Video, error) {
 	repo.videoLock.Lock()
 	defer repo.videoLock.Unlock()
 
@@ -103,7 +103,7 @@ func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
 	}
 
 	if len(repo.videos) < int(video.ID) {
-		return Video{}, ErrorVideoNotFound
+		return &Video{}, ErrorVideoNotFound
 	}
 
 	video.TimeUpdated = time.Now().Format(time.RFC3339)
@@ -113,7 +113,7 @@ func (repo *dummyVideoRepo) Save(video Video) (Video, error) {
 	return video, nil
 }
 
-func (repo *dummyVideoRepo) Delete(video Video) error {
+func (repo *dummyVideoRepo) Delete(video *Video) error {
 	// we can't actually delete videos because of
 	// the way we store them :'(
 	repo.videoLock.Lock()
@@ -121,7 +121,7 @@ func (repo *dummyVideoRepo) Delete(video Video) error {
 
 	index := video.ID - 1
 	// soft delete
-	repo.videos[index] = Video{}
+	repo.videos[index] = &Video{}
 	repo.dumpToDisk()
 
 	_, err := repo.fs.Stat(video.Source)
@@ -145,21 +145,21 @@ func (repo *dummyVideoRepo) Delete(video Video) error {
 	return nil
 }
 
-func (repo *dummyVideoRepo) FindById(video uint) (Video, error) {
+func (repo *dummyVideoRepo) FindById(video uint) (*Video, error) {
 	if len(repo.videos) < int(video) {
-		return Video{}, ErrorVideoNotFound
+		return nil, ErrorVideoNotFound
 	}
 
 	// ignore soft deleted videos
 	videoInstance := repo.videos[int(video)-1]
 	if !videoInstance.Exists() {
-		return Video{}, ErrorVideoNotFound
+		return nil, ErrorVideoNotFound
 	}
 
 	return videoInstance, nil
 }
 
-func (repo *dummyVideoRepo) limitVideoSlice(videos []Video, limit uint, offset uint) []Video {
+func (repo *dummyVideoRepo) limitVideoSlice(videos []*Video, limit uint, offset uint) []*Video {
 	max := uint(len(videos))
 
 	start := offset
@@ -175,7 +175,7 @@ func (repo *dummyVideoRepo) limitVideoSlice(videos []Video, limit uint, offset u
 	return videos[start:end]
 }
 
-func videoHasAllTags(video Video, tags []string) bool {
+func videoHasAllTags(video *Video, tags []string) bool {
 	if len(video.Tags) == 0 {
 		return false
 	}
@@ -197,13 +197,13 @@ func videoHasAllTags(video Video, tags []string) bool {
 	return true
 }
 
-func (repo *dummyVideoRepo) All(filter VideoFilter, limit uint, offset uint) ([]Video, error) {
-	var videos []Video
+func (repo *dummyVideoRepo) All(filter *VideoFilter, limit uint, offset uint) ([]*Video, error) {
+	var videos []*Video
 
 	if filter.Empty() {
 		videos = repo.videos
 	} else {
-		videos = make([]Video, 0)
+		videos = make([]*Video, 0)
 		// a very inefficient filter
 		// accepting PRs ;)
 		for _, video := range repo.videos {
@@ -227,7 +227,7 @@ func (repo *dummyVideoRepo) All(filter VideoFilter, limit uint, offset uint) ([]
 	}
 
 	// filter soft-deleted videos
-	existingVideos := make([]Video, 0)
+	existingVideos := make([]*Video, 0)
 	for _, video := range videos {
 		if video.Exists() {
 			existingVideos = append(existingVideos, video)
@@ -256,7 +256,7 @@ func (repo *dummyVideoRepo) All(filter VideoFilter, limit uint, offset uint) ([]
 				return iTime.Before(jTime)
 			}
 		} else {
-			return []Video{}, fmt.Errorf("unsupported sort field %v", filter.SortField)
+			return []*Video{}, fmt.Errorf("unsupported sort field %v", filter.SortField)
 		}
 
 		if filter.SortDirection == SortDirectionDescending {
@@ -265,7 +265,7 @@ func (repo *dummyVideoRepo) All(filter VideoFilter, limit uint, offset uint) ([]
 				return !oldSortFunction(i, j)
 			}
 		} else if filter.SortDirection != SortDirectionAscending {
-			return []Video{}, fmt.Errorf("unsupported sort direction %v", filter.SortDirection)
+			return []*Video{}, fmt.Errorf("unsupported sort direction %v", filter.SortDirection)
 		}
 
 		sort.Slice(existingVideos, sortFunction)

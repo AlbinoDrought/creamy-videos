@@ -10,7 +10,7 @@ import (
 
 var regenerateAllThumbnails = false
 
-type videoGetter func() []videostore.Video
+type videoGetter func() []*videostore.Video
 
 var thumbnailCommand = &cobra.Command{
 	Use:   "thumbnail [-a to regen all] [video ids]",
@@ -21,8 +21,8 @@ var thumbnailCommand = &cobra.Command{
 		if regenerateAllThumbnails {
 			currentOffset := uint(0)
 			limit := uint(100)
-			getter = func() []videostore.Video {
-				videos, err := app.repo.All(videostore.VideoFilter{}, limit, currentOffset)
+			getter = func() []*videostore.Video {
+				videos, err := app.repo.All(&videostore.VideoFilter{}, limit, currentOffset)
 				if err != nil {
 					log.Fatalf("error fetching videos: %+v", err)
 				}
@@ -40,9 +40,9 @@ var thumbnailCommand = &cobra.Command{
 				ids[i] = uint(id)
 			}
 
-			getter = func() []videostore.Video {
+			getter = func() []*videostore.Video {
 				if len(ids) == 0 {
-					return []videostore.Video{}
+					return []*videostore.Video{}
 				}
 
 				id := ids[0]
@@ -53,11 +53,11 @@ var thumbnailCommand = &cobra.Command{
 					log.Fatalf("error fetching video: %+v", err)
 				}
 
-				return []videostore.Video{video}
+				return []*videostore.Video{video}
 			}
 		}
 
-		var videos []videostore.Video
+		var videos []*videostore.Video
 		for {
 			videos = getter()
 			if len(videos) == 0 {
