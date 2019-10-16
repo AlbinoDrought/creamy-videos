@@ -104,11 +104,11 @@ func (repo *postgresVideoRepo) Save(video *Video) (*Video, error) {
 
 	if video.Exists() {
 		video.TimeUpdated = time.Now().Format(time.RFC3339)
-		err = repo.db.Update(&video)
+		err = repo.db.Update(video)
 	} else {
 		video.TimeCreated = time.Now().Format(time.RFC3339)
 		video.TimeUpdated = time.Now().Format(time.RFC3339)
-		err = repo.db.Insert(&video)
+		err = repo.db.Insert(video)
 	}
 
 	return video, err
