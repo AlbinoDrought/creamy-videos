@@ -10,7 +10,7 @@ type httpCompatibleFileSystem struct {
 	directoryListings bool
 }
 
-func (fs httpCompatibleFileSystem) Open(name string) (http.File, error) {
+func (fs *httpCompatibleFileSystem) Open(name string) (http.File, error) {
 	file, err := fs.fs.Open(name)
 
 	if err == nil && !fs.directoryListings {
@@ -40,7 +40,7 @@ func (fs httpCompatibleFileSystem) Open(name string) (http.File, error) {
 // AdaptToHTTPFileSystem converts any FileSystem implementation
 // into one that can be used with http.FileServer
 func AdaptToHTTPFileSystem(fs FileSystem, directoryListings bool) http.FileSystem {
-	return httpCompatibleFileSystem{
+	return &httpCompatibleFileSystem{
 		fs,
 		directoryListings,
 	}

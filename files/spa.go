@@ -15,19 +15,19 @@ type SPAFileSystem struct {
 }
 
 // CreateSPAFileSystem that falls back to `fallback`
-func CreateSPAFileSystem(fs http.FileSystem, fallback string) SPAFileSystem {
-	return SPAFileSystem{
+func CreateSPAFileSystem(fs http.FileSystem, fallback string) *SPAFileSystem {
+	return &SPAFileSystem{
 		fs,
 		fallback,
 	}
 }
 
-func (fs SPAFileSystem) forceFallback() (http.File, error) {
+func (fs *SPAFileSystem) forceFallback() (http.File, error) {
 	return fs.fs.Open(fs.fallback)
 }
 
 // Open a file, or respond with the fallback contents
-func (fs SPAFileSystem) Open(name string) (http.File, error) {
+func (fs *SPAFileSystem) Open(name string) (http.File, error) {
 	file, err := fs.fs.Open(name)
 
 	// prevent redirect loops, ignore root /

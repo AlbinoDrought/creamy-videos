@@ -11,7 +11,7 @@ type readableTransformedFile struct {
 }
 
 // Read transforms the parent implementation of Read
-func (tf readableTransformedFile) Read(p []byte) (n int, err error) {
+func (tf *readableTransformedFile) Read(p []byte) (n int, err error) {
 	n, err = tf.ReadableFile.Read(p)
 	tf.transformer(p)
 	return n, err
@@ -22,7 +22,7 @@ type writeableTransformedFile struct {
 	transformer ByteTransformer
 }
 
-func (wtf writeableTransformedFile) Write(b []byte) (n int, err error) {
+func (wtf *writeableTransformedFile) Write(b []byte) (n int, err error) {
 	wtf.transformer(b)
 	return wtf.WriteableFile.Write(b)
 }
@@ -45,7 +45,7 @@ func (fs transformedFileSystem) Create(name string) (WriteableFile, error) {
 		return file, err
 	}
 
-	return writeableTransformedFile{
+	return &writeableTransformedFile{
 		WriteableFile: file,
 		transformer:   fs.transformer,
 	}, nil
@@ -58,7 +58,7 @@ func (fs transformedFileSystem) Open(path string) (ReadableFile, error) {
 		return file, err
 	}
 
-	return readableTransformedFile{
+	return &readableTransformedFile{
 		ReadableFile: file,
 		transformer:  fs.transformer,
 	}, nil
