@@ -92,3 +92,7 @@ Regenerate all:
 Regenerate videos with IDs 3, 4, and 5:
 
 `./creamy-videos thumbnail 3 4 5`
+
+## See Also
+
+- [creamy-videos-importer](https://github.com/AlbinoDrought/creamy-videos-importer) for easily importing videos into your creamy-videos instance
