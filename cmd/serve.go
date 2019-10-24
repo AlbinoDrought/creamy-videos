@@ -13,6 +13,7 @@ import (
 
 	rice "github.com/GeertJohan/go.rice"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
 	"github.com/AlbinoDrought/creamy-videos/videostore"
@@ -184,6 +185,24 @@ func deleteVideoHandler(instance application) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("error deleting video: %+v", err)
 			return
+		}
+
+		_, err = instance.fs.Stat(video.Source)
+		if !instance.fs.IsNotExist(err) {
+			// video exists, attempt to delete
+			err = instance.fs.Remove(video.Source)
+			if err != nil {
+				log.Print(errors.Wrap(err, "failed to remove video from disk"))
+			}
+		}
+
+		_, err = instance.fs.Stat(video.Thumbnail)
+		if !instance.fs.IsNotExist(err) {
+			// thumbnail exists, attempt to delete
+			err = instance.fs.Remove(video.Thumbnail)
+			if err != nil {
+				log.Print(errors.Wrap(err, "failed to remove thumbnail from disk"))
+			}
 		}
 
 		json.NewEncoder(w).Encode(transformVideo(instance, video))

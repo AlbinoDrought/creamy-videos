@@ -4,14 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
-	"github.com/pkg/errors"
 )
 
 // dummyVideoRepo stores models to a local JSON file
@@ -95,24 +93,6 @@ func (repo *dummyVideoRepo) Delete(video Video) error {
 	// soft delete
 	repo.videos[index] = Video{}
 	repo.dumpToDisk()
-
-	_, err := repo.fs.Stat(video.Source)
-	if !repo.fs.IsNotExist(err) {
-		// video exists, attempt to delete
-		err = repo.fs.Remove(video.Source)
-		if err != nil {
-			log.Print(errors.Wrap(err, "failed to remove video from disk"))
-		}
-	}
-
-	_, err = repo.fs.Stat(video.Thumbnail)
-	if !repo.fs.IsNotExist(err) {
-		// thumbnail exists, attempt to delete
-		err = repo.fs.Remove(video.Thumbnail)
-		if err != nil {
-			log.Print(errors.Wrap(err, "failed to remove thumbnail from disk"))
-		}
-	}
 
 	return nil
 }
