@@ -27,7 +27,7 @@ func (instance application) makePostgresRepo() videostore.VideoRepo {
 	})
 	// db never closed
 
-	return videostore.NewPostgresVideoRepo(*db, instance.fs)
+	return videostore.NewPostgresVideoRepo(*db)
 }
 
 func makeApp(cfg appConfig) (instance application) {

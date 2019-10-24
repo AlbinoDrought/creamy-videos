@@ -7,7 +7,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/AlbinoDrought/creamy-videos/files"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 )
@@ -15,10 +14,9 @@ import (
 // postgresVideoRepo stores models to a Postgres DB
 type postgresVideoRepo struct {
 	db pg.DB
-	fs files.FileSystem
 }
 
-func NewPostgresVideoRepo(db pg.DB, fs files.FileSystem) *postgresVideoRepo {
+func NewPostgresVideoRepo(db pg.DB) *postgresVideoRepo {
 	err := db.CreateTable((*Video)(nil), &orm.CreateTableOptions{
 		IfNotExists: true,
 	})
@@ -28,7 +26,6 @@ func NewPostgresVideoRepo(db pg.DB, fs files.FileSystem) *postgresVideoRepo {
 
 	return &postgresVideoRepo{
 		db,
-		fs,
 	}
 }
 
