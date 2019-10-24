@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -60,13 +62,43 @@ func uploadFileHandler(instance application) http.HandlerFunc {
 			Tags:             tags,
 		}
 
-		video, err = instance.repo.Upload(video, file)
+		video, err = instance.repo.Save(video)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(fmt.Sprintf("error creating video: %+v", err)))
 			return
 		}
+
+		rootDir := strconv.Itoa(int(video.ID))
+		if _, err := instance.fs.Stat(rootDir); instance.fs.IsNotExist(err) {
+			instance.fs.MkdirAll(rootDir, os.ModePerm)
+		}
+
+		videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
+
+		err = files.PipeTo(instance.fs, videoPath, file)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("error saving video stream: %+v", err)))
+			return
+		}
+
+		video.Source = videoPath
+		video, err = instance.repo.Save(video)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("error setting video source: %+v", err)))
+			return
+		}
+
+		go func() {
+			_, err := videostore.GenerateThumbnail(video, instance.repo, instance.fs)
+			if err != nil {
+				log.Printf("failed to make thumbnail: %+v", err)
+			}
+		}()
 
 		go debug.FreeOSMemory() // hack to request our memory back :'(
 

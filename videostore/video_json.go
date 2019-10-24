@@ -4,12 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"os"
-	"path"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -57,30 +53,6 @@ func (repo *dummyVideoRepo) makeID() uint {
 	defer repo.idLock.Unlock()
 	repo.id = repo.id + 1
 	return repo.id
-}
-
-func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error) {
-	video.Thumbnail = ""
-	video.Source = ""
-	video, err := repo.Save(video)
-
-	if err != nil {
-		return video, err
-	}
-
-	rootDir := strconv.Itoa(int(video.ID))
-	if _, err := repo.fs.Stat(rootDir); repo.fs.IsNotExist(err) {
-		repo.fs.MkdirAll(rootDir, os.ModePerm)
-	}
-
-	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
-
-	files.PipeTo(repo.fs, videoPath, reader)
-
-	video.Source = videoPath
-	go eventuallyMakeThumbnail(video, repo, repo.fs)
-
-	return repo.Save(video)
 }
 
 func (repo *dummyVideoRepo) dumpToDisk() {

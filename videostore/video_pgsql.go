@@ -2,11 +2,7 @@ package videostore
 
 import (
 	"fmt"
-	"io"
 	"log"
-	"os"
-	"path"
-	"strconv"
 	"time"
 
 	"github.com/pkg/errors"
@@ -139,28 +135,4 @@ func (repo *postgresVideoRepo) Delete(video Video) error {
 	}
 
 	return nil
-}
-
-func (repo *postgresVideoRepo) Upload(video Video, reader io.Reader) (Video, error) {
-	video.Thumbnail = ""
-	video.Source = ""
-	video, err := repo.Save(video)
-
-	if err != nil {
-		return video, err
-	}
-
-	rootDir := strconv.Itoa(int(video.ID))
-	if _, err := repo.fs.Stat(rootDir); repo.fs.IsNotExist(err) {
-		repo.fs.MkdirAll(rootDir, os.ModePerm)
-	}
-
-	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
-
-	files.PipeTo(repo.fs, videoPath, reader)
-
-	video.Source = videoPath
-	go eventuallyMakeThumbnail(video, repo, repo.fs)
-
-	return repo.Save(video)
 }
