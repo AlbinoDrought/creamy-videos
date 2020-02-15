@@ -2,16 +2,11 @@ package videostore
 
 import (
 	"fmt"
-	"io"
 	"log"
-	"os"
-	"path"
-	"strconv"
 	"time"
 
 	"github.com/pkg/errors"
 
-	"github.com/AlbinoDrought/creamy-videos/files"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 )
@@ -19,10 +14,9 @@ import (
 // postgresVideoRepo stores models to a Postgres DB
 type postgresVideoRepo struct {
 	db pg.DB
-	fs files.FileSystem
 }
 
-func NewPostgresVideoRepo(db pg.DB, fs files.FileSystem) *postgresVideoRepo {
+func NewPostgresVideoRepo(db pg.DB) *postgresVideoRepo {
 	err := db.CreateTable((*Video)(nil), &orm.CreateTableOptions{
 		IfNotExists: true,
 	})
@@ -32,7 +26,6 @@ func NewPostgresVideoRepo(db pg.DB, fs files.FileSystem) *postgresVideoRepo {
 
 	return &postgresVideoRepo{
 		db,
-		fs,
 	}
 }
 
@@ -120,47 +113,5 @@ func (repo *postgresVideoRepo) Delete(video Video) error {
 		return errors.Wrap(err, "failed to delete from db")
 	}
 
-	_, err = repo.fs.Stat(video.Source)
-	if !repo.fs.IsNotExist(err) {
-		// video exists, attempt to delete
-		err = repo.fs.Remove(video.Source)
-		if err != nil {
-			log.Print(errors.Wrap(err, "failed to remove video from disk"))
-		}
-	}
-
-	_, err = repo.fs.Stat(video.Thumbnail)
-	if !repo.fs.IsNotExist(err) {
-		// thumbnail exists, attempt to delete
-		err = repo.fs.Remove(video.Thumbnail)
-		if err != nil {
-			log.Print(errors.Wrap(err, "failed to remove thumbnail from disk"))
-		}
-	}
-
 	return nil
-}
-
-func (repo *postgresVideoRepo) Upload(video Video, reader io.Reader) (Video, error) {
-	video.Thumbnail = ""
-	video.Source = ""
-	video, err := repo.Save(video)
-
-	if err != nil {
-		return video, err
-	}
-
-	rootDir := strconv.Itoa(int(video.ID))
-	if _, err := repo.fs.Stat(rootDir); repo.fs.IsNotExist(err) {
-		repo.fs.MkdirAll(rootDir, os.ModePerm)
-	}
-
-	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
-
-	files.PipeTo(repo.fs, videoPath, reader)
-
-	video.Source = videoPath
-	go eventuallyMakeThumbnail(video, repo, repo.fs)
-
-	return repo.Save(video)
 }

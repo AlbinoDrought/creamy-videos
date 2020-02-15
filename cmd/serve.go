@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path"
 	"runtime/debug"
 	"strconv"
 	"strings"
 
 	rice "github.com/GeertJohan/go.rice"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
 	"github.com/AlbinoDrought/creamy-videos/videostore"
@@ -60,13 +63,43 @@ func uploadFileHandler(instance application) http.HandlerFunc {
 			Tags:             tags,
 		}
 
-		video, err = instance.repo.Upload(video, file)
+		video, err = instance.repo.Save(video)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(fmt.Sprintf("error creating video: %+v", err)))
 			return
 		}
+
+		rootDir := strconv.Itoa(int(video.ID))
+		if _, err := instance.fs.Stat(rootDir); instance.fs.IsNotExist(err) {
+			instance.fs.MkdirAll(rootDir, os.ModePerm)
+		}
+
+		videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
+
+		err = files.PipeTo(instance.fs, videoPath, file)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("error saving video stream: %+v", err)))
+			return
+		}
+
+		video.Source = videoPath
+		video, err = instance.repo.Save(video)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("error setting video source: %+v", err)))
+			return
+		}
+
+		go func() {
+			_, err := videostore.GenerateThumbnail(video, instance.repo, instance.fs)
+			if err != nil {
+				log.Printf("failed to make thumbnail: %+v", err)
+			}
+		}()
 
 		go debug.FreeOSMemory() // hack to request our memory back :'(
 
@@ -152,6 +185,24 @@ func deleteVideoHandler(instance application) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("error deleting video: %+v", err)
 			return
+		}
+
+		_, err = instance.fs.Stat(video.Source)
+		if !instance.fs.IsNotExist(err) {
+			// video exists, attempt to delete
+			err = instance.fs.Remove(video.Source)
+			if err != nil {
+				log.Print(errors.Wrap(err, "failed to remove video from disk"))
+			}
+		}
+
+		_, err = instance.fs.Stat(video.Thumbnail)
+		if !instance.fs.IsNotExist(err) {
+			// thumbnail exists, attempt to delete
+			err = instance.fs.Remove(video.Thumbnail)
+			if err != nil {
+				log.Print(errors.Wrap(err, "failed to remove thumbnail from disk"))
+			}
 		}
 
 		json.NewEncoder(w).Encode(transformVideo(instance, video))

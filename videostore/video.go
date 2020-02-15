@@ -2,7 +2,6 @@ package videostore
 
 import (
 	"errors"
-	"io"
 )
 
 const SortDirectionAscending = "asc"
@@ -70,7 +69,6 @@ func (video Video) Exists() bool {
 }
 
 type VideoRepo interface {
-	Upload(video Video, reader io.Reader) (Video, error)
 	Save(video Video) (Video, error)
 	FindById(id uint) (Video, error)
 	All(filter VideoFilter, limit uint, offset uint) ([]Video, error)

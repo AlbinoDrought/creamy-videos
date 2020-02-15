@@ -4,18 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
-	"os"
-	"path"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
-	"github.com/pkg/errors"
 )
 
 // dummyVideoRepo stores models to a local JSON file
@@ -59,30 +53,6 @@ func (repo *dummyVideoRepo) makeID() uint {
 	return repo.id
 }
 
-func (repo *dummyVideoRepo) Upload(video Video, reader io.Reader) (Video, error) {
-	video.Thumbnail = ""
-	video.Source = ""
-	video, err := repo.Save(video)
-
-	if err != nil {
-		return video, err
-	}
-
-	rootDir := strconv.Itoa(int(video.ID))
-	if _, err := repo.fs.Stat(rootDir); repo.fs.IsNotExist(err) {
-		repo.fs.MkdirAll(rootDir, os.ModePerm)
-	}
-
-	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
-
-	files.PipeTo(repo.fs, videoPath, reader)
-
-	video.Source = videoPath
-	go eventuallyMakeThumbnail(video, repo, repo.fs)
-
-	return repo.Save(video)
-}
-
 func (repo *dummyVideoRepo) dumpToDisk() {
 	videoJSON, _ := json.Marshal(&repo.videos)
 	files.PipeTo(repo.fs, "dummy.json", bytes.NewReader(videoJSON))
@@ -123,24 +93,6 @@ func (repo *dummyVideoRepo) Delete(video Video) error {
 	// soft delete
 	repo.videos[index] = Video{}
 	repo.dumpToDisk()
-
-	_, err := repo.fs.Stat(video.Source)
-	if !repo.fs.IsNotExist(err) {
-		// video exists, attempt to delete
-		err = repo.fs.Remove(video.Source)
-		if err != nil {
-			log.Print(errors.Wrap(err, "failed to remove video from disk"))
-		}
-	}
-
-	_, err = repo.fs.Stat(video.Thumbnail)
-	if !repo.fs.IsNotExist(err) {
-		// thumbnail exists, attempt to delete
-		err = repo.fs.Remove(video.Thumbnail)
-		if err != nil {
-			log.Print(errors.Wrap(err, "failed to remove thumbnail from disk"))
-		}
-	}
 
 	return nil
 }

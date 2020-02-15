@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -117,11 +116,4 @@ func generateThumbnailUsingTemporaryFile(video Video, fs files.FileSystem) (Vide
 	video.Thumbnail = finalThumbnailPath
 
 	return video, nil
-}
-
-func eventuallyMakeThumbnail(video Video, repo VideoRepo, fs files.FileSystem) {
-	_, err := GenerateThumbnail(video, repo, fs)
-	if err != nil {
-		log.Printf("failed to make thumbnail: %+v", err)
-	}
 }
