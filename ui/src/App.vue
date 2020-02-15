@@ -62,7 +62,10 @@
         <sort-dropdown :fluid="true" v-model="sortKey" />
       </div>
 
-      <router-view :key="searchKey" />
+      <keep-alive>
+        <router-view :key="searchKey" v-if="$route.meta.keepAlive" />
+      </keep-alive>
+      <router-view :key="searchKey" v-if="!$route.meta.keepAlive" />
     </div>
   </div>
 </template>
