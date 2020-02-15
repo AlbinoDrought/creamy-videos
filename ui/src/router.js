@@ -49,6 +49,9 @@ export default new Router({
         sort: route.query.sort,
         title: 'Home',
       }),
+      meta: {
+        keepAlive: true,
+      },
     },
     {
       path: '/watch/:id',
@@ -63,6 +66,7 @@ export default new Router({
       component: Search,
       meta: {
         sortable: true,
+        keepAlive: true,
       },
       props: route => ({
         page: parseInt(route.query.page, 10) || 1,
