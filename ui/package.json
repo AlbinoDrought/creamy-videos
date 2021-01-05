@@ -10,7 +10,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "semantic-ui-css": "^2.4.1",
     "vue": "^2.5.21",
     "vue-infinite-loading": "^2.4.3",
