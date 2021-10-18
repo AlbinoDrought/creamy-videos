@@ -76,7 +76,7 @@ export default new Vuex.Store({
   actions: {
     videos(context, params = {}) {
       return client.get('/api/video', { params })
-        .then(resp => resp.data);
+        .then((resp) => resp.data);
     },
     tagged({ dispatch }, { tags, page = 1, sortOption = {} }) {
       return dispatch('videos', {
@@ -95,13 +95,13 @@ export default new Vuex.Store({
       });
     },
     video(context, id) {
-      return client.get(`/api/video/${id}`).then(resp => resp.data);
+      return client.get(`/api/video/${id}`).then((resp) => resp.data);
     },
     upload(context, { formData, config = {} }) {
-      return client.post('/api/upload', formData, config).then(resp => resp.data);
+      return client.post('/api/upload', formData, config).then((resp) => resp.data);
     },
     edit(context, video) {
-      return client.post(`/api/video/${video.id}`, video).then(resp => resp.data);
+      return client.post(`/api/video/${video.id}`, video).then((resp) => resp.data);
     },
     delete(context, id) {
       return client.delete(`/api/video/${id}`);
