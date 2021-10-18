@@ -11,9 +11,7 @@ import (
 )
 
 // dummy func to fulfill FileTransformer
-var passthrough = func(r io.Reader) io.Reader {
-	return r
-}
+var passthrough = func(b []byte) {}
 
 func TestMkdirAll(t *testing.T) {
 	root := "test-mkdirall"
@@ -25,7 +23,7 @@ func TestMkdirAll(t *testing.T) {
 	}
 
 	tfs := TransformFileSystem(
-		root,
+		LocalFileSystem(root),
 		passthrough,
 	)
 	defer os.RemoveAll(root)
@@ -42,7 +40,7 @@ func TestStat(t *testing.T) {
 	root := "test-stat"
 
 	tfs := TransformFileSystem(
-		".",
+		LocalFileSystem("."),
 		passthrough,
 	)
 	defer os.RemoveAll(root)
@@ -66,7 +64,7 @@ func TestOpen(t *testing.T) {
 	root := "test-open"
 
 	tfs := TransformFileSystem(
-		root,
+		LocalFileSystem(root),
 		passthrough,
 	)
 	defer os.RemoveAll(root)
