@@ -22,15 +22,6 @@ import (
 
 const maxMultipartFormSize = 1024 * 1024 // 1MB
 
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		next.ServeHTTP(w, r)
-	})
-}
-
 func uploadFileHandler(instance application) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
@@ -369,8 +360,6 @@ var serveCmd = &cobra.Command{
 		} else {
 			r.PathPrefix("/").Handler(http.FileServer(files.CreateSPAFileSystem(box.HTTPBox(), "/index.html")))
 		}
-
-		r.Use(corsMiddleware)
 
 		http.Handle("/", r)
 
