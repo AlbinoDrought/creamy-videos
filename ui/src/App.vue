@@ -106,7 +106,7 @@ export default {
   },
 
   metaInfo: {
-    titleTemplate: titleChunk => (titleChunk ? `${titleChunk} | creamy-videos` : 'creamy-videos'),
+    titleTemplate: (titleChunk) => (titleChunk ? `${titleChunk} | creamy-videos` : 'creamy-videos'),
   },
 
   methods: {

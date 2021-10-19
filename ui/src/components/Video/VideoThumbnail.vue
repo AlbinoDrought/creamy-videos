@@ -19,7 +19,7 @@ export default {
     value: {
       type: Object,
       required: true,
-      validator: v => v
+      validator: (v) => v
         && v.id
         && v.title
         && v.thumbnail

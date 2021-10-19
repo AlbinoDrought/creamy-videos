@@ -23,7 +23,7 @@ export default {
       return this.page + this.infinitePage;
     },
     sortOption() {
-      return sortOptions.find(option => option.key === this.sort) || sortOptions[0];
+      return sortOptions.find((option) => option.key === this.sort) || sortOptions[0];
     },
   },
   data() {

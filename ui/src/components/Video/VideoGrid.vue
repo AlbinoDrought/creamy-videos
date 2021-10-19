@@ -37,7 +37,7 @@ export default {
     values: {
       type: Array,
       required: true,
-      validator: v => v,
+      validator: (v) => v,
     },
   },
 };

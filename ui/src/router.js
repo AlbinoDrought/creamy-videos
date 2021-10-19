@@ -42,7 +42,7 @@ export default new Router({
       path: '/',
       name: 'home',
       component: Search,
-      props: route => ({
+      props: (route) => ({
         page: parseInt(route.query.page, 10) || 1,
         mode: 'tags',
         tags: 'home',
@@ -64,7 +64,7 @@ export default new Router({
       meta: {
         sortable: true,
       },
-      props: route => ({
+      props: (route) => ({
         page: parseInt(route.query.page, 10) || 1,
         mode: route.query.mode || 'text',
         text: route.query.text,

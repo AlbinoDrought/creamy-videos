@@ -19,7 +19,7 @@ export default {
 
     sortOption: {
       get() {
-        return this.sortOptions.find(option => option.key === this.value) || this.sortOptions[0];
+        return this.sortOptions.find((option) => option.key === this.value) || this.sortOptions[0];
       },
 
       set(value) {
