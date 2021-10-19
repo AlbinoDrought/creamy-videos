@@ -1,0 +1,225 @@
+openapi: 3.0.2
+
+servers:
+  - url: /api
+
+info:
+  title: Creamy Videos
+  version: 0.0.1
+  license:
+    name: AGPL-3.0
+
+tags:
+  - name: video
+    description: Video operations
+
+paths:
+  /upload:
+    post:
+      tags: [video]
+      summary: Upload a video
+      operationId: uploadVideo
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/FormDataVideoUpload"
+      responses:
+        201:
+          $ref: "#/components/responses/SingleVideo"
+        403:
+          $ref: "#/components/responses/DisabledInReadOnlyMode"
+
+  /video:
+    get:
+      tags: [video]
+      summary: List videos
+      operationId: listVideos
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: tags
+          in: query
+          description: Only show videos with these comma-separated tags
+          required: false
+          schema:
+            type: string
+        - name: title
+          in: query
+          description: Only show videos with this text in their title
+          required: false
+          schema:
+            type: string
+        - name: filter
+          in: query
+          description: Only show videos with this text in their title or with this tag
+          required: false
+          schema:
+            type: string
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+        - name: sort_field
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [title, time_created, time_updated]
+      responses:
+        200:
+          $ref: "#/components/responses/MultipleVideos"
+
+  /video/{videoID}:
+    parameters:
+      - $ref: "#/components/parameters/videoID"
+    get:
+      tags: [video]
+      summary: Show video
+      operationId: showVideo
+      responses:
+        200:
+          $ref: "#/components/responses/SingleVideo"
+        404:
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: [video]
+      summary: Edit video
+      operationId: editVideo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Video"
+      responses:
+        200:
+          $ref: "#/components/responses/SingleVideo"
+        403:
+          $ref: "#/components/responses/DisabledInReadOnlyMode"
+        404:
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [video]
+      summary: Delete video
+      operationId: deleteVideo
+      responses:
+        200:
+          $ref: "#/components/responses/SingleVideo"
+        404:
+          $ref: "#/components/responses/NotFound"
+
+components:
+  parameters:
+    videoID:
+      name: videoID
+      in: path
+      required: true
+      schema:
+        type: integer
+
+  responses:
+    SingleVideo:
+      description: Single Video Response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Video"
+    MultipleVideos:
+      description: Multiple Video Response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Video"
+    DisabledInReadOnlyMode:
+      description: This feature is disabled in read-only mode
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [error]
+            properties:
+              error:
+                type: string
+                example: This feature is disabled in read-only mode.
+    NotFound:
+      description: Not Found
+
+  schemas:
+    Video:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          example: Dog Jumping
+        description:
+          type: string
+          example: Cogito, ergo bibo
+          default: ""
+        thumbnail:
+          type: string
+          description: Full path to thumbnail image
+          example: https://example.com/videos/1.png
+          readOnly: true
+        source:
+          type: string
+          description: Full path to video
+          example: https://example.com/videos/1.mp4
+          readOnly: true
+        original_file_name:
+          type: string
+          default: ""
+          readOnly: true
+        time_created:
+          type: string
+          readOnly: true
+          example: 2006-01-02T15:04:05Z07:00
+        time_updated:
+          type: string
+          readOnly: true
+          example: 2006-01-02T15:04:05Z07:00
+        tags:
+          type: array
+          default: []
+          items:
+            type: string
+            example: dog
+      required:
+        - id
+        - title
+        - description
+        - thumbnail
+        - source
+        - original_file_name
+        - time_created
+        - time_updated
+        - tags
+
+    FormDataVideoUpload:
+      allOf:
+        - $ref: "#/components/schemas/Video"
+        - type: object
+          properties:
+            tags:
+              type: string
+              description: Comma-separated list of tags
+              example: "dog, cat"
+              default: ""
+            file:
+              type: string
+              format: binary
+          required:
+            - tags
+            - file
