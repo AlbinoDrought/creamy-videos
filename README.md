@@ -36,7 +36,7 @@ go build
 
 ### With Docker
 
-`docker build -t ghcr.ioalbinodrought/creamy-videos .`
+`docker build -t ghcr.io/albinodrought/creamy-videos .`
 
 ## Usage
 
