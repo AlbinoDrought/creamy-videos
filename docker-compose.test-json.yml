@@ -1,0 +1,16 @@
+version: "2"
+services:
+  creamy-videos:
+    image:  creamy-videos-test
+    restart: on-failure:10
+    environment:
+      - CREAMY_VIDEO_DIR=/videos
+      - CREAMY_POSTGRES=false
+      - CREAMY_APP_URL=
+    volumes:
+      - videos:/videos
+    ports:
+      - 3001:3000
+
+volumes:
+  videos:
