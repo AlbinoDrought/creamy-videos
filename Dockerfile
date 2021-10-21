@@ -1,5 +1,5 @@
 # Build SPA
-FROM albinodrought/node-alpine-gcc-make-ssh as SPA
+FROM node:16 as SPA
 
 COPY ./ui /ui
 WORKDIR /ui
@@ -8,9 +8,8 @@ RUN npm install --no-optional
 RUN npm run build
 
 # Build binary
-FROM golang:alpine as builder
+FROM golang:1.17 as builder
 
-RUN apk update && apk add git
 COPY . $GOPATH/src/github.com/AlbinoDrought/creamy-videos
 WORKDIR $GOPATH/src/github.com/AlbinoDrought/creamy-videos
 
