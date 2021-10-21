@@ -23,16 +23,4 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
-
-Cypress.Commands.add('upload', { prevSubject: 'element' }, (subject, file, fileName, mimeType) => {
-  cy.window().then((window) => {
-    Cypress.Blob.base64StringToBlob(file, mimeType).then((blob) => {
-      const element = subject[0];
-      const testFile = new window.File([blob], fileName, { type: mimeType });
-      const dataTransfer = new window.DataTransfer();
-      dataTransfer.items.add(testFile);
-      element.files = dataTransfer.files;
-      subject.trigger('change');
-    });
-  });
-});
+import 'cypress-file-upload';

@@ -7,21 +7,19 @@ const uploadVideo = (title, tags, description = 'not an empty string', originalF
   cy.get('[name="tags"]').invoke('val').should('eq', 'home');
   cy.get('[name="description"]').invoke('val').should('be.empty');
 
-  cy.fixture('doggo_waddling.mp4', 'base64').then((content) => {
-    cy.get('[name="file"]').upload(content, originalFileName, 'video/mp4');
+  cy.get('[name="file"]').attachFile({ filePath: 'doggo_waddling.mp4', encoding: 'binary' });
 
-    cy.get('[name="title"]').clear().type(title);
-    cy.get('[name="tags"]').clear().type(tags);
-    cy.get('[name="description"]').clear().type(description);
-    cy.get('.submit.button').click();
+  cy.get('[name="title"]').clear().type(title);
+  cy.get('[name="tags"]').clear().type(tags);
+  cy.get('[name="description"]').clear().type(description);
+  cy.get('.submit.button').click();
 
-    cy.url().should('contain', '/watch/');
-    cy.get('video')
-      .should('have.prop', 'duration')
-      .and('be.greaterThan', '0');
+  cy.url().should('contain', '/watch/');
+  cy.get('video')
+    .should('have.prop', 'duration')
+    .and('be.greaterThan', '0');
 
-    resolve();
-  });
+  resolve();
 }));
 
 const assertVideoIsSeen = (title) => {
