@@ -90,6 +90,7 @@ func (a *api) UploadVideo(w http.ResponseWriter, r *http.Request) {
 
 	if err := r.ParseMultipartForm(maxMultipartFormSize); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Bad multipart/form-data request"))
 		return
 	}
 	defer r.MultipartForm.RemoveAll()
@@ -102,12 +103,12 @@ func (a *api) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file, header, err := r.FormFile("file")
-	defer file.Close()
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Bad file"))
 		return
 	}
+	defer file.Close()
 
 	video := videostore.Video{
 		Title:            r.FormValue("title"),
