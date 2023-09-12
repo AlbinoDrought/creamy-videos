@@ -1,0 +1,28 @@
+version: "2"
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  creamy-videos:
+    image:  creamy-videos-test
+    depends_on:
+      - db
+    restart: on-failure:10
+    environment:
+      - CREAMY_VIDEO_DIR=/videos
+      - CREAMY_POSTGRES=true
+      - CREAMY_POSTGRES_ADDRESS=db:5432
+      - CREAMY_APP_URL=
+      - CREAMY_SPA=false
+    volumes:
+      - videos:/videos
+    ports:
+      - 3003:3000
+
+volumes:
+  db:
+  videos:

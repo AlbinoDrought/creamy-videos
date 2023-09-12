@@ -42,6 +42,15 @@ jobs:
         env:
           CYPRESS_BASE_URL: http://localhost:3002
 
+      - name: E2E against Creamy-Videos w/ Postgres store, no SPA
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: ui
+          start: docker-compose -f ../docker-compose.test-postgres-nospa.yml up -d
+          wait-on: http://localhost:3003
+        env:
+          CYPRESS_BASE_URL: http://localhost:3003
+
   push-image:
     if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
