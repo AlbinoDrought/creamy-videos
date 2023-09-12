@@ -33,6 +33,11 @@ type CreamyVideosAPI interface {
 	DeleteVideo(w http.ResponseWriter, r *http.Request)
 }
 
+func writeJSON(w http.ResponseWriter, thing any) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(thing)
+}
+
 type api struct {
 	PublicURL tmpl.PublicURLGenerator
 	FS        files.FileSystem
@@ -76,7 +81,7 @@ func (a *api) ListVideos(w http.ResponseWriter, r *http.Request) {
 		transformedVideos[i] = a.transformVideo(video)
 	}
 
-	json.NewEncoder(w).Encode(transformedVideos)
+	writeJSON(w, transformedVideos)
 }
 
 func (a *api) UploadVideo(w http.ResponseWriter, r *http.Request) {
@@ -152,7 +157,7 @@ func (a *api) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	go debug.FreeOSMemory() // hack to request our memory back :'(
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(a.transformVideo(video))
+	writeJSON(w, a.transformVideo(video))
 }
 
 func (a *api) ShowVideo(w http.ResponseWriter, r *http.Request) {
@@ -179,7 +184,7 @@ func (a *api) ShowVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(a.transformVideo(video))
+	writeJSON(w, a.transformVideo(video))
 }
 
 func (a *api) EditVideo(w http.ResponseWriter, r *http.Request) {
@@ -219,7 +224,7 @@ func (a *api) EditVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(a.transformVideo(video))
+	writeJSON(w, a.transformVideo(video))
 }
 
 func (a *api) DeleteVideo(w http.ResponseWriter, r *http.Request) {
@@ -272,7 +277,7 @@ func (a *api) DeleteVideo(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	json.NewEncoder(w).Encode(a.transformVideo(video))
+	writeJSON(w, a.transformVideo(video))
 }
 
 func newAPI(PublicURL tmpl.PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) CreamyVideosAPI {
