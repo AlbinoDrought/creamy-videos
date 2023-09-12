@@ -68,6 +68,20 @@ templ videoGrid(pug PublicURLGenerator, videos []videostore.Video) {
   </div>
 }
 
+templ pagingLinks(p Paging) {
+  <div class="ui pagination menu">
+    for _, page := range genPages(p) {
+      if page.Disabled {
+        <div class="disabled item">{ page.Page }</div>
+      } else {
+        <a class={ classes("item", classIf("active", page.Active)) } href={ templ.SafeURL(page.URL) }>
+          { page.Page }
+        </a>
+      }
+    }
+  </div>
+}
+
 // wrappers:
 
 templ page(title string, description string) {
@@ -166,18 +180,20 @@ templ app(state AppState) {
 
 // pages:
 
-templ Home(state AppState, videos []videostore.Video) {
+templ Home(state AppState, paging Paging, videos []videostore.Video) {
   @page("Home", "The creamiest selfhosted tubesite") {
     @app(state) {
       @videoGrid(state.PUG, videos)
+      @pagingLinks(paging)
     }
   }
 }
 
-templ Search(state AppState, videos []videostore.Video) {
+templ Search(state AppState, paging Paging, videos []videostore.Video) {
   @page("Search: " + state.SearchText, "The creamiest selfhosted tubesite") {
     @app(state) {
       @videoGrid(state.PUG, videos)
+      @pagingLinks(paging)
     }
   }
 }

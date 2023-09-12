@@ -1,8 +1,10 @@
 package web
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/AlbinoDrought/creamy-videos/ui2/static"
@@ -87,6 +89,12 @@ func (u *cUI2) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	count, err := u.Repo.Count(filter)
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusInternalServerError, err, "failed counting videos")
+		return
+	}
+
 	w.Header().Add("Content-Type", "text/html")
 	tmpl.Home(tmpl.AppState{
 		ReadOnly:      u.ReadOnly,
@@ -94,6 +102,12 @@ func (u *cUI2) Home(w http.ResponseWriter, r *http.Request) {
 		Sortable:      false,
 		SearchText:    "",
 		PUG:           u.PublicURL,
+	}, tmpl.Paging{
+		URL: func(p int) string {
+			return fmt.Sprintf("/?page=%v", p)
+		},
+		CurrentPage: pageInt,
+		Pages:       int(pages(count, videosPerPage)),
 	}, videos).Render(r.Context(), w)
 }
 
@@ -133,14 +147,34 @@ func (u *cUI2) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Add("Content-Type", "text/html")
+	count, err := u.Repo.Count(filter)
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusInternalServerError, err, "failed counting videos")
+		return
+	}
 
+	baseURL := fmt.Sprintf("/search?sort=%v&", url.QueryEscape(sort))
+	for _, key := range []string{"tags", "title", "filter"} {
+		v := filterArgs[key]
+		if v == "" {
+			continue
+		}
+		baseURL = fmt.Sprintf("%v%v=%v&", baseURL, key, url.QueryEscape(v))
+	}
+
+	w.Header().Add("Content-Type", "text/html")
 	tmpl.Search(tmpl.AppState{
 		ReadOnly:      u.ReadOnly,
 		SortDirection: sort,
 		Sortable:      true,
 		SearchText:    r.URL.Query().Get("text"),
 		PUG:           u.PublicURL,
+	}, tmpl.Paging{
+		URL: func(p int) string {
+			return fmt.Sprintf("%vpage=%v", baseURL, p)
+		},
+		CurrentPage: pageInt,
+		Pages:       int(pages(count, videosPerPage)),
 	}, videos).Render(r.Context(), w)
 }
 
