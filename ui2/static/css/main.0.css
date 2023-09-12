@@ -151,3 +151,67 @@ html, body, head {
 #app .sort-dropdown option {
   direction: ltr;
 }
+
+/* Video Card */
+#app .ui.video.card {
+  border: 0px;
+  border-radius: 0px;
+  transition: none;
+  box-shadow: none;
+  background-color: inherit;
+}
+
+#app .ui.video.card .content {
+  padding: 0.5em 0.5em;
+}
+
+#app .ui.video.card .header {
+  color: rgb(171, 171, 171);
+  word-wrap: break-word;
+}
+#app .ui.video.card .header:hover {
+  color: #1e70bf;
+}
+
+#app .ui.video.card>.ui.image, #app .ui.video.card>.ui.image>img {
+    /*
+    // remove semantic-ui border-radius
+    */
+    border-radius: 0px;
+}
+#app .ui.video.card>.ui.image {
+  /*
+  // black background makes it appear
+  // as if the bounding box is an extension
+  // of the actual video thumbnail.
+  */
+  background-color: #000;
+
+  /*
+  // force box to be 16:9
+  // https://css-tricks.com/aspect-ratio-boxes/
+  */
+  width: 100%;
+  padding-bottom: 56.25%;
+  /*
+  // ...and hide anything that sticks out
+  */
+  overflow: hidden;
+}
+#app .ui.video.card>.ui.image>img {
+  /*
+  // make the image take up the full width
+  // of the box
+  */
+  min-width: 100%;
+  height: auto;
+
+  /*
+  // force the image to vertically center itself
+  // https://stackoverflow.com/a/28456704/3649573
+  */
+  position: absolute;
+  top: 50%;
+  left: 0px;
+  transform: translateY(-50%);
+}

@@ -1,7 +1,9 @@
 package tmpl
 
 import (
+  "fmt"
   "strings"
+  "github.com/AlbinoDrought/creamy-videos/videostore"
 )
 
 // formatters:
@@ -17,6 +19,10 @@ func classIf(name string, condition bool) string {
   return ""
 }
 
+func videoURL(video videostore.Video) templ.SafeURL {
+  return templ.SafeURL(fmt.Sprintf("/watch/%v", video.ID))
+}
+
 // components:
 
 templ sortDropdown(direction string, fluid bool) {
@@ -26,6 +32,27 @@ templ sortDropdown(direction string, fluid bool) {
     <option value="az" selected?={ direction == "az" }>A-Z</option>
     <option value="za" selected?={ direction == "za" }>Z-A</option>
   </select>
+}
+
+templ videoThumbnail(pug PublicURLGenerator, video videostore.Video) {
+  <a href={ videoURL(video) } class="ui fluid video card" aria-label="Video Thumbnail">
+    <div class="ui image">
+      <img src={ pug(video.Thumbnail) } />
+    </div>
+    <div class="content">
+      <span class="header">{ video.Title }</span>
+    </div>
+  </a>
+}
+
+templ videoGrid(pug PublicURLGenerator, videos []videostore.Video) {
+  <div class="ui stackable grid">
+    for _, video := range videos {
+      <div class="four wide column">
+        @videoThumbnail(pug, video)
+      </div>
+    }
+  </div>
 }
 
 // wrappers:
@@ -126,18 +153,18 @@ templ app(state AppState) {
 
 // pages:
 
-templ Home(state AppState) {
+templ Home(state AppState, videos []videostore.Video) {
   @page("Home", "The creamiest selfhosted tubesite") {
     @app(state) {
-      do me
+      @videoGrid(state.PUG, videos)
     }
   }
 }
 
-templ Search(state AppState) {
+templ Search(state AppState, videos []videostore.Video) {
   @page("Search: " + state.SearchText, "The creamiest selfhosted tubesite") {
     @app(state) {
-      do me
+      @videoGrid(state.PUG, videos)
     }
   }
 }

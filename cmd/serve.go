@@ -54,9 +54,9 @@ var serveCmd = &cobra.Command{
 			// mount non-SPA UI:
 			var cUI2Handler http.Handler
 			if app.config.ReadOnly {
-				cUI2Handler = web.NewReadOnlyCUI2()
+				cUI2Handler = web.NewReadOnlyCUI2(publicUrlGenerator, app.repo)
 			} else {
-				cUI2Handler = web.NewWriteableCUI2()
+				cUI2Handler = web.NewWriteableCUI2(publicUrlGenerator, app.repo)
 			}
 			r.PathPrefix("/").Handler(cUI2Handler)
 		}

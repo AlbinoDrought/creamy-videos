@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
+	"github.com/AlbinoDrought/creamy-videos/ui2/tmpl"
 	"github.com/AlbinoDrought/creamy-videos/videostore"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -32,10 +33,8 @@ type CreamyVideosAPI interface {
 	DeleteVideo(w http.ResponseWriter, r *http.Request)
 }
 
-type PublicURLGenerator func(relativeURL string) string
-
 type api struct {
-	PublicURL PublicURLGenerator
+	PublicURL tmpl.PublicURLGenerator
 	FS        files.FileSystem
 	Repo      videostore.VideoRepo
 }
@@ -51,12 +50,7 @@ func (a *api) transformVideo(video videostore.Video) videostore.Video {
 func (a *api) ListVideos(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	page := r.URL.Query().Get("page")
-	if len(page) <= 0 {
-		page = "1"
-	}
-	pageInt, err := strconv.Atoi(page)
-
+	pageInt, err := page(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -281,11 +275,11 @@ func (a *api) DeleteVideo(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(a.transformVideo(video))
 }
 
-func newAPI(PublicURL PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) CreamyVideosAPI {
+func newAPI(PublicURL tmpl.PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) CreamyVideosAPI {
 	return &api{PublicURL, FS, Repo}
 }
 
-func NewWriteableAPI(PublicURL PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) http.Handler {
+func NewWriteableAPI(PublicURL tmpl.PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) http.Handler {
 	api := newAPI(PublicURL, FS, Repo)
 	r := mux.NewRouter()
 
@@ -317,7 +311,7 @@ func NewWriteableAPI(PublicURL PublicURLGenerator, FS files.FileSystem, Repo vid
 	return r
 }
 
-func NewReadOnlyAPI(PublicURL PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) http.Handler {
+func NewReadOnlyAPI(PublicURL tmpl.PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) http.Handler {
 	api := newAPI(PublicURL, FS, Repo)
 	r := mux.NewRouter()
 

@@ -49,41 +49,104 @@ var sortDirs = map[string]sortDir{
 var defaultSortDir = "newest"
 
 type cUI2 struct {
-	ReadOnly bool
+	ReadOnly  bool
+	PublicURL tmpl.PublicURLGenerator
+	Repo      videostore.VideoRepo
+}
+
+func (u *cUI2) WriteErrorPage(w http.ResponseWriter, r *http.Request, statusCode int, err error, msg string) {
+	w.WriteHeader(statusCode)
+	w.Write([]byte("todo"))
+	log.Printf("%v error: %v", msg, err)
 }
 
 func (u *cUI2) Home(w http.ResponseWriter, r *http.Request) {
+	pageInt, err := page(r)
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusBadRequest, err, "bad page number")
+		return
+	}
+
+	limit := videosPerPage
+	offset := videosPerPage * (pageInt - 1)
+	if offset < 0 {
+		offset = 0
+	}
+
+	filter := videoFilterFromDict(sortDir(map[string]string{
+		"tags":           "home",
+		"sort_field":     "time_created",
+		"sort_direction": videostore.SortDirectionDescending,
+	}))
+
+	videos, err := u.Repo.All(filter, uint(limit), uint(offset))
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusInternalServerError, err, "failed listing videos")
+		return
+	}
+
 	w.Header().Add("Content-Type", "text/html")
 	tmpl.Home(tmpl.AppState{
 		ReadOnly:      u.ReadOnly,
 		SortDirection: "",
 		Sortable:      false,
 		SearchText:    "",
-	}).Render(r.Context(), w)
+		PUG:           u.PublicURL,
+	}, videos).Render(r.Context(), w)
 }
 
 func (u *cUI2) Search(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "text/html")
-	sort := r.URL.Query().Get("sort")
-	sortDir, ok := sortDirs[sort]
-	if !ok {
-		sort = defaultSortDir
-		sortDir = sortDirs[sort]
+	pageInt, err := page(r)
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusBadRequest, err, "bad page number")
+		return
 	}
 
-	log.Print("todo", sortDir)
+	limit := videosPerPage
+	offset := videosPerPage * (pageInt - 1)
+	if offset < 0 {
+		offset = 0
+	}
+
+	sort := r.URL.Query().Get("sort")
+	_, ok := sortDirs[sort]
+	if !ok {
+		sort = defaultSortDir
+	}
+
+	filterArgs := map[string]string{
+		"tags":   r.URL.Query().Get("tags"),
+		"title":  r.URL.Query().Get("title"),
+		"filter": r.URL.Query().Get("text"),
+	}
+	for k, v := range sortDirs[sort] {
+		filterArgs[k] = v
+	}
+
+	filter := videoFilterFromDict(sortDir(filterArgs))
+
+	videos, err := u.Repo.All(filter, uint(limit), uint(offset))
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusInternalServerError, err, "failed listing videos")
+		return
+	}
+
+	w.Header().Add("Content-Type", "text/html")
 
 	tmpl.Search(tmpl.AppState{
 		ReadOnly:      u.ReadOnly,
 		SortDirection: sort,
 		Sortable:      true,
 		SearchText:    r.URL.Query().Get("text"),
-	}).Render(r.Context(), w)
+		PUG:           u.PublicURL,
+	}, videos).Render(r.Context(), w)
 }
 
-func NewWriteableCUI2() http.Handler {
+func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRepo) http.Handler {
 	u := &cUI2{
-		ReadOnly: false,
+		ReadOnly:  false,
+		PublicURL: publicURL,
+		Repo:      repo,
 	}
 
 	r := mux.NewRouter()
@@ -107,9 +170,11 @@ func NewWriteableCUI2() http.Handler {
 	return r
 }
 
-func NewReadOnlyCUI2() http.Handler {
+func NewReadOnlyCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRepo) http.Handler {
 	u := &cUI2{
-		ReadOnly: true,
+		ReadOnly:  true,
+		PublicURL: publicURL,
+		Repo:      repo,
 	}
 
 	r := mux.NewRouter()
