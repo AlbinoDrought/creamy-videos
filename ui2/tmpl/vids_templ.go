@@ -109,7 +109,7 @@ func sortDropdown(direction string, fluid bool) templ.Component {
 			return err
 		}
 		// Text
-		var_3 := `Newest`
+		var_3 := `Sort: Newest`
 		_, err = templBuffer.WriteString(var_3)
 		if err != nil {
 			return err
@@ -139,7 +139,7 @@ func sortDropdown(direction string, fluid bool) templ.Component {
 			return err
 		}
 		// Text
-		var_4 := `Oldest`
+		var_4 := `Sort: Oldest`
 		_, err = templBuffer.WriteString(var_4)
 		if err != nil {
 			return err
@@ -169,7 +169,7 @@ func sortDropdown(direction string, fluid bool) templ.Component {
 			return err
 		}
 		// Text
-		var_5 := `A-Z`
+		var_5 := `Sort: A-Z`
 		_, err = templBuffer.WriteString(var_5)
 		if err != nil {
 			return err
@@ -199,7 +199,7 @@ func sortDropdown(direction string, fluid bool) templ.Component {
 			return err
 		}
 		// Text
-		var_6 := `Z-A`
+		var_6 := `Sort: Z-A`
 		_, err = templBuffer.WriteString(var_6)
 		if err != nil {
 			return err

@@ -27,10 +27,10 @@ func videoURL(video videostore.Video) templ.SafeURL {
 
 templ sortDropdown(direction string, fluid bool) {
   <select name="sort" class={ classes("sort-dropdown", classIf("fluid", fluid)) } onchange="window.cvSubmitNearestForm(this)">
-    <option value="newest" selected?={ direction == "newest" }>Newest</option>
-    <option value="oldest" selected?={ direction == "oldest" }>Oldest</option>
-    <option value="az" selected?={ direction == "az" }>A-Z</option>
-    <option value="za" selected?={ direction == "za" }>Z-A</option>
+    <option value="newest" selected?={ direction == "newest" }>Sort: Newest</option>
+    <option value="oldest" selected?={ direction == "oldest" }>Sort: Oldest</option>
+    <option value="az" selected?={ direction == "az" }>Sort: A-Z</option>
+    <option value="za" selected?={ direction == "za" }>Sort: Z-A</option>
   </select>
 }
 
