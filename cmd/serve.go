@@ -42,12 +42,23 @@ var serveCmd = &cobra.Command{
 			),
 		)
 
-		// mount built SPA ui:
-		box, boxError := rice.FindBox("./../ui/dist")
-		if boxError != nil {
-			log.Printf("failed to find SPA box, running in API-only mode: %+v", boxError)
+		if app.config.SPA {
+			// mount built SPA ui:
+			box, boxError := rice.FindBox("./../ui/dist")
+			if boxError != nil {
+				log.Printf("failed to find SPA box, running in API-only mode: %+v", boxError)
+			} else {
+				r.PathPrefix("/").Handler(http.FileServer(files.CreateSPAFileSystem(box.HTTPBox(), "/index.html")))
+			}
 		} else {
-			r.PathPrefix("/").Handler(http.FileServer(files.CreateSPAFileSystem(box.HTTPBox(), "/index.html")))
+			// mount non-SPA UI:
+			var cUI2Handler http.Handler
+			if app.config.ReadOnly {
+				cUI2Handler = web.NewReadOnlyCUI2()
+			} else {
+				cUI2Handler = web.NewWriteableCUI2()
+			}
+			r.PathPrefix("/").Handler(cUI2Handler)
 		}
 
 		http.Handle("/", r)

@@ -1,5 +1,123 @@
+html, body, head {
+  background-color: rgb(27, 27, 27);
+  min-height: 100%;
+  line-height: 1.15;
+}
+
+/* App */
+:root {
+  /*
+  // grabbed during runtime
+  */
+  --main-menu-height: 53px;
+  --mobile-search-menu-height: 40px;
+  --base-top-margin: 59px; /* --main-menu-height + 6px */
+  --mobile-top-margin: 99px; /* --base-top-margin + --mobile-search-menu-height */
+}
+
+#app .main.menu {
+  height: var(--main-menu-height);
+}
+
+#app .main.menu .header.item img {
+  margin-right: 10px;
+}
+
+#app>.ui.main.container {
+  /*
+  // the fixed semantic-ui menu doesn't
+  // pad the contents below it.
+  // without this margin-top, some contents
+  // would be obscured
+  */
+  margin-top: var(--base-top-margin);
+}
+
+#app .only-small {
+  display: none;
+}
+
+#app .mobile-sort-controls {
+  margin: 1em 0;
+}
+
+#app .search.menu {
+  top: var(--main-menu-height);
+  height: var(--mobile-search-menu-height);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+@media only screen and (max-width: 767px) {
+  #app .main.menu .item::before {
+    /*
+    // disable semantic-ui "pseudo-borders" in mobile
+    */
+    background: none;
+  }
+
+  #app .main.menu .header.item {
+    /*
+    // align menu items to the right in mobile
+    */
+    flex-grow: 1;
+  }
+
+  #app>.ui.main.container {
+    /*
+    // when we show the mobile search menu,
+    // offset main container contents even more
+    // so nothing is obscured
+    */
+    margin-top: var(--mobile-top-margin);
+  }
+
+  #app .only-small {
+    display: block;
+  }
+
+  #app .not-small {
+    display: none;
+  }
+}
+
+/* Search Input... this just retargets semantic-ui styling to button and icon combo, so it works without JS */
+#app .search-input button {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+}
+#app .search-input button, .search-input i {
+  width: 1.1em;
+  position: absolute;
+  line-height: 1;
+  text-align: center;
+  top: 0;
+  right: 0;
+  margin: 0;
+  height: 100%;
+  border-radius: 0 .28571429rem .28571429rem 0;
+  transition: opacity .3s ease;
+
+  font-size: 1em;
+
+  display: inline-block;
+  font-family: Icons;
+  font-style: normal;
+  font-weight: 400;
+  text-decoration: inherit;
+  backface-visibility: hidden;
+  color: white;
+}
+#app .search-input i {
+  opacity: .5;
+}
+#app .search-input i:hover {
+  opacity: 1;
+}
+
 /* Sort Dropdown */
-.sort-dropdown {
+#app .sort-dropdown {
   text-align: right;
   appearance: none;
   color: white;
@@ -11,12 +129,12 @@
   color: rgba(255,255,255,0.6);
 }
 
-.sort-dropdown option {
+#app .sort-dropdown option {
   color: black;
   background-color: white;
 }
 
-.sort-dropdown.fluid {
+#app .sort-dropdown.fluid {
   width: 100%;
 }
 
@@ -27,9 +145,9 @@
 
 // This is a semi-hack to force right-aligned selects:
 */
-.sort-dropdown {
+#app .sort-dropdown {
   direction: rtl;
 }
-.sort-dropdown option {
+#app .sort-dropdown option {
   direction: ltr;
 }

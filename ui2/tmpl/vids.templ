@@ -28,7 +28,6 @@ templ sortDropdown(direction string, fluid bool) {
   </select>
 }
 
-
 // wrappers:
 
 templ page(title string, description string) {
@@ -39,10 +38,11 @@ templ page(title string, description string) {
       <meta http-equiv="X-UA-Compatible" content="IE=edge" />
       <meta name="viewport" content="width=device-width,initial-scale=1.0" />
       <meta name="description" content={ description } />
-    	<meta name="theme-color" content="#1b1b1b" />
+      <meta name="theme-color" content="#1b1b1b" />
       <link rel="icon" href="/favicon.ico" />
       <title>{ title } | creamy-videos</title>
-			<link href="/css/main.0.css" rel="stylesheet" />
+      <link href="/css/semantic.min.0.css" rel="stylesheet" />
+      <link href="/css/main.0.css" rel="stylesheet" />
     </head>
     <body>
       { children... }
@@ -55,7 +55,7 @@ templ app(state AppState) {
     <div class="ui fixed inverted main menu">
       <div class="ui container">
         <a href="/" class="header item">
-          <img class="logo" src="@/assets/icon.png" />
+          <img class="logo" src="/img/icon.png" />
           Creamy Videos
         </a>
         <a href="/" class="item">
@@ -66,26 +66,25 @@ templ app(state AppState) {
             Upload
           </a>
         }
-        <form method="GET" action="/search">
-          <div class="not-small right menu">
-            if state.Sortable {
-              <div class="borderless item">
-                @sortDropdown(state.SortDirection, false)
-              </div>
-            }
-
+        <form method="GET" action="/search"  class="not-small right menu">
+          if state.Sortable {
             <div class="borderless item">
-              <div class="ui inverted transparent icon input">
-                <input
-                  aria-label="Search"
-                  type="text"
-                  placeholder="Search..."
-                  value={ state.SearchText }
-                />
-                  <button type="submit">
-                    <i class="search link icon"></i>
-                  </button>
-              </div>
+              @sortDropdown(state.SortDirection, false)
+            </div>
+          }
+
+          <div class="borderless item">
+            <div class="search-input ui inverted transparent icon input">
+              <input
+                aria-label="Search"
+                type="text"
+                placeholder="Search..."
+                name="search"
+                value={ state.SearchText }
+              />
+                <button type="submit">
+                  <i class="search link icon"></i>
+                </button>
             </div>
           </div>
         </form>
@@ -95,10 +94,11 @@ templ app(state AppState) {
     <form method="GET" action="/search">
       <div class="ui only-small fluid fixed inverted menu search">
         <div class="borderless item">
-          <div class="ui inverted transparent icon input">
+          <div class="search-input ui inverted transparent icon input">
             <input
               type="text"
               placeholder="Search..."
+              name="search"
               value={ state.SearchText }
             />
             <button type="submit">
@@ -120,4 +120,15 @@ templ app(state AppState) {
       { children... }
     </div>
   </div>
+}
+
+
+// pages:
+
+templ Home(state AppState) {
+  @page("Home", "The creamiest selfhosted tubesite") {
+    @app(state) {
+      do me
+    }
+  }
 }

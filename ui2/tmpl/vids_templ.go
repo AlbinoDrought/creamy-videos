@@ -389,6 +389,24 @@ func page(title string, description string) templ.Component {
 			return err
 		}
 		// Element Attributes
+		_, err = templBuffer.WriteString(" href=\"/css/semantic.min.0.css\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(" rel=\"stylesheet\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(">")
+		if err != nil {
+			return err
+		}
+		// Element (void)
+		_, err = templBuffer.WriteString("<link")
+		if err != nil {
+			return err
+		}
+		// Element Attributes
 		_, err = templBuffer.WriteString(" href=\"/css/main.0.css\"")
 		if err != nil {
 			return err
@@ -513,7 +531,7 @@ func app(state AppState) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(" src=\"@/assets/icon.png\"")
+		_, err = templBuffer.WriteString(" src=\"/img/icon.png\"")
 		if err != nil {
 			return err
 		}
@@ -609,16 +627,6 @@ func app(state AppState) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(">")
-		if err != nil {
-			return err
-		}
-		// Element (standard)
-		_, err = templBuffer.WriteString("<div")
-		if err != nil {
-			return err
-		}
-		// Element Attributes
 		_, err = templBuffer.WriteString(" class=\"not-small right menu\"")
 		if err != nil {
 			return err
@@ -673,7 +681,7 @@ func app(state AppState) templ.Component {
 			return err
 		}
 		// Element Attributes
-		_, err = templBuffer.WriteString(" class=\"ui inverted transparent icon input\"")
+		_, err = templBuffer.WriteString(" class=\"search-input ui inverted transparent icon input\"")
 		if err != nil {
 			return err
 		}
@@ -696,6 +704,10 @@ func app(state AppState) templ.Component {
 			return err
 		}
 		_, err = templBuffer.WriteString(" placeholder=\"Search...\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(" name=\"search\"")
 		if err != nil {
 			return err
 		}
@@ -752,10 +764,6 @@ func app(state AppState) templ.Component {
 			return err
 		}
 		_, err = templBuffer.WriteString("</button>")
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("</div>")
 		if err != nil {
 			return err
 		}
@@ -831,7 +839,7 @@ func app(state AppState) templ.Component {
 			return err
 		}
 		// Element Attributes
-		_, err = templBuffer.WriteString(" class=\"ui inverted transparent icon input\"")
+		_, err = templBuffer.WriteString(" class=\"search-input ui inverted transparent icon input\"")
 		if err != nil {
 			return err
 		}
@@ -850,6 +858,10 @@ func app(state AppState) templ.Component {
 			return err
 		}
 		_, err = templBuffer.WriteString(" placeholder=\"Search...\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(" name=\"search\"")
 		if err != nil {
 			return err
 		}
@@ -993,6 +1005,67 @@ func app(state AppState) templ.Component {
 			return err
 		}
 		_, err = templBuffer.WriteString("</div>")
+		if err != nil {
+			return err
+		}
+		if !templIsBuffer {
+			_, err = io.Copy(w, templBuffer)
+		}
+		return err
+	})
+}
+
+// GoExpression
+// pages:
+
+func Home(state AppState) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		templBuffer, templIsBuffer := w.(*bytes.Buffer)
+		if !templIsBuffer {
+			templBuffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templBuffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		var_14 := templ.GetChildren(ctx)
+		if var_14 == nil {
+			var_14 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		// TemplElement
+		var_15 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+			templBuffer, templIsBuffer := w.(*bytes.Buffer)
+			if !templIsBuffer {
+				templBuffer = templ.GetBuffer()
+				defer templ.ReleaseBuffer(templBuffer)
+			}
+			// TemplElement
+			var_16 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+				templBuffer, templIsBuffer := w.(*bytes.Buffer)
+				if !templIsBuffer {
+					templBuffer = templ.GetBuffer()
+					defer templ.ReleaseBuffer(templBuffer)
+				}
+				// Text
+				var_17 := `do me`
+				_, err = templBuffer.WriteString(var_17)
+				if err != nil {
+					return err
+				}
+				if !templIsBuffer {
+					_, err = io.Copy(w, templBuffer)
+				}
+				return err
+			})
+			err = app(state).Render(templ.WithChildren(ctx, var_16), templBuffer)
+			if err != nil {
+				return err
+			}
+			if !templIsBuffer {
+				_, err = io.Copy(w, templBuffer)
+			}
+			return err
+		})
+		err = page("Home", "The creamiest selfhosted tubesite").Render(templ.WithChildren(ctx, var_15), templBuffer)
 		if err != nil {
 			return err
 		}
