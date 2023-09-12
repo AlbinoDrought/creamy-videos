@@ -8,7 +8,7 @@ RUN npm install --no-optional
 RUN npm run build
 
 # Build binary
-FROM golang:1.17 as builder
+FROM golang:1.21 as builder
 
 COPY . $GOPATH/src/github.com/AlbinoDrought/creamy-videos
 WORKDIR $GOPATH/src/github.com/AlbinoDrought/creamy-videos
@@ -28,7 +28,7 @@ ENV CGO_ENABLED=0 \
 # install dependencies
 RUN go get -d -v
 # install go.rice buildtool
-RUN go get github.com/GeertJohan/go.rice/rice
+RUN go install github.com/GeertJohan/go.rice/rice
 
 # create embedded SPA files
 RUN cd cmd && rice embed-go
