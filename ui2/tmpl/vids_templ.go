@@ -74,19 +74,7 @@ func sortDropdown(direction string, fluid bool) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(" value=")
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("\"")
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString(templ.EscapeString(direction))
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("\"")
+		_, err = templBuffer.WriteString(" onchange=\"window.cvSubmitNearestForm(this)\"")
 		if err != nil {
 			return err
 		}
@@ -103,6 +91,12 @@ func sortDropdown(direction string, fluid bool) templ.Component {
 		_, err = templBuffer.WriteString(" value=\"newest\"")
 		if err != nil {
 			return err
+		}
+		if direction == "newest" {
+			_, err = templBuffer.WriteString(" selected")
+			if err != nil {
+				return err
+			}
 		}
 		_, err = templBuffer.WriteString(">")
 		if err != nil {
@@ -128,6 +122,12 @@ func sortDropdown(direction string, fluid bool) templ.Component {
 		if err != nil {
 			return err
 		}
+		if direction == "oldest" {
+			_, err = templBuffer.WriteString(" selected")
+			if err != nil {
+				return err
+			}
+		}
 		_, err = templBuffer.WriteString(">")
 		if err != nil {
 			return err
@@ -152,6 +152,12 @@ func sortDropdown(direction string, fluid bool) templ.Component {
 		if err != nil {
 			return err
 		}
+		if direction == "az" {
+			_, err = templBuffer.WriteString(" selected")
+			if err != nil {
+				return err
+			}
+		}
 		_, err = templBuffer.WriteString(">")
 		if err != nil {
 			return err
@@ -175,6 +181,12 @@ func sortDropdown(direction string, fluid bool) templ.Component {
 		_, err = templBuffer.WriteString(" value=\"za\"")
 		if err != nil {
 			return err
+		}
+		if direction == "za" {
+			_, err = templBuffer.WriteString(" selected")
+			if err != nil {
+				return err
+			}
 		}
 		_, err = templBuffer.WriteString(">")
 		if err != nil {
@@ -416,6 +428,32 @@ func page(title string, description string) templ.Component {
 			return err
 		}
 		_, err = templBuffer.WriteString(">")
+		if err != nil {
+			return err
+		}
+		// Element (standard)
+		_, err = templBuffer.WriteString("<script")
+		if err != nil {
+			return err
+		}
+		// Element Attributes
+		_, err = templBuffer.WriteString(" defer")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(" src=\"/js/main.0.js\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(" type=\"text/javascript\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(">")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</script>")
 		if err != nil {
 			return err
 		}
@@ -707,7 +745,7 @@ func app(state AppState) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(" name=\"search\"")
+		_, err = templBuffer.WriteString(" name=\"text\"")
 		if err != nil {
 			return err
 		}
@@ -861,7 +899,7 @@ func app(state AppState) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(" name=\"search\"")
+		_, err = templBuffer.WriteString(" name=\"text\"")
 		if err != nil {
 			return err
 		}
@@ -1066,6 +1104,64 @@ func Home(state AppState) templ.Component {
 			return err
 		})
 		err = page("Home", "The creamiest selfhosted tubesite").Render(templ.WithChildren(ctx, var_15), templBuffer)
+		if err != nil {
+			return err
+		}
+		if !templIsBuffer {
+			_, err = io.Copy(w, templBuffer)
+		}
+		return err
+	})
+}
+
+func Search(state AppState) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		templBuffer, templIsBuffer := w.(*bytes.Buffer)
+		if !templIsBuffer {
+			templBuffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templBuffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		var_18 := templ.GetChildren(ctx)
+		if var_18 == nil {
+			var_18 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		// TemplElement
+		var_19 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+			templBuffer, templIsBuffer := w.(*bytes.Buffer)
+			if !templIsBuffer {
+				templBuffer = templ.GetBuffer()
+				defer templ.ReleaseBuffer(templBuffer)
+			}
+			// TemplElement
+			var_20 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+				templBuffer, templIsBuffer := w.(*bytes.Buffer)
+				if !templIsBuffer {
+					templBuffer = templ.GetBuffer()
+					defer templ.ReleaseBuffer(templBuffer)
+				}
+				// Text
+				var_21 := `do me`
+				_, err = templBuffer.WriteString(var_21)
+				if err != nil {
+					return err
+				}
+				if !templIsBuffer {
+					_, err = io.Copy(w, templBuffer)
+				}
+				return err
+			})
+			err = app(state).Render(templ.WithChildren(ctx, var_20), templBuffer)
+			if err != nil {
+				return err
+			}
+			if !templIsBuffer {
+				_, err = io.Copy(w, templBuffer)
+			}
+			return err
+		})
+		err = page("Search: "+state.SearchText, "The creamiest selfhosted tubesite").Render(templ.WithChildren(ctx, var_19), templBuffer)
 		if err != nil {
 			return err
 		}

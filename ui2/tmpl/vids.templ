@@ -20,11 +20,11 @@ func classIf(name string, condition bool) string {
 // components:
 
 templ sortDropdown(direction string, fluid bool) {
-  <select name="sort" class={ classes("sort-dropdown", classIf("fluid", fluid)) } value={ direction }>
-    <option value="newest">Newest</option>
-    <option value="oldest">Oldest</option>
-    <option value="az">A-Z</option>
-    <option value="za">Z-A</option>
+  <select name="sort" class={ classes("sort-dropdown", classIf("fluid", fluid)) } onchange="window.cvSubmitNearestForm(this)">
+    <option value="newest" selected?={ direction == "newest" }>Newest</option>
+    <option value="oldest" selected?={ direction == "oldest" }>Oldest</option>
+    <option value="az" selected?={ direction == "az" }>A-Z</option>
+    <option value="za" selected?={ direction == "za" }>Z-A</option>
   </select>
 }
 
@@ -43,6 +43,7 @@ templ page(title string, description string) {
       <title>{ title } | creamy-videos</title>
       <link href="/css/semantic.min.0.css" rel="stylesheet" />
       <link href="/css/main.0.css" rel="stylesheet" />
+      <script defer src="/js/main.0.js" type="text/javascript" />
     </head>
     <body>
       { children... }
@@ -79,7 +80,7 @@ templ app(state AppState) {
                 aria-label="Search"
                 type="text"
                 placeholder="Search..."
-                name="search"
+                name="text"
                 value={ state.SearchText }
               />
                 <button type="submit">
@@ -98,7 +99,7 @@ templ app(state AppState) {
             <input
               type="text"
               placeholder="Search..."
-              name="search"
+              name="text"
               value={ state.SearchText }
             />
             <button type="submit">
@@ -127,6 +128,14 @@ templ app(state AppState) {
 
 templ Home(state AppState) {
   @page("Home", "The creamiest selfhosted tubesite") {
+    @app(state) {
+      do me
+    }
+  }
+}
+
+templ Search(state AppState) {
+  @page("Search: " + state.SearchText, "The creamiest selfhosted tubesite") {
     @app(state) {
       do me
     }
