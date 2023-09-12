@@ -3,6 +3,7 @@ package tmpl
 import (
   "fmt"
   "strings"
+  "net/url"
   "github.com/AlbinoDrought/creamy-videos/videostore"
 )
 
@@ -21,6 +22,18 @@ func classIf(name string, condition bool) string {
 
 func videoURL(video videostore.Video) templ.SafeURL {
   return templ.SafeURL(fmt.Sprintf("/watch/%v", video.ID))
+}
+
+func videoEditURL(video videostore.Video) templ.SafeURL {
+  return templ.SafeURL(fmt.Sprintf("/edit/%v", video.ID))
+}
+
+func videoDeleteURL(video videostore.Video) templ.SafeURL {
+  return templ.SafeURL(fmt.Sprintf("/delete/%v", video.ID))
+}
+
+func tagSearchURL(tag string) templ.SafeURL {
+  return templ.SafeURL("/search?tags=" + url.QueryEscape(tag))
 }
 
 // components:
@@ -165,6 +178,49 @@ templ Search(state AppState, videos []videostore.Video) {
   @page("Search: " + state.SearchText, "The creamiest selfhosted tubesite") {
     @app(state) {
       @videoGrid(state.PUG, videos)
+    }
+  }
+}
+
+templ Watch(state AppState, video videostore.Video) {
+  @page(video.Title, video.Description) {
+    @app(state) {
+      <div class="watch">
+        <div class="ui vertical segment">
+          <div class="ui center aligned fluid video container">
+            <video src={ state.PUG(video.Source) } controls autoplay />
+          </div>
+        </div>
+        <div class="ui vertical segment">
+          <span aria-label="Video Title" class="header">{ video.Title }</span>
+          <p aria-label="Video Description" class="description">{ video.Description }</p>
+          <div class="ui right floated buttons">
+            <a
+              class="ui basic inverted icon download button"
+              download={ video.OriginalFileName }
+              href={ templ.SafeURL(state.PUG(video.Source)) }
+            >
+              <i class="download icon" />
+              Download
+            </a>
+            if !state.ReadOnly {
+              <a class="ui basic red icon delete button" href={ videoDeleteURL(video) }>
+                <i class="trash icon" />
+                Delete
+              </a>
+              <a class="ui basic yellow icon edit button" href={ videoEditURL(video) }>
+                <i class="edit icon" />
+                Edit
+              </a>
+            }
+          </div>
+          <div aria-label="Video Tags" class="tags">
+            for _, tag := range video.Tags {
+              <a class="ui label" href={ tagSearchURL(tag) }>{ tag }</a>
+            }
+          </div>
+        </div>
+      </div>
     }
   }
 }

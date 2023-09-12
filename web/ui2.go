@@ -3,6 +3,7 @@ package web
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/AlbinoDrought/creamy-videos/ui2/static"
 	"github.com/AlbinoDrought/creamy-videos/ui2/tmpl"
@@ -13,6 +14,7 @@ import (
 type CreamyVideosUI2 interface {
 	Home(w http.ResponseWriter, r *http.Request)
 	Search(w http.ResponseWriter, r *http.Request)
+	Watch(w http.ResponseWriter, r *http.Request)
 
 	// todo: Upload, Show, Edit, Delete UI & Handler routes
 }
@@ -142,6 +144,35 @@ func (u *cUI2) Search(w http.ResponseWriter, r *http.Request) {
 	}, videos).Render(r.Context(), w)
 }
 
+func (u *cUI2) Watch(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	rawID := vars["id"]
+	id, err := strconv.Atoi(rawID)
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusBadRequest, err, "bad ID")
+		return
+	}
+
+	video, err := u.Repo.FindById(uint(id))
+	if err == videostore.ErrorVideoNotFound {
+		u.WriteErrorPage(w, r, http.StatusNotFound, err, "video not found")
+		return
+	}
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusInternalServerError, err, "failed finding video")
+		return
+	}
+
+	w.Header().Add("Content-Type", "text/html")
+	tmpl.Watch(tmpl.AppState{
+		ReadOnly:      u.ReadOnly,
+		SortDirection: "",
+		Sortable:      false,
+		SearchText:    "",
+		PUG:           u.PublicURL,
+	}, video).Render(r.Context(), w)
+}
+
 func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRepo) http.Handler {
 	u := &cUI2{
 		ReadOnly:  false,
@@ -165,6 +196,11 @@ func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRe
 	r.HandleFunc(
 		"/search",
 		u.Search,
+	).Methods("GET")
+
+	r.HandleFunc(
+		"/watch/{id:[0-9]+}",
+		u.Watch,
 	).Methods("GET")
 
 	return r

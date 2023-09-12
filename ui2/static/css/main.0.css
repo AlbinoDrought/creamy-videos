@@ -215,3 +215,44 @@ html, body, head {
   left: 0px;
   transform: translateY(-50%);
 }
+
+/* Watch */
+#app .ui.video.container {
+  background-color: #000;
+  max-height: 100%;
+  margin: 0px;
+}
+
+#app .ui.video.container>video {
+  min-height: 60vh;
+  max-height: 80vh;
+  max-width: 100%;
+}
+
+#app div.watch {
+  color: rgb(171, 171, 171);
+}
+
+#app div.watch>.ui.segment:first-child {
+  /*
+  // force remove semantic-ui segment padding.
+  // without this, top of video does not
+  // match up with top of content on other pages.
+  */
+  padding-top: 0px;
+}
+
+#app div.watch .header {
+  font-weight: bold;
+  font-size: 3em;
+  word-wrap: break-word;
+}
+
+#app div.watch .description {
+  margin-top: 1em;
+  /*
+  // retain original description spacing and linebreaks,
+  // but wrap if required
+  */
+  white-space: pre-wrap;
+}

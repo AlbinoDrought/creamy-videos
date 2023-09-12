@@ -13,6 +13,7 @@ import "bytes"
 import (
 	"fmt"
 	"github.com/AlbinoDrought/creamy-videos/videostore"
+	"net/url"
 	"strings"
 )
 
@@ -31,6 +32,18 @@ func classIf(name string, condition bool) string {
 
 func videoURL(video videostore.Video) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf("/watch/%v", video.ID))
+}
+
+func videoEditURL(video videostore.Video) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf("/edit/%v", video.ID))
+}
+
+func videoDeleteURL(video videostore.Video) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf("/delete/%v", video.ID))
+}
+
+func tagSearchURL(tag string) templ.SafeURL {
+	return templ.SafeURL("/search?tags=" + url.QueryEscape(tag))
 }
 
 // components:
@@ -1375,6 +1388,524 @@ func Search(state AppState, videos []videostore.Video) templ.Component {
 			return err
 		})
 		err = page("Search: "+state.SearchText, "The creamiest selfhosted tubesite").Render(templ.WithChildren(ctx, var_22), templBuffer)
+		if err != nil {
+			return err
+		}
+		if !templIsBuffer {
+			_, err = io.Copy(w, templBuffer)
+		}
+		return err
+	})
+}
+
+func Watch(state AppState, video videostore.Video) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		templBuffer, templIsBuffer := w.(*bytes.Buffer)
+		if !templIsBuffer {
+			templBuffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templBuffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		var_24 := templ.GetChildren(ctx)
+		if var_24 == nil {
+			var_24 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		// TemplElement
+		var_25 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+			templBuffer, templIsBuffer := w.(*bytes.Buffer)
+			if !templIsBuffer {
+				templBuffer = templ.GetBuffer()
+				defer templ.ReleaseBuffer(templBuffer)
+			}
+			// TemplElement
+			var_26 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+				templBuffer, templIsBuffer := w.(*bytes.Buffer)
+				if !templIsBuffer {
+					templBuffer = templ.GetBuffer()
+					defer templ.ReleaseBuffer(templBuffer)
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<div")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" class=\"watch\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<div")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" class=\"ui vertical segment\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<div")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" class=\"ui center aligned fluid video container\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<video")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" src=")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(templ.EscapeString(state.PUG(video.Source)))
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(" controls")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(" autoplay")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</video>")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</div>")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</div>")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<div")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" class=\"ui vertical segment\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<span")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" aria-label=\"Video Title\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(" class=\"header\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// StringExpression
+				var var_27 string = video.Title
+				_, err = templBuffer.WriteString(templ.EscapeString(var_27))
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</span>")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<p")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" aria-label=\"Video Description\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(" class=\"description\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// StringExpression
+				var var_28 string = video.Description
+				_, err = templBuffer.WriteString(templ.EscapeString(var_28))
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</p>")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<div")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" class=\"ui right floated buttons\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<a")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" class=\"ui basic inverted icon download button\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(" download=")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(templ.EscapeString(video.OriginalFileName))
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(" href=")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("\"")
+				if err != nil {
+					return err
+				}
+				var var_29 templ.SafeURL = templ.SafeURL(state.PUG(video.Source))
+				_, err = templBuffer.WriteString(templ.EscapeString(string(var_29)))
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<i")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" class=\"download icon\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</i>")
+				if err != nil {
+					return err
+				}
+				// Whitespace (normalised)
+				_, err = templBuffer.WriteString(` `)
+				if err != nil {
+					return err
+				}
+				// Text
+				var_30 := `Download`
+				_, err = templBuffer.WriteString(var_30)
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</a>")
+				if err != nil {
+					return err
+				}
+				// If
+				if !state.ReadOnly {
+					// Element (standard)
+					_, err = templBuffer.WriteString("<a")
+					if err != nil {
+						return err
+					}
+					// Element Attributes
+					_, err = templBuffer.WriteString(" class=\"ui basic red icon delete button\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(" href=")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("\"")
+					if err != nil {
+						return err
+					}
+					var var_31 templ.SafeURL = videoDeleteURL(video)
+					_, err = templBuffer.WriteString(templ.EscapeString(string(var_31)))
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(">")
+					if err != nil {
+						return err
+					}
+					// Element (standard)
+					_, err = templBuffer.WriteString("<i")
+					if err != nil {
+						return err
+					}
+					// Element Attributes
+					_, err = templBuffer.WriteString(" class=\"trash icon\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(">")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("</i>")
+					if err != nil {
+						return err
+					}
+					// Whitespace (normalised)
+					_, err = templBuffer.WriteString(` `)
+					if err != nil {
+						return err
+					}
+					// Text
+					var_32 := `Delete`
+					_, err = templBuffer.WriteString(var_32)
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("</a>")
+					if err != nil {
+						return err
+					}
+					// Whitespace (normalised)
+					_, err = templBuffer.WriteString(` `)
+					if err != nil {
+						return err
+					}
+					// Element (standard)
+					_, err = templBuffer.WriteString("<a")
+					if err != nil {
+						return err
+					}
+					// Element Attributes
+					_, err = templBuffer.WriteString(" class=\"ui basic yellow icon edit button\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(" href=")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("\"")
+					if err != nil {
+						return err
+					}
+					var var_33 templ.SafeURL = videoEditURL(video)
+					_, err = templBuffer.WriteString(templ.EscapeString(string(var_33)))
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(">")
+					if err != nil {
+						return err
+					}
+					// Element (standard)
+					_, err = templBuffer.WriteString("<i")
+					if err != nil {
+						return err
+					}
+					// Element Attributes
+					_, err = templBuffer.WriteString(" class=\"edit icon\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(">")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("</i>")
+					if err != nil {
+						return err
+					}
+					// Whitespace (normalised)
+					_, err = templBuffer.WriteString(` `)
+					if err != nil {
+						return err
+					}
+					// Text
+					var_34 := `Edit`
+					_, err = templBuffer.WriteString(var_34)
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("</a>")
+					if err != nil {
+						return err
+					}
+				}
+				_, err = templBuffer.WriteString("</div>")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<div")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" aria-label=\"Video Tags\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(" class=\"tags\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// For
+				for _, tag := range video.Tags {
+					// Element (standard)
+					_, err = templBuffer.WriteString("<a")
+					if err != nil {
+						return err
+					}
+					// Element Attributes
+					_, err = templBuffer.WriteString(" class=\"ui label\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(" href=")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("\"")
+					if err != nil {
+						return err
+					}
+					var var_35 templ.SafeURL = tagSearchURL(tag)
+					_, err = templBuffer.WriteString(templ.EscapeString(string(var_35)))
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(">")
+					if err != nil {
+						return err
+					}
+					// StringExpression
+					var var_36 string = tag
+					_, err = templBuffer.WriteString(templ.EscapeString(var_36))
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("</a>")
+					if err != nil {
+						return err
+					}
+				}
+				_, err = templBuffer.WriteString("</div>")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</div>")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</div>")
+				if err != nil {
+					return err
+				}
+				if !templIsBuffer {
+					_, err = io.Copy(w, templBuffer)
+				}
+				return err
+			})
+			err = app(state).Render(templ.WithChildren(ctx, var_26), templBuffer)
+			if err != nil {
+				return err
+			}
+			if !templIsBuffer {
+				_, err = io.Copy(w, templBuffer)
+			}
+			return err
+		})
+		err = page(video.Title, video.Description).Render(templ.WithChildren(ctx, var_25), templBuffer)
 		if err != nil {
 			return err
 		}
