@@ -1,0 +1,123 @@
+package tmpl
+
+import (
+  "strings"
+)
+
+// formatters:
+
+func classes(c ...string) string {
+  return strings.Join(c, " ")
+}
+
+func classIf(name string, condition bool) string {
+  if condition {
+    return name
+  }
+  return ""
+}
+
+// components:
+
+templ sortDropdown(direction string, fluid bool) {
+  <select name="sort" class={ classes("sort-dropdown", classIf("fluid", fluid)) } value={ direction }>
+    <option value="newest">Newest</option>
+    <option value="oldest">Oldest</option>
+    <option value="az">A-Z</option>
+    <option value="za">Z-A</option>
+  </select>
+}
+
+
+// wrappers:
+
+templ page(title string, description string) {
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+      <meta name="description" content={ description } />
+    	<meta name="theme-color" content="#1b1b1b" />
+      <link rel="icon" href="/favicon.ico" />
+      <title>{ title } | creamy-videos</title>
+			<link href="/css/main.0.css" rel="stylesheet" />
+    </head>
+    <body>
+      { children... }
+    </body>
+  </html>
+}
+
+templ app(state AppState) {
+  <div id="app">
+    <div class="ui fixed inverted main menu">
+      <div class="ui container">
+        <a href="/" class="header item">
+          <img class="logo" src="@/assets/icon.png" />
+          Creamy Videos
+        </a>
+        <a href="/" class="item">
+          Home
+        </a>
+        if !state.ReadOnly {
+          <a href="/upload" class="item">
+            Upload
+          </a>
+        }
+        <form method="GET" action="/search">
+          <div class="not-small right menu">
+            if state.Sortable {
+              <div class="borderless item">
+                @sortDropdown(state.SortDirection, false)
+              </div>
+            }
+
+            <div class="borderless item">
+              <div class="ui inverted transparent icon input">
+                <input
+                  aria-label="Search"
+                  type="text"
+                  placeholder="Search..."
+                  value={ state.SearchText }
+                />
+                  <button type="submit">
+                    <i class="search link icon"></i>
+                  </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <form method="GET" action="/search">
+      <div class="ui only-small fluid fixed inverted menu search">
+        <div class="borderless item">
+          <div class="ui inverted transparent icon input">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={ state.SearchText }
+            />
+            <button type="submit">
+              <i class="search link icon"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="ui main container only-small">
+        if state.Sortable {
+          <div class="only-small mobile-sort-controls">
+            @sortDropdown(state.SortDirection, true)
+          </div>
+        }
+      </div>
+    </form>
+
+    <div class="ui main container">
+      { children... }
+    </div>
+  </div>
+}

@@ -1,6 +1,6 @@
 module github.com/AlbinoDrought/creamy-videos
 
-go 1.17
+go 1.21
 
 require (
 	github.com/GeertJohan/go.rice v1.0.2
@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/a-h/templ v0.2.334 // indirect
 	github.com/daaku/go.zipexe v1.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
