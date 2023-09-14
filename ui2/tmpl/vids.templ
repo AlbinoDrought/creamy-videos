@@ -36,6 +36,13 @@ func tagSearchURL(tag string) templ.SafeURL {
   return templ.SafeURL("/search?tags=" + url.QueryEscape(tag))
 }
 
+func plural(count int, singular string, plural string) string {
+  if count == 1 {
+    return singular
+  }
+  return plural
+}
+
 // components:
 
 templ sortDropdown(direction string, fluid bool) {
@@ -84,17 +91,28 @@ templ pagingLinks(p Paging) {
 
 // wrappers:
 
-templ page(title string, description string) {
+templ page(title string, description string, image string) {
   <!DOCTYPE html>
   <html lang="en">
     <head>
       <meta charset="utf-8" />
       <meta http-equiv="X-UA-Compatible" content="IE=edge" />
       <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-      <meta name="description" content={ description } />
       <meta name="theme-color" content="#1b1b1b" />
       <link rel="icon" href="/favicon.ico" />
       <title>{ title } | creamy-videos</title>
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={ title } />
+      <meta property="twitter:title" content={ title } />
+      if description != "" {
+        <meta name="description" content={ description } />
+        <meta property="og:description" content={ description } />
+        <meta property="twitter:description" content={ description } />
+      }
+      if image != "" {
+        <meta property="og:image" content={ image } />
+        <meta property="twitter:image" content={ image } />
+      }
       <link href="/css/semantic.min.0.css" rel="stylesheet" />
       <link href="/css/main.0.css" rel="stylesheet" />
       <script defer src="/js/main.0.js" type="text/javascript" />
@@ -181,7 +199,7 @@ templ app(state AppState) {
 // pages:
 
 templ Home(state AppState, paging Paging, videos []videostore.Video) {
-  @page("Home", "The creamiest selfhosted tubesite") {
+  @page("Home", "The creamiest selfhosted tubesite", "/img/banner.jpg") {
     @app(state) {
       @videoGrid(state.PUG, videos)
       @pagingLinks(paging)
@@ -190,7 +208,7 @@ templ Home(state AppState, paging Paging, videos []videostore.Video) {
 }
 
 templ Search(state AppState, paging Paging, videos []videostore.Video) {
-  @page("Search: " + state.SearchText, "The creamiest selfhosted tubesite") {
+  @page("Search: " + state.SearchText, fmt.Sprintf("Page %v of %v", paging.CurrentPage, paging.Pages), "/img/banner.jpg") {
     @app(state) {
       @videoGrid(state.PUG, videos)
       @pagingLinks(paging)
@@ -199,7 +217,7 @@ templ Search(state AppState, paging Paging, videos []videostore.Video) {
 }
 
 templ UploadForm(state AppState, videoFormState VideoFormState) {
-  @page("Upload", "The creamiest selfhosted tubesite") {
+  @page("Upload", "Contribute to the creamiest selfhosted tubesite", "/img/banner.jpg") {
     @app(state) {
       <div class="upload ui text container">
         <form method="POST" class="ui form" enctype="multipart/form-data">
@@ -260,7 +278,7 @@ templ UploadForm(state AppState, videoFormState VideoFormState) {
 }
 
 templ EditForm(state AppState, videoFormState VideoFormState, video videostore.Video) {
-  @page(fmt.Sprintf("Edit %v", video.Title), "The creamiest selfhosted tubesite") {
+  @page(fmt.Sprintf("Edit %v", video.Title), video.Description, state.PUG(video.Thumbnail)) {
     @app(state) {
       <div class="upload ui text container">
         <form method="POST" class="ui form" enctype="multipart/form-data">
@@ -310,7 +328,7 @@ templ EditForm(state AppState, videoFormState VideoFormState, video videostore.V
 }
 
 templ DeleteForm(state AppState, videoFormState VideoFormState, video videostore.Video) {
-  @page(fmt.Sprintf("Delete %v", video.Title), "The creamiest selfhosted tubesite") {
+  @page(fmt.Sprintf("Delete %v", video.Title), video.Description, state.PUG(video.Thumbnail)) {
     @app(state) {
       <div class="upload ui text container">
         <form method="POST" class="ui form" enctype="multipart/form-data">
@@ -334,7 +352,7 @@ templ DeleteForm(state AppState, videoFormState VideoFormState, video videostore
 }
 
 templ Watch(state AppState, video videostore.Video) {
-  @page(video.Title, video.Description) {
+  @page(video.Title, video.Description, state.PUG(video.Thumbnail)) {
     @app(state) {
       <div class="watch">
         <div class="ui vertical segment">
