@@ -492,5 +492,15 @@ func NewReadOnlyCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRep
 		u.Home,
 	).Methods("GET")
 
+	r.HandleFunc(
+		"/search",
+		u.Search,
+	).Methods("GET")
+
+	r.HandleFunc(
+		"/watch/{id:[0-9]+}",
+		u.Watch,
+	).Methods("GET")
+
 	return r
 }
