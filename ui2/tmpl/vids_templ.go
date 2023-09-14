@@ -1648,6 +1648,10 @@ func UploadForm(state AppState, videoFormState VideoFormState) templ.Component {
 					return err
 				}
 				// Element Attributes
+				_, err = templBuffer.WriteString(" id=\"txtTitle\"")
+				if err != nil {
+					return err
+				}
 				_, err = templBuffer.WriteString(" type=\"text\"")
 				if err != nil {
 					return err
@@ -1860,6 +1864,10 @@ func UploadForm(state AppState, videoFormState VideoFormState) templ.Component {
 					return err
 				}
 				_, err = templBuffer.WriteString(" required")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(" cv-filename-default-to=\"#txtTitle\"")
 				if err != nil {
 					return err
 				}

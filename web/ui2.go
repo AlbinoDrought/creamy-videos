@@ -231,7 +231,9 @@ func (u *cUI2) UploadForm(w http.ResponseWriter, r *http.Request) {
 		Sortable:      false,
 		SearchText:    "",
 		PUG:           u.PublicURL,
-	}, tmpl.VideoFormState{}).Render(r.Context(), w)
+	}, tmpl.VideoFormState{
+		Tags: "home",
+	}).Render(r.Context(), w)
 }
 
 func (u *cUI2) Upload(w http.ResponseWriter, r *http.Request) {

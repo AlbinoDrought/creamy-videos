@@ -3,15 +3,15 @@
 const uploadVideo = (title, tags, description = 'not an empty string', originalFileName = 'doggo_waddling.mp4') => cy.wrap(new Promise((resolve) => {
   cy.visit('/upload');
   cy.contains('.submit.button', 'Upload');
-  cy.get('[name="title"]').invoke('val').should('be.empty');
-  cy.get('[name="tags"]').invoke('val').should('eq', 'home');
-  cy.get('[name="description"]').invoke('val').should('be.empty');
+  cy.get('body [name="title"]').invoke('val').should('be.empty');
+  cy.get('body [name="tags"]').invoke('val').should('eq', 'home');
+  cy.get('body [name="description"]').invoke('val').should('be.empty');
 
-  cy.get('[name="file"]').attachFile({ filePath: 'doggo_waddling.mp4', encoding: 'binary' });
+  cy.get('body [name="file"]').attachFile({ filePath: 'doggo_waddling.mp4', encoding: 'binary' });
 
-  cy.get('[name="title"]').clear().type(title);
-  cy.get('[name="tags"]').clear().type(tags);
-  cy.get('[name="description"]').clear().type(description);
+  cy.get('body [name="title"]').clear().type(title);
+  cy.get('body [name="tags"]').clear().type(tags);
+  cy.get('body [name="description"]').clear().type(description);
   cy.get('.submit.button').click();
 
   cy.url().should('contain', '/watch/');

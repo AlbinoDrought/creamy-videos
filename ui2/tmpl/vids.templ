@@ -206,6 +206,7 @@ templ UploadForm(state AppState, videoFormState VideoFormState) {
           <div class="ui field">
             <label>Title</label>
             <input
+              id="txtTitle"
               type="text"
               name="title"
               placeholder="Title"
@@ -236,6 +237,7 @@ templ UploadForm(state AppState, videoFormState VideoFormState) {
               type="file"
               name="file"
               required
+              cv-filename-default-to="#txtTitle"
             />
           </div>
 

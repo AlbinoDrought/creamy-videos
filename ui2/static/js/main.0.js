@@ -33,21 +33,21 @@ window.cvReplacePage = function (html) {
   doc.close();
 };
 
-// when we're looking at a list of videos
-// and we click one
-// the video should automatically play
-// -----
-// the reality:
-// 1. we click a video link
-// 2. the user-interaction context is lost for the new page
-// 3. the browser complains and doesn't play the video
-// -----
-// the solution: use SPA-style page loading.
-// I tried using hx-boost (HTMX) originally,
-// but I had some issues with videos continuing to play in the background,
-// the page scrolling to the bottom weirdly, etc.
-// the below code works great on my machine:
 if (window.fetch) {
+  // when we're looking at a list of videos
+  // and we click one
+  // the video should automatically play
+  // -----
+  // the reality:
+  // 1. we click a video link
+  // 2. the user-interaction context is lost for the new page
+  // 3. the browser complains and doesn't play the video
+  // -----
+  // the solution: use SPA-style page loading.
+  // I tried using hx-boost (HTMX) originally,
+  // but I had some issues with videos continuing to play in the background,
+  // the page scrolling to the bottom weirdly, etc.
+  // the below code works great on my machine:
   window.addEventListener('popstate', function () {
     // when the user goes back, reload the page from the server
     window.location.reload();
@@ -72,6 +72,8 @@ if (window.fetch) {
         });
     });
   });
+
+  // click a button multiple times to submit a form
   document.querySelectorAll('a[cv-confirm]').forEach(function (el) {
     var clicks = 0;
     var requiredClicks = 4;
@@ -119,3 +121,18 @@ if (window.fetch) {
     });
   });
 }
+
+document.querySelectorAll('input[type="file"][cv-filename-default-to]').forEach(function (el) {
+  var target = document.querySelector(el.getAttribute('cv-filename-default-to'));
+  if (!target) {
+    console.error('cv-filename-default-to element target not found!', el);
+    return;
+  }
+  el.addEventListener('change', function (e) {
+    var file = e.target.files[0];
+    if (!target.value) {
+      target.value = file.name;
+    }
+  });
+});
+

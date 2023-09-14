@@ -4,13 +4,13 @@ describe('Full Video CRUD Flow', () => {
   it('Uploads a file', () => {
     cy.visit('/upload');
     cy.contains('.submit.button', 'Upload');
-    cy.get('[name="title"]').invoke('val').should('be.empty');
-    cy.get('[name="tags"]').invoke('val').should('eq', 'home');
-    cy.get('[name="description"]').invoke('val').should('be.empty');
+    cy.get('body [name="title"]').invoke('val').should('be.empty');
+    cy.get('body [name="tags"]').invoke('val').should('eq', 'home');
+    cy.get('body [name="description"]').invoke('val').should('be.empty');
 
     // upload a file
-    cy.get('[name="file"]').attachFile({ filePath: 'doggo_waddling.mp4', encoding: 'binary' });
-    cy.get('[name="title"]').invoke('val').should('eq', 'doggo_waddling.mp4');
+    cy.get('body [name="file"]').attachFile({ filePath: 'doggo_waddling.mp4', encoding: 'binary' });
+    cy.get('body [name="title"]').invoke('val').should('eq', 'doggo_waddling.mp4');
 
     // submit upload
     cy.get('.submit.button').click();
@@ -39,15 +39,15 @@ describe('Full Video CRUD Flow', () => {
     cy.url().should('contain', '/edit');
 
     // assert ui
-    cy.get('[name="title"]').invoke('val').should('eq', 'doggo_waddling.mp4');
-    cy.get('[name="tags"]').invoke('val').should('eq', 'home');
-    cy.get('[name="description"]').invoke('val').should('be.empty');
+    cy.get('body [name="title"]').invoke('val').should('eq', 'doggo_waddling.mp4');
+    cy.get('body [name="tags"]').invoke('val').should('eq', 'home');
+    cy.get('body [name="description"]').invoke('val').should('be.empty');
     cy.get('.submit.button').should('contain', 'Save');
 
     // change input fields, save
-    cy.get('[name="title"]').clear().type('My Waddling Doggo');
-    cy.get('[name="tags"]').type(',doggo');
-    cy.get('[name="description"]').type('This is a short video of my doggo waddling.');
+    cy.get('body [name="title"]').clear().type('My Waddling Doggo');
+    cy.get('body [name="tags"]').type(',doggo');
+    cy.get('body [name="description"]').type('This is a short video of my doggo waddling.');
     cy.get('.submit.button').click();
 
     cy.url().should('contain', '/watch/');
@@ -62,7 +62,7 @@ describe('Full Video CRUD Flow', () => {
     cy.get('.delete.button').click();
     cy.contains('.delete.button', 'Click 2 more times to confirm');
     cy.get('.delete.button').click();
-    cy.contains('.delete.button', 'Click 1 more times to confirm');
+    cy.contains('.delete.button', /Click 1 more time(s)? to confirm/);
     cy.get('.delete.button').click();
 
     // pseudo-check that we have returned to the home screen
