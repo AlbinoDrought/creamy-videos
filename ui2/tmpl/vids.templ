@@ -402,7 +402,7 @@ templ Watch(state AppState, video videostore.Video) {
           </div>
           <div aria-label="Video Tags" class="tags">
             for _, tag := range video.Tags {
-              <a class="ui label" href={ tagSearchURL(tag) }>{ tag }</a>
+              <a class="ui label" href={ tagSearchURL(tag) }>{ tag }</a>&nbsp;
             }
           </div>
         </div>

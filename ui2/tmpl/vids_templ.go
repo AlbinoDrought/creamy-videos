@@ -1346,6 +1346,11 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 					if err != nil {
 						return err
 					}
+					var_73 := `&nbsp;`
+					_, err = templBuffer.WriteString(var_73)
+					if err != nil {
+						return err
+					}
 				}
 				_, err = templBuffer.WriteString("</div></div></div>")
 				if err != nil {
@@ -1384,18 +1389,18 @@ func ErrorPage(state AppState, message string) templ.Component {
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_73 := templ.GetChildren(ctx)
-		if var_73 == nil {
-			var_73 = templ.NopComponent
+		var_74 := templ.GetChildren(ctx)
+		if var_74 == nil {
+			var_74 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var_74 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		var_75 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 			templBuffer, templIsBuffer := w.(*bytes.Buffer)
 			if !templIsBuffer {
 				templBuffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templBuffer)
 			}
-			var_75 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+			var_76 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 				templBuffer, templIsBuffer := w.(*bytes.Buffer)
 				if !templIsBuffer {
 					templBuffer = templ.GetBuffer()
@@ -1405,8 +1410,8 @@ func ErrorPage(state AppState, message string) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_76 := `Something broke`
-				_, err = templBuffer.WriteString(var_76)
+				var_77 := `Something broke`
+				_, err = templBuffer.WriteString(var_77)
 				if err != nil {
 					return err
 				}
@@ -1414,8 +1419,8 @@ func ErrorPage(state AppState, message string) templ.Component {
 				if err != nil {
 					return err
 				}
-				var var_77 string = message
-				_, err = templBuffer.WriteString(templ.EscapeString(var_77))
+				var var_78 string = message
+				_, err = templBuffer.WriteString(templ.EscapeString(var_78))
 				if err != nil {
 					return err
 				}
@@ -1428,7 +1433,7 @@ func ErrorPage(state AppState, message string) templ.Component {
 				}
 				return err
 			})
-			err = app(state).Render(templ.WithChildren(ctx, var_75), templBuffer)
+			err = app(state).Render(templ.WithChildren(ctx, var_76), templBuffer)
 			if err != nil {
 				return err
 			}
@@ -1437,7 +1442,7 @@ func ErrorPage(state AppState, message string) templ.Component {
 			}
 			return err
 		})
-		err = page("Error", "", "/img/banner.jpg").Render(templ.WithChildren(ctx, var_74), templBuffer)
+		err = page("Error", "", "/img/banner.jpg").Render(templ.WithChildren(ctx, var_75), templBuffer)
 		if err != nil {
 			return err
 		}
