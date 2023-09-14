@@ -26,7 +26,7 @@ type CreamyVideosUI2 interface {
 	UploadForm(w http.ResponseWriter, r *http.Request)
 	Upload(w http.ResponseWriter, r *http.Request)
 
-	// todo: Upload, Show, Edit, Delete UI & Handler routes
+	// todo: Delete UI & Handler routes
 }
 
 type sortDir map[string]string
@@ -224,7 +224,7 @@ func (u *cUI2) UploadForm(w http.ResponseWriter, r *http.Request) {
 		Sortable:      false,
 		SearchText:    "",
 		PUG:           u.PublicURL,
-	}, tmpl.UploadFormState{}).Render(r.Context(), w)
+	}, tmpl.VideoFormState{}).Render(r.Context(), w)
 }
 
 func (u *cUI2) Upload(w http.ResponseWriter, r *http.Request) {
@@ -238,7 +238,7 @@ func (u *cUI2) Upload(w http.ResponseWriter, r *http.Request) {
 			Sortable:      false,
 			SearchText:    "",
 			PUG:           u.PublicURL,
-		}, tmpl.UploadFormState{
+		}, tmpl.VideoFormState{
 			Error: msg,
 
 			Title:       r.FormValue("title"),
@@ -318,6 +318,108 @@ func (u *cUI2) Upload(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/watch/%v", video.ID), http.StatusFound)
 }
 
+func (u *cUI2) EditForm(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	rawID := vars["id"]
+	id, err := strconv.Atoi(rawID)
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusBadRequest, err, "bad ID")
+		return
+	}
+
+	video, err := u.Repo.FindById(uint(id))
+	if err == videostore.ErrorVideoNotFound {
+		u.WriteErrorPage(w, r, http.StatusNotFound, err, "video not found")
+		return
+	}
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusInternalServerError, err, "failed finding video")
+		return
+	}
+
+	w.Header().Add("Content-Type", "text/html")
+	tmpl.EditForm(tmpl.AppState{
+		ReadOnly:      u.ReadOnly,
+		SortDirection: "",
+		Sortable:      false,
+		SearchText:    "",
+		PUG:           u.PublicURL,
+	}, tmpl.VideoFormState{
+		Title:       video.Title,
+		Tags:        strings.Join(video.Tags, ", "),
+		Description: video.Description,
+	}, video).Render(r.Context(), w)
+}
+
+func (u *cUI2) Edit(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	rawID := vars["id"]
+	id, err := strconv.Atoi(rawID)
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusBadRequest, err, "bad ID")
+		return
+	}
+
+	video, err := u.Repo.FindById(uint(id))
+	if err == videostore.ErrorVideoNotFound {
+		u.WriteErrorPage(w, r, http.StatusNotFound, err, "video not found")
+		return
+	}
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusInternalServerError, err, "failed finding video")
+		return
+	}
+
+	writeErrorPage := func(statusCode int, err error, msg string) {
+		log.Printf("%v error: %v", msg, err)
+		w.Header().Add("Content-Type", "text/html")
+		w.WriteHeader(statusCode)
+		tmpl.EditForm(tmpl.AppState{
+			ReadOnly:      u.ReadOnly,
+			SortDirection: "",
+			Sortable:      false,
+			SearchText:    "",
+			PUG:           u.PublicURL,
+		}, tmpl.VideoFormState{
+			Error: msg,
+
+			Title:       r.FormValue("title"),
+			Tags:        r.FormValue("tags"),
+			Description: r.FormValue("description"),
+		}, video).Render(r.Context(), w)
+	}
+
+	defer r.Body.Close()
+
+	if err := r.ParseMultipartForm(maxMultipartFormSize); err != nil {
+		writeErrorPage(http.StatusBadRequest, err, "Bad multipart/form-data request")
+		return
+	}
+	defer r.MultipartForm.RemoveAll()
+
+	// convert "foo, bar" and "foo,bar" into
+	// ["foo", "bar"]
+	tags := strings.Split(r.FormValue("tags"), ",")
+	for i, tag := range tags {
+		tags[i] = strings.Trim(tag, " ")
+	}
+	if len(tags) == 1 && tags[0] == "" {
+		tags = []string{}
+	}
+
+	video.Title = r.FormValue("title")
+	video.Tags = tags
+	video.Description = r.FormValue("description")
+
+	video, err = u.Repo.Save(video)
+	if err != nil {
+		writeErrorPage(http.StatusInternalServerError, err, "Internal error updating video resource")
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/watch/%v", video.ID), http.StatusFound)
+}
+
 func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, fs files.FileSystem, repo videostore.VideoRepo) http.Handler {
 	u := &cUI2{
 		ReadOnly:  false,
@@ -357,6 +459,15 @@ func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, fs files.FileSystem, re
 		"/watch/{id:[0-9]+}",
 		u.Watch,
 	).Methods("GET")
+
+	r.HandleFunc(
+		"/edit/{id:[0-9]+}",
+		u.EditForm,
+	).Methods("GET")
+	r.HandleFunc(
+		"/edit/{id:[0-9]+}",
+		u.Edit,
+	).Methods("POST")
 
 	return r
 }

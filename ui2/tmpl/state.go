@@ -19,7 +19,7 @@ type Paging struct {
 	Pages       int
 }
 
-type UploadFormState struct {
+type VideoFormState struct {
 	Error       string
 	Title       string
 	Tags        string

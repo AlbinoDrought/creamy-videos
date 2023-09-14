@@ -198,7 +198,7 @@ templ Search(state AppState, paging Paging, videos []videostore.Video) {
   }
 }
 
-templ UploadForm(state AppState, uploadFormState UploadFormState) {
+templ UploadForm(state AppState, videoFormState VideoFormState) {
   @page("Upload", "The creamiest selfhosted tubesite") {
     @app(state) {
       <div class="upload ui text container">
@@ -209,7 +209,7 @@ templ UploadForm(state AppState, uploadFormState UploadFormState) {
               type="text"
               name="title"
               placeholder="Title"
-              value={ uploadFormState.Title }
+              value={ videoFormState.Title }
             />
           </div>
           <div class="ui field">
@@ -218,7 +218,7 @@ templ UploadForm(state AppState, uploadFormState UploadFormState) {
               type="text"
               name="tags"
               placeholder="educational, computer science, wizardry"
-              value={ uploadFormState.Tags }
+              value={ videoFormState.Tags }
             />
           </div>
 
@@ -227,7 +227,7 @@ templ UploadForm(state AppState, uploadFormState UploadFormState) {
             <textarea
               name="description"
               placeholder="Description"
-            >{ uploadFormState.Description }</textarea>
+            >{ videoFormState.Description }</textarea>
           </div>
 
           <div class="field">
@@ -239,17 +239,67 @@ templ UploadForm(state AppState, uploadFormState UploadFormState) {
             />
           </div>
 
-          if uploadFormState.Error != "" {
+          if videoFormState.Error != "" {
             <div class="ui visible negative message">
               <div class="header">
                 Video upload failed
               </div>
-              <p>{ uploadFormState.Error }</p>
+              <p>{ videoFormState.Error }</p>
             </div>
           }
 
           <button type="submit" class="ui submit button">
             Upload
+          </button>
+        </form>
+      </div>
+    }
+  }
+}
+
+templ EditForm(state AppState, videoFormState VideoFormState, video videostore.Video) {
+  @page(fmt.Sprintf("Edit %v", video.Title), "The creamiest selfhosted tubesite") {
+    @app(state) {
+      <div class="upload ui text container">
+        <form method="POST" class="ui form" enctype="multipart/form-data">
+          <div class="ui field">
+            <label>Title</label>
+            <input
+              type="text"
+              name="title"
+              placeholder="Title"
+              value={ videoFormState.Title }
+            />
+          </div>
+          <div class="ui field">
+            <label>Tags (separated by comma)</label>
+            <input
+              type="text"
+              name="tags"
+              placeholder="educational, computer science, wizardry"
+              value={ videoFormState.Tags }
+            />
+          </div>
+
+          <div class="field">
+            <label>Description</label>
+            <textarea
+              name="description"
+              placeholder="Description"
+            >{ videoFormState.Description }</textarea>
+          </div>
+
+          if videoFormState.Error != "" {
+            <div class="ui visible negative message">
+              <div class="header">
+                Video edit failed
+              </div>
+              <p>{ videoFormState.Error }</p>
+            </div>
+          }
+
+          <button type="submit" class="ui submit button">
+            Save
           </button>
         </form>
       </div>
