@@ -198,7 +198,7 @@ templ Search(state AppState, paging Paging, videos []videostore.Video) {
   }
 }
 
-templ UploadForm(state AppState) {
+templ UploadForm(state AppState, uploadFormState UploadFormState) {
   @page("Upload", "The creamiest selfhosted tubesite") {
     @app(state) {
       <div class="upload ui text container">
@@ -209,6 +209,7 @@ templ UploadForm(state AppState) {
               type="text"
               name="title"
               placeholder="Title"
+              value={ uploadFormState.Title }
             />
           </div>
           <div class="ui field">
@@ -217,6 +218,7 @@ templ UploadForm(state AppState) {
               type="text"
               name="tags"
               placeholder="educational, computer science, wizardry"
+              value={ uploadFormState.Tags }
             />
           </div>
 
@@ -225,7 +227,7 @@ templ UploadForm(state AppState) {
             <textarea
               name="description"
               placeholder="Description"
-            />
+            >{ uploadFormState.Description }</textarea>
           </div>
 
           <div class="field">
@@ -233,8 +235,18 @@ templ UploadForm(state AppState) {
             <input
               type="file"
               name="file"
+              required
             />
           </div>
+
+          if uploadFormState.Error != "" {
+            <div class="ui visible negative message">
+              <div class="header">
+                Video upload failed
+              </div>
+              <p>{ uploadFormState.Error }</p>
+            </div>
+          }
 
           <button type="submit" class="ui submit button">
             Upload

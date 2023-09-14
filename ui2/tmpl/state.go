@@ -19,6 +19,13 @@ type Paging struct {
 	Pages       int
 }
 
+type UploadFormState struct {
+	Error       string
+	Title       string
+	Tags        string
+	Description string
+}
+
 type paginationPage struct {
 	URL      string
 	Active   bool

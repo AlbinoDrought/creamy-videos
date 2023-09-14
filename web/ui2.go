@@ -5,8 +5,13 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"path"
+	"runtime/debug"
 	"strconv"
+	"strings"
 
+	"github.com/AlbinoDrought/creamy-videos/files"
 	"github.com/AlbinoDrought/creamy-videos/ui2/static"
 	"github.com/AlbinoDrought/creamy-videos/ui2/tmpl"
 	"github.com/AlbinoDrought/creamy-videos/videostore"
@@ -19,6 +24,7 @@ type CreamyVideosUI2 interface {
 	Watch(w http.ResponseWriter, r *http.Request)
 
 	UploadForm(w http.ResponseWriter, r *http.Request)
+	Upload(w http.ResponseWriter, r *http.Request)
 
 	// todo: Upload, Show, Edit, Delete UI & Handler routes
 }
@@ -57,6 +63,7 @@ var defaultSortDir = "newest"
 type cUI2 struct {
 	ReadOnly  bool
 	PublicURL tmpl.PublicURLGenerator
+	FS        files.FileSystem
 	Repo      videostore.VideoRepo
 }
 
@@ -217,13 +224,105 @@ func (u *cUI2) UploadForm(w http.ResponseWriter, r *http.Request) {
 		Sortable:      false,
 		SearchText:    "",
 		PUG:           u.PublicURL,
-	}).Render(r.Context(), w)
+	}, tmpl.UploadFormState{}).Render(r.Context(), w)
 }
 
-func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRepo) http.Handler {
+func (u *cUI2) Upload(w http.ResponseWriter, r *http.Request) {
+	writeErrorPage := func(statusCode int, err error, msg string) {
+		log.Printf("%v error: %v", msg, err)
+		w.Header().Add("Content-Type", "text/html")
+		w.WriteHeader(statusCode)
+		tmpl.UploadForm(tmpl.AppState{
+			ReadOnly:      u.ReadOnly,
+			SortDirection: "",
+			Sortable:      false,
+			SearchText:    "",
+			PUG:           u.PublicURL,
+		}, tmpl.UploadFormState{
+			Error: msg,
+
+			Title:       r.FormValue("title"),
+			Tags:        r.FormValue("tags"),
+			Description: r.FormValue("description"),
+		}).Render(r.Context(), w)
+	}
+
+	defer r.Body.Close()
+
+	if err := r.ParseMultipartForm(maxMultipartFormSize); err != nil {
+		writeErrorPage(http.StatusBadRequest, err, "Bad multipart/form-data request")
+		return
+	}
+	defer r.MultipartForm.RemoveAll()
+
+	// convert "foo, bar" and "foo,bar" into
+	// ["foo", "bar"]
+	tags := strings.Split(r.FormValue("tags"), ",")
+	for i, tag := range tags {
+		tags[i] = strings.Trim(tag, " ")
+	}
+	if len(tags) == 1 && tags[0] == "" {
+		tags = []string{}
+	}
+
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		writeErrorPage(http.StatusBadRequest, err, "Bad file")
+		return
+	}
+	defer file.Close()
+
+	video := videostore.Video{
+		Title:            r.FormValue("title"),
+		Description:      r.FormValue("description"),
+		OriginalFileName: header.Filename,
+		Tags:             tags,
+	}
+
+	video, err = u.Repo.Save(video)
+	if err != nil {
+		writeErrorPage(http.StatusInternalServerError, err, "Internal error creating video resource")
+		return
+	}
+
+	rootDir := strconv.Itoa(int(video.ID))
+	if _, err := u.FS.Stat(rootDir); u.FS.IsNotExist(err) {
+		u.FS.MkdirAll(rootDir, os.ModePerm)
+	}
+
+	videoPath := path.Join(rootDir, "video"+path.Ext(video.OriginalFileName))
+
+	err = files.PipeTo(u.FS, videoPath, file)
+	if err != nil {
+		writeErrorPage(http.StatusInternalServerError, err, "Internal error saving video stream")
+		return
+	}
+
+	video.Source = videoPath
+	video, err = u.Repo.Save(video)
+
+	if err != nil {
+		writeErrorPage(http.StatusInternalServerError, err, "Internal error setting video source")
+		return
+	}
+
+	go func() {
+		_, err := videostore.GenerateThumbnail(video, u.Repo, u.FS)
+		if err != nil {
+			log.Printf("failed to make thumbnail: %+v", err)
+		}
+	}()
+
+	go debug.FreeOSMemory() // hack to request our memory back :'(
+
+	http.Redirect(w, r, fmt.Sprintf("/watch/%v", video.ID), http.StatusFound)
+}
+
+func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, fs files.FileSystem, repo videostore.VideoRepo) http.Handler {
 	u := &cUI2{
 		ReadOnly:  false,
 		PublicURL: publicURL,
+		FS:        fs,
 		Repo:      repo,
 	}
 
@@ -249,6 +348,10 @@ func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRe
 		"/upload",
 		u.UploadForm,
 	).Methods("GET")
+	r.HandleFunc(
+		"/upload",
+		u.Upload,
+	).Methods("POST")
 
 	r.HandleFunc(
 		"/watch/{id:[0-9]+}",

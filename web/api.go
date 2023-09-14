@@ -100,6 +100,9 @@ func (a *api) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	for i, tag := range tags {
 		tags[i] = strings.Trim(tag, " ")
 	}
+	if len(tags) == 1 && tags[0] == "" {
+		tags = []string{}
+	}
 
 	file, header, err := r.FormFile("file")
 	if err != nil {

@@ -56,7 +56,7 @@ var serveCmd = &cobra.Command{
 			if app.config.ReadOnly {
 				cUI2Handler = web.NewReadOnlyCUI2(publicUrlGenerator, app.repo)
 			} else {
-				cUI2Handler = web.NewWriteableCUI2(publicUrlGenerator, app.repo)
+				cUI2Handler = web.NewWriteableCUI2(publicUrlGenerator, app.fs, app.repo)
 			}
 			r.PathPrefix("/").Handler(cUI2Handler)
 		}
