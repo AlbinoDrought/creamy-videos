@@ -10,6 +10,8 @@ type AppState struct {
 	Sortable      bool
 	SearchText    string
 
+	XSRFToken func() string
+
 	PUG PublicURLGenerator
 }
 

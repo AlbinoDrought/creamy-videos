@@ -89,6 +89,14 @@ templ pagingLinks(p Paging) {
   </div>
 }
 
+templ xsrf(state AppState) {
+  <input
+    type="hidden"
+    name="_xsrf"
+    value={ state.XSRFToken() }
+  />
+}
+
 // wrappers:
 
 templ page(title string, description string, image string) {
@@ -221,6 +229,8 @@ templ UploadForm(state AppState, videoFormState VideoFormState) {
     @app(state) {
       <div class="upload ui text container">
         <form method="POST" class="ui form" enctype="multipart/form-data">
+          @xsrf(state)
+          
           <div class="ui field">
             <label>Title</label>
             <input
@@ -282,6 +292,8 @@ templ EditForm(state AppState, videoFormState VideoFormState, video videostore.V
     @app(state) {
       <div class="upload ui text container">
         <form method="POST" class="ui form" enctype="multipart/form-data">
+          @xsrf(state)
+          
           <div class="ui field">
             <label>Title</label>
             <input
@@ -332,6 +344,8 @@ templ DeleteForm(state AppState, videoFormState VideoFormState, video videostore
     @app(state) {
       <div class="upload ui text container">
         <form method="POST" class="ui form" enctype="multipart/form-data">
+          @xsrf(state)
+          
           <p>Are you sure you want to delete <strong>{ video.Title }</strong>?</p>
           if videoFormState.Error != "" {
             <div class="ui visible negative message">
@@ -378,6 +392,7 @@ templ Watch(state AppState, video videostore.Video) {
                 Delete
               </a>
               <form id="formDelete" method="POST" action={ fmt.Sprintf("/delete/%v", video.ID) }>
+                @xsrf(state)
               </form>
               <a class="ui basic yellow icon edit button" href={ videoEditURL(video) }>
                 <i class="edit icon" />

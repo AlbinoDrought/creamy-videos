@@ -71,6 +71,8 @@ CREAMY_POSTGRES_ADDRESS=localhost:5432 \
 
 - `CREAMY_READ_ONLY`: if `true`, set the API to read-only mode and disable non-read-only routes
 
+- `CREAMY_XSRF_KEY_B64`: Base64-encoded key to use for generating XSRF tokens. If empty, a random one will be generated. It is recommended to set this value.
+
 (all following commands require the same env configuration)
 
 ### Migrating data from JSON to Postgres

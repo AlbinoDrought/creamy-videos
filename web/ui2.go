@@ -17,6 +17,7 @@ import (
 	"github.com/AlbinoDrought/creamy-videos/videostore"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+	"golang.org/x/net/xsrftoken"
 )
 
 type CreamyVideosUI2 interface {
@@ -70,21 +71,40 @@ type cUI2 struct {
 	PublicURL tmpl.PublicURLGenerator
 	FS        files.FileSystem
 	Repo      videostore.VideoRepo
+	XSRFKey   []byte
 }
 
 var _ CreamyVideosUI2 = &cUI2{}
+
+func (u *cUI2) baseAppState() tmpl.AppState {
+	appState := tmpl.AppState{
+		ReadOnly: u.ReadOnly,
+		PUG:      u.PublicURL,
+	}
+
+	if !appState.ReadOnly {
+		appState.XSRFToken = func() string {
+			return xsrftoken.Generate(string(u.XSRFKey), "0", "0")
+		}
+	}
+
+	return appState
+}
+
+var ErrXSRFInvalid = errors.New("xsrf token invalid")
+
+func (u *cUI2) validateXSRF(val string) error {
+	if xsrftoken.Valid(val, string(u.XSRFKey), "0", "0") {
+		return nil
+	}
+	return ErrXSRFInvalid
+}
 
 func (u *cUI2) WriteErrorPage(w http.ResponseWriter, r *http.Request, statusCode int, err error, msg string) {
 	log.Printf("%v error: %v", msg, err)
 	w.Header().Add("Content-Type", "text/html")
 	w.WriteHeader(statusCode)
-	tmpl.ErrorPage(tmpl.AppState{
-		ReadOnly:      u.ReadOnly,
-		SortDirection: "",
-		Sortable:      false,
-		SearchText:    "",
-		PUG:           u.PublicURL,
-	}, msg).Render(r.Context(), w)
+	tmpl.ErrorPage(u.baseAppState(), msg).Render(r.Context(), w)
 }
 
 func (u *cUI2) Home(w http.ResponseWriter, r *http.Request) {
@@ -119,13 +139,7 @@ func (u *cUI2) Home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("Content-Type", "text/html")
-	tmpl.Home(tmpl.AppState{
-		ReadOnly:      u.ReadOnly,
-		SortDirection: "",
-		Sortable:      false,
-		SearchText:    "",
-		PUG:           u.PublicURL,
-	}, tmpl.Paging{
+	tmpl.Home(u.baseAppState(), tmpl.Paging{
 		URL: func(p int) string {
 			return fmt.Sprintf("/?page=%v", p)
 		},
@@ -186,13 +200,11 @@ func (u *cUI2) Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("Content-Type", "text/html")
-	tmpl.Search(tmpl.AppState{
-		ReadOnly:      u.ReadOnly,
-		SortDirection: sort,
-		Sortable:      true,
-		SearchText:    r.URL.Query().Get("text"),
-		PUG:           u.PublicURL,
-	}, tmpl.Paging{
+	appState := u.baseAppState()
+	appState.Sortable = true
+	appState.SortDirection = sort
+	appState.SearchText = r.URL.Query().Get("text")
+	tmpl.Search(appState, tmpl.Paging{
 		URL: func(p int) string {
 			return fmt.Sprintf("%vpage=%v", baseURL, p)
 		},
@@ -221,24 +233,12 @@ func (u *cUI2) Watch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("Content-Type", "text/html")
-	tmpl.Watch(tmpl.AppState{
-		ReadOnly:      u.ReadOnly,
-		SortDirection: "",
-		Sortable:      false,
-		SearchText:    "",
-		PUG:           u.PublicURL,
-	}, video).Render(r.Context(), w)
+	tmpl.Watch(u.baseAppState(), video).Render(r.Context(), w)
 }
 
 func (u *cUI2) UploadForm(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/html")
-	tmpl.UploadForm(tmpl.AppState{
-		ReadOnly:      u.ReadOnly,
-		SortDirection: "",
-		Sortable:      false,
-		SearchText:    "",
-		PUG:           u.PublicURL,
-	}, tmpl.VideoFormState{
+	tmpl.UploadForm(u.baseAppState(), tmpl.VideoFormState{
 		Tags: "home",
 	}).Render(r.Context(), w)
 }
@@ -248,13 +248,7 @@ func (u *cUI2) Upload(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%v error: %v", msg, err)
 		w.Header().Add("Content-Type", "text/html")
 		w.WriteHeader(statusCode)
-		tmpl.UploadForm(tmpl.AppState{
-			ReadOnly:      u.ReadOnly,
-			SortDirection: "",
-			Sortable:      false,
-			SearchText:    "",
-			PUG:           u.PublicURL,
-		}, tmpl.VideoFormState{
+		tmpl.UploadForm(u.baseAppState(), tmpl.VideoFormState{
 			Error: msg,
 
 			Title:       r.FormValue("title"),
@@ -263,13 +257,16 @@ func (u *cUI2) Upload(w http.ResponseWriter, r *http.Request) {
 		}).Render(r.Context(), w)
 	}
 
-	defer r.Body.Close()
-
 	if err := r.ParseMultipartForm(maxMultipartFormSize); err != nil {
 		writeErrorPage(http.StatusBadRequest, err, "Bad multipart/form-data request")
 		return
 	}
 	defer r.MultipartForm.RemoveAll()
+
+	if err := u.validateXSRF(r.FormValue("_xsrf")); err != nil {
+		writeErrorPage(http.StatusUnprocessableEntity, err, "XSRF token expired")
+		return
+	}
 
 	// convert "foo, bar" and "foo,bar" into
 	// ["foo", "bar"]
@@ -354,13 +351,7 @@ func (u *cUI2) EditForm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("Content-Type", "text/html")
-	tmpl.EditForm(tmpl.AppState{
-		ReadOnly:      u.ReadOnly,
-		SortDirection: "",
-		Sortable:      false,
-		SearchText:    "",
-		PUG:           u.PublicURL,
-	}, tmpl.VideoFormState{
+	tmpl.EditForm(u.baseAppState(), tmpl.VideoFormState{
 		Title:       video.Title,
 		Tags:        strings.Join(video.Tags, ", "),
 		Description: video.Description,
@@ -390,13 +381,7 @@ func (u *cUI2) Edit(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%v error: %v", msg, err)
 		w.Header().Add("Content-Type", "text/html")
 		w.WriteHeader(statusCode)
-		tmpl.EditForm(tmpl.AppState{
-			ReadOnly:      u.ReadOnly,
-			SortDirection: "",
-			Sortable:      false,
-			SearchText:    "",
-			PUG:           u.PublicURL,
-		}, tmpl.VideoFormState{
+		tmpl.EditForm(u.baseAppState(), tmpl.VideoFormState{
 			Error: msg,
 
 			Title:       r.FormValue("title"),
@@ -405,13 +390,16 @@ func (u *cUI2) Edit(w http.ResponseWriter, r *http.Request) {
 		}, video).Render(r.Context(), w)
 	}
 
-	defer r.Body.Close()
-
 	if err := r.ParseMultipartForm(maxMultipartFormSize); err != nil {
 		writeErrorPage(http.StatusBadRequest, err, "Bad multipart/form-data request")
 		return
 	}
 	defer r.MultipartForm.RemoveAll()
+
+	if err := u.validateXSRF(r.FormValue("_xsrf")); err != nil {
+		writeErrorPage(http.StatusUnprocessableEntity, err, "XSRF token expired")
+		return
+	}
 
 	// convert "foo, bar" and "foo,bar" into
 	// ["foo", "bar"]
@@ -456,13 +444,7 @@ func (u *cUI2) DeleteForm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("Content-Type", "text/html")
-	tmpl.DeleteForm(tmpl.AppState{
-		ReadOnly:      u.ReadOnly,
-		SortDirection: "",
-		Sortable:      false,
-		SearchText:    "",
-		PUG:           u.PublicURL,
-	}, tmpl.VideoFormState{}, video).Render(r.Context(), w)
+	tmpl.DeleteForm(u.baseAppState(), tmpl.VideoFormState{}, video).Render(r.Context(), w)
 }
 
 func (u *cUI2) Delete(w http.ResponseWriter, r *http.Request) {
@@ -488,15 +470,14 @@ func (u *cUI2) Delete(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%v error: %v", msg, err)
 		w.Header().Add("Content-Type", "text/html")
 		w.WriteHeader(statusCode)
-		tmpl.DeleteForm(tmpl.AppState{
-			ReadOnly:      u.ReadOnly,
-			SortDirection: "",
-			Sortable:      false,
-			SearchText:    "",
-			PUG:           u.PublicURL,
-		}, tmpl.VideoFormState{
+		tmpl.DeleteForm(u.baseAppState(), tmpl.VideoFormState{
 			Error: msg,
 		}, video).Render(r.Context(), w)
+	}
+
+	if err := u.validateXSRF(r.FormValue("_xsrf")); err != nil {
+		writeErrorPage(http.StatusUnprocessableEntity, err, "XSRF token expired")
+		return
 	}
 
 	err = u.Repo.Delete(video)
@@ -526,12 +507,18 @@ func (u *cUI2) Delete(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, fs files.FileSystem, repo videostore.VideoRepo) http.Handler {
+func NewWriteableCUI2(
+	publicURL tmpl.PublicURLGenerator,
+	fs files.FileSystem,
+	repo videostore.VideoRepo,
+	xsrfKey []byte,
+) http.Handler {
 	u := &cUI2{
 		ReadOnly:  false,
 		PublicURL: publicURL,
 		FS:        fs,
 		Repo:      repo,
+		XSRFKey:   xsrfKey,
 	}
 
 	r := mux.NewRouter()
