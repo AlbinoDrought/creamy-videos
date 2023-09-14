@@ -251,6 +251,10 @@ func videoThumbnail(pug PublicURLGenerator, video videostore.Video) templ.Compon
 			return err
 		}
 		// Element Attributes
+		_, err = templBuffer.WriteString(" hx-boost=\"true\"")
+		if err != nil {
+			return err
+		}
 		_, err = templBuffer.WriteString(" href=")
 		if err != nil {
 			return err
@@ -813,12 +817,47 @@ func page(title string, description string) templ.Component {
 		if err != nil {
 			return err
 		}
+		// Element (standard)
+		_, err = templBuffer.WriteString("<script")
+		if err != nil {
+			return err
+		}
+		// Element Attributes
+		_, err = templBuffer.WriteString(" defer")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(" src=\"/js/htmx.1.9.5.min.js\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(" type=\"text/javascript\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(">")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</script>")
+		if err != nil {
+			return err
+		}
 		_, err = templBuffer.WriteString("</head>")
 		if err != nil {
 			return err
 		}
 		// Element (standard)
-		_, err = templBuffer.WriteString("<body>")
+		_, err = templBuffer.WriteString("<body")
+		if err != nil {
+			return err
+		}
+		// Element Attributes
+		_, err = templBuffer.WriteString(" hx-history=\"false\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(">")
 		if err != nil {
 			return err
 		}
