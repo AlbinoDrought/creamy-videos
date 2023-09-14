@@ -256,3 +256,31 @@ html, body, head {
   */
   white-space: pre-wrap;
 }
+
+
+/* Upload Form */
+#app div.upload {
+  color: rgb(171, 171, 171);
+}
+
+/*
+// intended to override semantic-ui defaults:
+*/
+#app div.upload input,
+#app div.upload input:focus,
+#app div.upload textarea,
+#app div.upload textarea:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+#app div.upload textarea {
+  /*
+  // fix a weird issue where the drag-to-resize component was appearing with a white background:
+  */
+  appearance: textarea;
+}
+
+#app div.upload label {
+  color: rgb(171, 171, 171);
+}

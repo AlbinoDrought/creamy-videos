@@ -198,6 +198,53 @@ templ Search(state AppState, paging Paging, videos []videostore.Video) {
   }
 }
 
+templ UploadForm(state AppState) {
+  @page("Upload", "The creamiest selfhosted tubesite") {
+    @app(state) {
+      <div class="upload ui text container">
+        <form method="POST" class="ui form" enctype="multipart/form-data">
+          <div class="ui field">
+            <label>Title</label>
+            <input
+              type="text"
+              name="title"
+              placeholder="Title"
+            />
+          </div>
+          <div class="ui field">
+            <label>Tags (separated by comma)</label>
+            <input
+              type="text"
+              name="tags"
+              placeholder="educational, computer science, wizardry"
+            />
+          </div>
+
+          <div class="field">
+            <label>Description</label>
+            <textarea
+              name="description"
+              placeholder="Description"
+            />
+          </div>
+
+          <div class="field">
+            <label>File</label>
+            <input
+              type="file"
+              name="file"
+            />
+          </div>
+
+          <button type="submit" class="ui submit button">
+            Upload
+          </button>
+        </form>
+      </div>
+    }
+  }
+}
+
 templ Watch(state AppState, video videostore.Video) {
   @page(video.Title, video.Description) {
     @app(state) {

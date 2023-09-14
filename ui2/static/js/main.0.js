@@ -23,6 +23,16 @@ window.cvSubmitNearestForm = function (el) {
   form.submit();
 };
 
+/**
+ * Replace the content of a page entirely
+ * @param {string} html 
+ */
+window.cvReplacePage = function (html) {
+  var doc = document.open();
+  doc.write(html);
+  doc.close();
+};
+
 // when we're looking at a list of videos
 // and we click one
 // the video should automatically play
@@ -52,7 +62,7 @@ if (window.fetch) {
         })
         .then(function (text) {
           window.history.pushState({}, '', target);
-          document.body.innerHTML = text;
+          window.cvReplacePage(text);
         })
         .catch(function (ex) {
           // try to fallback to regular navigation if we break something

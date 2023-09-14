@@ -18,6 +18,8 @@ type CreamyVideosUI2 interface {
 	Search(w http.ResponseWriter, r *http.Request)
 	Watch(w http.ResponseWriter, r *http.Request)
 
+	UploadForm(w http.ResponseWriter, r *http.Request)
+
 	// todo: Upload, Show, Edit, Delete UI & Handler routes
 }
 
@@ -207,6 +209,17 @@ func (u *cUI2) Watch(w http.ResponseWriter, r *http.Request) {
 	}, video).Render(r.Context(), w)
 }
 
+func (u *cUI2) UploadForm(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/html")
+	tmpl.UploadForm(tmpl.AppState{
+		ReadOnly:      u.ReadOnly,
+		SortDirection: "",
+		Sortable:      false,
+		SearchText:    "",
+		PUG:           u.PublicURL,
+	}).Render(r.Context(), w)
+}
+
 func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRepo) http.Handler {
 	u := &cUI2{
 		ReadOnly:  false,
@@ -230,6 +243,11 @@ func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRe
 	r.HandleFunc(
 		"/search",
 		u.Search,
+	).Methods("GET")
+
+	r.HandleFunc(
+		"/upload",
+		u.UploadForm,
 	).Methods("GET")
 
 	r.HandleFunc(
