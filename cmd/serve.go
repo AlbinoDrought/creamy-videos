@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	rice "github.com/GeertJohan/go.rice"
 	"github.com/gorilla/mux"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
@@ -42,24 +41,15 @@ var serveCmd = &cobra.Command{
 			),
 		)
 
-		if app.config.SPA {
-			// mount built SPA ui:
-			box, boxError := rice.FindBox("./../ui/dist")
-			if boxError != nil {
-				log.Printf("failed to find SPA box, running in API-only mode: %+v", boxError)
-			} else {
-				r.PathPrefix("/").Handler(http.FileServer(files.CreateSPAFileSystem(box.HTTPBox(), "/index.html")))
-			}
+		// there was previously an SPA UI @ commit 7c6cf4e199ef3baa03dde8cbe16ced4e21251be8
+		// mount non-SPA UI:
+		var cUI2Handler http.Handler
+		if app.config.ReadOnly {
+			cUI2Handler = web.NewReadOnlyCUI2(publicUrlGenerator, app.repo)
 		} else {
-			// mount non-SPA UI:
-			var cUI2Handler http.Handler
-			if app.config.ReadOnly {
-				cUI2Handler = web.NewReadOnlyCUI2(publicUrlGenerator, app.repo)
-			} else {
-				cUI2Handler = web.NewWriteableCUI2(publicUrlGenerator, app.fs, app.repo)
-			}
-			r.PathPrefix("/").Handler(cUI2Handler)
+			cUI2Handler = web.NewWriteableCUI2(publicUrlGenerator, app.fs, app.repo)
 		}
+		r.PathPrefix("/").Handler(cUI2Handler)
 
 		http.Handle("/", r)
 

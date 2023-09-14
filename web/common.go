@@ -17,7 +17,7 @@ func pages(count uint, videosPerPage uint) uint {
 	if count == 0 {
 		return 1
 	}
-	p := videosPerPage / count
+	p := count / videosPerPage
 	if count > (videosPerPage * p) {
 		p++
 	}

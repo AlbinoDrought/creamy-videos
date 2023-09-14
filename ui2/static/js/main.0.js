@@ -136,3 +136,11 @@ document.querySelectorAll('input[type="file"][cv-filename-default-to]').forEach(
   });
 });
 
+
+console.log(`
+# AlbinoDrought/creamy-videos
+
+Repo: https://github.com/AlbinoDrought/creamy-videos
+
+Source: https://${window.location.host}/source.tar.gz
+`);
