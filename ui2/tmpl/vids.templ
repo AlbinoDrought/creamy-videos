@@ -395,3 +395,16 @@ templ Watch(state AppState, video videostore.Video) {
     }
   }
 }
+
+templ ErrorPage(state AppState, message string) {
+  @page("Error", "", "/img/banner.jpg") {
+    @app(state) {
+      <div class="ui visible negative message">
+        <div class="header">
+          Something broke
+        </div>
+        <p>{ message }</p>
+      </div>
+    }
+  }
+}

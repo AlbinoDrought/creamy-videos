@@ -1311,3 +1311,75 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 		return err
 	})
 }
+
+func ErrorPage(state AppState, message string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		templBuffer, templIsBuffer := w.(*bytes.Buffer)
+		if !templIsBuffer {
+			templBuffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templBuffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		var_72 := templ.GetChildren(ctx)
+		if var_72 == nil {
+			var_72 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		var_73 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+			templBuffer, templIsBuffer := w.(*bytes.Buffer)
+			if !templIsBuffer {
+				templBuffer = templ.GetBuffer()
+				defer templ.ReleaseBuffer(templBuffer)
+			}
+			var_74 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+				templBuffer, templIsBuffer := w.(*bytes.Buffer)
+				if !templIsBuffer {
+					templBuffer = templ.GetBuffer()
+					defer templ.ReleaseBuffer(templBuffer)
+				}
+				_, err = templBuffer.WriteString("<div class=\"ui visible negative message\"><div class=\"header\">")
+				if err != nil {
+					return err
+				}
+				var_75 := `Something broke`
+				_, err = templBuffer.WriteString(var_75)
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</div><p>")
+				if err != nil {
+					return err
+				}
+				var var_76 string = message
+				_, err = templBuffer.WriteString(templ.EscapeString(var_76))
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</p></div>")
+				if err != nil {
+					return err
+				}
+				if !templIsBuffer {
+					_, err = io.Copy(w, templBuffer)
+				}
+				return err
+			})
+			err = app(state).Render(templ.WithChildren(ctx, var_74), templBuffer)
+			if err != nil {
+				return err
+			}
+			if !templIsBuffer {
+				_, err = io.Copy(w, templBuffer)
+			}
+			return err
+		})
+		err = page("Error", "", "/img/banner.jpg").Render(templ.WithChildren(ctx, var_73), templBuffer)
+		if err != nil {
+			return err
+		}
+		if !templIsBuffer {
+			_, err = templBuffer.WriteTo(w)
+		}
+		return err
+	})
+}

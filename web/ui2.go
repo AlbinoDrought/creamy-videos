@@ -75,9 +75,16 @@ type cUI2 struct {
 var _ CreamyVideosUI2 = &cUI2{}
 
 func (u *cUI2) WriteErrorPage(w http.ResponseWriter, r *http.Request, statusCode int, err error, msg string) {
-	w.WriteHeader(statusCode)
-	w.Write([]byte("todo"))
 	log.Printf("%v error: %v", msg, err)
+	w.Header().Add("Content-Type", "text/html")
+	w.WriteHeader(statusCode)
+	tmpl.ErrorPage(tmpl.AppState{
+		ReadOnly:      u.ReadOnly,
+		SortDirection: "",
+		Sortable:      false,
+		SearchText:    "",
+		PUG:           u.PublicURL,
+	}, msg).Render(r.Context(), w)
 }
 
 func (u *cUI2) Home(w http.ResponseWriter, r *http.Request) {
