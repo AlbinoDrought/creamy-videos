@@ -2886,6 +2886,10 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 						return err
 					}
 					// Element Attributes
+					_, err = templBuffer.WriteString(" cv-confirm=\"#formDelete\"")
+					if err != nil {
+						return err
+					}
 					_, err = templBuffer.WriteString(" class=\"ui basic red icon delete button\"")
 					if err != nil {
 						return err
@@ -2941,6 +2945,49 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 						return err
 					}
 					_, err = templBuffer.WriteString("</a>")
+					if err != nil {
+						return err
+					}
+					// Whitespace (normalised)
+					_, err = templBuffer.WriteString(` `)
+					if err != nil {
+						return err
+					}
+					// Element (standard)
+					_, err = templBuffer.WriteString("<form")
+					if err != nil {
+						return err
+					}
+					// Element Attributes
+					_, err = templBuffer.WriteString(" id=\"formDelete\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(" method=\"POST\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(" action=")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("/delete/%v", video.ID)))
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(">")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("</form>")
 					if err != nil {
 						return err
 					}

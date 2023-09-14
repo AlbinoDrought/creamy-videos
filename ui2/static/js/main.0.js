@@ -72,4 +72,50 @@ if (window.fetch) {
         });
     });
   });
+  document.querySelectorAll('a[cv-confirm]').forEach(function (el) {
+    var clicks = 0;
+    var requiredClicks = 4;
+    var timeoutHandle;
+    var originalText = el.innerText;
+
+    var updateText = function () {
+      if (clicks === 0) {
+        el.innerText = originalText;
+      } else {
+        var remainingClicks = requiredClicks - clicks;
+        el.innerText = [
+          'Click',
+          remainingClicks,
+          'more',
+          remainingClicks === 1 ? 'time' : 'times',
+          'to confirm',
+        ].join(' ');
+      }
+    };
+
+    var resetClicks = function () {
+      clicks = 0;
+      timeoutHandle = false;
+      updateText();
+    };
+
+    var target = document.querySelector(el.getAttribute('cv-confirm'));
+    if (!target) {
+      console.error('cv-confirm element target not found!', el);
+      return;
+    }
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      clearTimeout(timeoutHandle);
+      clicks += 1;
+      if (clicks >= requiredClicks) {
+        clicks = 0;
+        updateText();
+        target.submit();
+      } else {
+        updateText();
+        timeoutHandle = setTimeout(resetClicks, 2000);
+      }
+    });
+  });
 }

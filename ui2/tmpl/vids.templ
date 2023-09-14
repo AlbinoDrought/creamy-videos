@@ -353,10 +353,12 @@ templ Watch(state AppState, video videostore.Video) {
               Download
             </a>
             if !state.ReadOnly {
-              <a class="ui basic red icon delete button" href={ videoDeleteURL(video) }>
+              <a cv-confirm="#formDelete" class="ui basic red icon delete button" href={ videoDeleteURL(video) }>
                 <i class="trash icon" />
                 Delete
               </a>
+              <form id="formDelete" method="POST" action={ fmt.Sprintf("/delete/%v", video.ID) }>
+              </form>
               <a class="ui basic yellow icon edit button" href={ videoEditURL(video) }>
                 <i class="edit icon" />
                 Edit
