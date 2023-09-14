@@ -16,6 +16,7 @@ import (
 	"github.com/AlbinoDrought/creamy-videos/ui2/tmpl"
 	"github.com/AlbinoDrought/creamy-videos/videostore"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 )
 
 type CreamyVideosUI2 interface {
@@ -26,7 +27,11 @@ type CreamyVideosUI2 interface {
 	UploadForm(w http.ResponseWriter, r *http.Request)
 	Upload(w http.ResponseWriter, r *http.Request)
 
-	// todo: Delete UI & Handler routes
+	EditForm(w http.ResponseWriter, r *http.Request)
+	Edit(w http.ResponseWriter, r *http.Request)
+
+	DeleteForm(w http.ResponseWriter, r *http.Request) // skipped for JS clients
+	Delete(w http.ResponseWriter, r *http.Request)
 }
 
 type sortDir map[string]string
@@ -66,6 +71,8 @@ type cUI2 struct {
 	FS        files.FileSystem
 	Repo      videostore.VideoRepo
 }
+
+var _ CreamyVideosUI2 = &cUI2{}
 
 func (u *cUI2) WriteErrorPage(w http.ResponseWriter, r *http.Request, statusCode int, err error, msg string) {
 	w.WriteHeader(statusCode)
@@ -420,6 +427,96 @@ func (u *cUI2) Edit(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/watch/%v", video.ID), http.StatusFound)
 }
 
+func (u *cUI2) DeleteForm(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	rawID := vars["id"]
+	id, err := strconv.Atoi(rawID)
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusBadRequest, err, "bad ID")
+		return
+	}
+
+	video, err := u.Repo.FindById(uint(id))
+	if err == videostore.ErrorVideoNotFound {
+		u.WriteErrorPage(w, r, http.StatusNotFound, err, "video not found")
+		return
+	}
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusInternalServerError, err, "failed finding video")
+		return
+	}
+
+	w.Header().Add("Content-Type", "text/html")
+	tmpl.DeleteForm(tmpl.AppState{
+		ReadOnly:      u.ReadOnly,
+		SortDirection: "",
+		Sortable:      false,
+		SearchText:    "",
+		PUG:           u.PublicURL,
+	}, tmpl.VideoFormState{}, video).Render(r.Context(), w)
+}
+
+func (u *cUI2) Delete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	rawID := vars["id"]
+	id, err := strconv.Atoi(rawID)
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusBadRequest, err, "bad ID")
+		return
+	}
+
+	video, err := u.Repo.FindById(uint(id))
+	if err == videostore.ErrorVideoNotFound {
+		u.WriteErrorPage(w, r, http.StatusNotFound, err, "video not found")
+		return
+	}
+	if err != nil {
+		u.WriteErrorPage(w, r, http.StatusInternalServerError, err, "failed finding video")
+		return
+	}
+
+	writeErrorPage := func(statusCode int, err error, msg string) {
+		log.Printf("%v error: %v", msg, err)
+		w.Header().Add("Content-Type", "text/html")
+		w.WriteHeader(statusCode)
+		tmpl.DeleteForm(tmpl.AppState{
+			ReadOnly:      u.ReadOnly,
+			SortDirection: "",
+			Sortable:      false,
+			SearchText:    "",
+			PUG:           u.PublicURL,
+		}, tmpl.VideoFormState{
+			Error: msg,
+		}, video).Render(r.Context(), w)
+	}
+
+	err = u.Repo.Delete(video)
+	if err != nil {
+		writeErrorPage(http.StatusInternalServerError, err, "Failed to delete video resource")
+		return
+	}
+
+	_, err = u.FS.Stat(video.Source)
+	if !u.FS.IsNotExist(err) {
+		// video exists, attempt to delete
+		err = u.FS.Remove(video.Source)
+		if err != nil {
+			log.Print(errors.Wrap(err, "failed to remove video from disk"))
+		}
+	}
+
+	_, err = u.FS.Stat(video.Thumbnail)
+	if !u.FS.IsNotExist(err) {
+		// thumbnail exists, attempt to delete
+		err = u.FS.Remove(video.Thumbnail)
+		if err != nil {
+			log.Print(errors.Wrap(err, "failed to remove thumbnail from disk"))
+		}
+	}
+
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
 func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, fs files.FileSystem, repo videostore.VideoRepo) http.Handler {
 	u := &cUI2{
 		ReadOnly:  false,
@@ -467,6 +564,15 @@ func NewWriteableCUI2(publicURL tmpl.PublicURLGenerator, fs files.FileSystem, re
 	r.HandleFunc(
 		"/edit/{id:[0-9]+}",
 		u.Edit,
+	).Methods("POST")
+
+	r.HandleFunc(
+		"/delete/{id:[0-9]+}",
+		u.DeleteForm,
+	).Methods("GET")
+	r.HandleFunc(
+		"/delete/{id:[0-9]+}",
+		u.Delete,
 	).Methods("POST")
 
 	return r

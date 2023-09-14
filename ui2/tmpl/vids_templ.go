@@ -2379,7 +2379,7 @@ func EditForm(state AppState, videoFormState VideoFormState, video videostore.Vi
 	})
 }
 
-func Watch(state AppState, video videostore.Video) templ.Component {
+func DeleteForm(state AppState, videoFormState VideoFormState, video videostore.Video) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -2401,6 +2401,226 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 			}
 			// TemplElement
 			var_52 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+				templBuffer, templIsBuffer := w.(*bytes.Buffer)
+				if !templIsBuffer {
+					templBuffer = templ.GetBuffer()
+					defer templ.ReleaseBuffer(templBuffer)
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<div")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" class=\"upload ui text container\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<form")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" method=\"POST\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(" class=\"ui form\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(" enctype=\"multipart/form-data\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<p>")
+				if err != nil {
+					return err
+				}
+				// Text
+				var_53 := `Are you sure you want to delete `
+				_, err = templBuffer.WriteString(var_53)
+				if err != nil {
+					return err
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<strong>")
+				if err != nil {
+					return err
+				}
+				// StringExpression
+				var var_54 string = video.Title
+				_, err = templBuffer.WriteString(templ.EscapeString(var_54))
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</strong>")
+				if err != nil {
+					return err
+				}
+				// Text
+				var_55 := `?`
+				_, err = templBuffer.WriteString(var_55)
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</p>")
+				if err != nil {
+					return err
+				}
+				// If
+				if videoFormState.Error != "" {
+					// Element (standard)
+					_, err = templBuffer.WriteString("<div")
+					if err != nil {
+						return err
+					}
+					// Element Attributes
+					_, err = templBuffer.WriteString(" class=\"ui visible negative message\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(">")
+					if err != nil {
+						return err
+					}
+					// Element (standard)
+					_, err = templBuffer.WriteString("<div")
+					if err != nil {
+						return err
+					}
+					// Element Attributes
+					_, err = templBuffer.WriteString(" class=\"header\"")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString(">")
+					if err != nil {
+						return err
+					}
+					// Text
+					var_56 := `Video delete failed`
+					_, err = templBuffer.WriteString(var_56)
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("</div>")
+					if err != nil {
+						return err
+					}
+					// Element (standard)
+					_, err = templBuffer.WriteString("<p>")
+					if err != nil {
+						return err
+					}
+					// StringExpression
+					var var_57 string = videoFormState.Error
+					_, err = templBuffer.WriteString(templ.EscapeString(var_57))
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("</p>")
+					if err != nil {
+						return err
+					}
+					_, err = templBuffer.WriteString("</div>")
+					if err != nil {
+						return err
+					}
+				}
+				// Element (standard)
+				_, err = templBuffer.WriteString("<button")
+				if err != nil {
+					return err
+				}
+				// Element Attributes
+				_, err = templBuffer.WriteString(" type=\"submit\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(" class=\"ui submit negative button\"")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString(">")
+				if err != nil {
+					return err
+				}
+				// Text
+				var_58 := `Delete`
+				_, err = templBuffer.WriteString(var_58)
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</button>")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</form>")
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</div>")
+				if err != nil {
+					return err
+				}
+				if !templIsBuffer {
+					_, err = io.Copy(w, templBuffer)
+				}
+				return err
+			})
+			err = app(state).Render(templ.WithChildren(ctx, var_52), templBuffer)
+			if err != nil {
+				return err
+			}
+			if !templIsBuffer {
+				_, err = io.Copy(w, templBuffer)
+			}
+			return err
+		})
+		err = page(fmt.Sprintf("Delete %v", video.Title), "The creamiest selfhosted tubesite").Render(templ.WithChildren(ctx, var_51), templBuffer)
+		if err != nil {
+			return err
+		}
+		if !templIsBuffer {
+			_, err = io.Copy(w, templBuffer)
+		}
+		return err
+	})
+}
+
+func Watch(state AppState, video videostore.Video) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		templBuffer, templIsBuffer := w.(*bytes.Buffer)
+		if !templIsBuffer {
+			templBuffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templBuffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		var_59 := templ.GetChildren(ctx)
+		if var_59 == nil {
+			var_59 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		// TemplElement
+		var_60 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+			templBuffer, templIsBuffer := w.(*bytes.Buffer)
+			if !templIsBuffer {
+				templBuffer = templ.GetBuffer()
+				defer templ.ReleaseBuffer(templBuffer)
+			}
+			// TemplElement
+			var_61 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 				templBuffer, templIsBuffer := w.(*bytes.Buffer)
 				if !templIsBuffer {
 					templBuffer = templ.GetBuffer()
@@ -2527,8 +2747,8 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 					return err
 				}
 				// StringExpression
-				var var_53 string = video.Title
-				_, err = templBuffer.WriteString(templ.EscapeString(var_53))
+				var var_62 string = video.Title
+				_, err = templBuffer.WriteString(templ.EscapeString(var_62))
 				if err != nil {
 					return err
 				}
@@ -2555,8 +2775,8 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 					return err
 				}
 				// StringExpression
-				var var_54 string = video.Description
-				_, err = templBuffer.WriteString(templ.EscapeString(var_54))
+				var var_63 string = video.Description
+				_, err = templBuffer.WriteString(templ.EscapeString(var_63))
 				if err != nil {
 					return err
 				}
@@ -2612,8 +2832,8 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 				if err != nil {
 					return err
 				}
-				var var_55 templ.SafeURL = templ.SafeURL(state.PUG(video.Source))
-				_, err = templBuffer.WriteString(templ.EscapeString(string(var_55)))
+				var var_64 templ.SafeURL = templ.SafeURL(state.PUG(video.Source))
+				_, err = templBuffer.WriteString(templ.EscapeString(string(var_64)))
 				if err != nil {
 					return err
 				}
@@ -2649,8 +2869,8 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 					return err
 				}
 				// Text
-				var_56 := `Download`
-				_, err = templBuffer.WriteString(var_56)
+				var_65 := `Download`
+				_, err = templBuffer.WriteString(var_65)
 				if err != nil {
 					return err
 				}
@@ -2678,8 +2898,8 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 					if err != nil {
 						return err
 					}
-					var var_57 templ.SafeURL = videoDeleteURL(video)
-					_, err = templBuffer.WriteString(templ.EscapeString(string(var_57)))
+					var var_66 templ.SafeURL = videoDeleteURL(video)
+					_, err = templBuffer.WriteString(templ.EscapeString(string(var_66)))
 					if err != nil {
 						return err
 					}
@@ -2715,8 +2935,8 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 						return err
 					}
 					// Text
-					var_58 := `Delete`
-					_, err = templBuffer.WriteString(var_58)
+					var_67 := `Delete`
+					_, err = templBuffer.WriteString(var_67)
 					if err != nil {
 						return err
 					}
@@ -2747,8 +2967,8 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 					if err != nil {
 						return err
 					}
-					var var_59 templ.SafeURL = videoEditURL(video)
-					_, err = templBuffer.WriteString(templ.EscapeString(string(var_59)))
+					var var_68 templ.SafeURL = videoEditURL(video)
+					_, err = templBuffer.WriteString(templ.EscapeString(string(var_68)))
 					if err != nil {
 						return err
 					}
@@ -2784,8 +3004,8 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 						return err
 					}
 					// Text
-					var_60 := `Edit`
-					_, err = templBuffer.WriteString(var_60)
+					var_69 := `Edit`
+					_, err = templBuffer.WriteString(var_69)
 					if err != nil {
 						return err
 					}
@@ -2836,8 +3056,8 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 					if err != nil {
 						return err
 					}
-					var var_61 templ.SafeURL = tagSearchURL(tag)
-					_, err = templBuffer.WriteString(templ.EscapeString(string(var_61)))
+					var var_70 templ.SafeURL = tagSearchURL(tag)
+					_, err = templBuffer.WriteString(templ.EscapeString(string(var_70)))
 					if err != nil {
 						return err
 					}
@@ -2850,8 +3070,8 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 						return err
 					}
 					// StringExpression
-					var var_62 string = tag
-					_, err = templBuffer.WriteString(templ.EscapeString(var_62))
+					var var_71 string = tag
+					_, err = templBuffer.WriteString(templ.EscapeString(var_71))
 					if err != nil {
 						return err
 					}
@@ -2877,7 +3097,7 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 				}
 				return err
 			})
-			err = app(state).Render(templ.WithChildren(ctx, var_52), templBuffer)
+			err = app(state).Render(templ.WithChildren(ctx, var_61), templBuffer)
 			if err != nil {
 				return err
 			}
@@ -2886,7 +3106,7 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 			}
 			return err
 		})
-		err = page(video.Title, video.Description).Render(templ.WithChildren(ctx, var_51), templBuffer)
+		err = page(video.Title, video.Description).Render(templ.WithChildren(ctx, var_60), templBuffer)
 		if err != nil {
 			return err
 		}

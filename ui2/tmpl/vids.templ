@@ -307,6 +307,30 @@ templ EditForm(state AppState, videoFormState VideoFormState, video videostore.V
   }
 }
 
+templ DeleteForm(state AppState, videoFormState VideoFormState, video videostore.Video) {
+  @page(fmt.Sprintf("Delete %v", video.Title), "The creamiest selfhosted tubesite") {
+    @app(state) {
+      <div class="upload ui text container">
+        <form method="POST" class="ui form" enctype="multipart/form-data">
+          <p>Are you sure you want to delete <strong>{ video.Title }</strong>?</p>
+          if videoFormState.Error != "" {
+            <div class="ui visible negative message">
+              <div class="header">
+                Video delete failed
+              </div>
+              <p>{ videoFormState.Error }</p>
+            </div>
+          }
+
+          <button type="submit" class="ui submit negative button">
+            Delete
+          </button>
+        </form>
+      </div>
+    }
+  }
+}
+
 templ Watch(state AppState, video videostore.Video) {
   @page(video.Title, video.Description) {
     @app(state) {
