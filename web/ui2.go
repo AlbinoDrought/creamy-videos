@@ -148,6 +148,34 @@ func (u *cUI2) Home(w http.ResponseWriter, r *http.Request) {
 	}, videos).Render(r.Context(), w)
 }
 
+func queryJoin(base string, args []string) string {
+	var (
+		sb        strings.Builder
+		something bool
+	)
+
+	for i := 0; i < len(args); i += 2 {
+		k := args[i]
+		v := args[i+1]
+		if v == "" {
+			continue
+		}
+		if something {
+			sb.WriteRune('&')
+		} else {
+			something = true
+		}
+		sb.WriteString(url.QueryEscape(k))
+		sb.WriteRune('=')
+		sb.WriteString(url.QueryEscape(v))
+	}
+
+	if something {
+		return base + "?" + sb.String()
+	}
+	return base
+}
+
 func (u *cUI2) Search(w http.ResponseWriter, r *http.Request) {
 	pageInt, err := page(r)
 	if err != nil {
@@ -190,15 +218,6 @@ func (u *cUI2) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	baseURL := fmt.Sprintf("/search?sort=%v&", url.QueryEscape(sort))
-	for _, key := range []string{"tags", "title", "filter"} {
-		v := filterArgs[key]
-		if v == "" {
-			continue
-		}
-		baseURL = fmt.Sprintf("%v%v=%v&", baseURL, key, url.QueryEscape(v))
-	}
-
 	w.Header().Add("Content-Type", "text/html")
 	appState := u.baseAppState()
 	appState.Sortable = true
@@ -206,7 +225,16 @@ func (u *cUI2) Search(w http.ResponseWriter, r *http.Request) {
 	appState.SearchText = r.URL.Query().Get("text")
 	tmpl.Search(appState, tmpl.Paging{
 		URL: func(p int) string {
-			return fmt.Sprintf("%vpage=%v", baseURL, p)
+			return queryJoin(
+				"/search",
+				[]string{
+					"sort", sort,
+					"tags", r.URL.Query().Get("tags"),
+					"title", r.URL.Query().Get("title"),
+					"text", r.URL.Query().Get("text"),
+					"page", strconv.Itoa(p),
+				},
+			)
 		},
 		CurrentPage: pageInt,
 		Pages:       int(pages(count, videosPerPage)),
