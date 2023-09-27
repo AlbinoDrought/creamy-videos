@@ -590,7 +590,7 @@ func app(state AppState) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\"><button type=\"submit\"><i class=\"search link icon\"></i></button></div></div></form></div></div><form method=\"GET\" action=\"/search\"><div class=\"ui only-small fluid fixed inverted menu search\"><div class=\"borderless item\"><div class=\"search-input ui inverted transparent icon input\"><input type=\"text\" placeholder=\"Search...\" name=\"text\" value=\"")
+		_, err = templBuffer.WriteString("\"><button type=\"submit\" aria-label=\"Search\"><i class=\"search link icon\"></i></button></div></div></form></div></div><form method=\"GET\" action=\"/search\"><div class=\"ui only-small fluid fixed inverted menu search\"><div class=\"borderless item\"><div class=\"search-input ui inverted transparent icon input\"><input type=\"text\" placeholder=\"Search...\" name=\"text\" value=\"")
 		if err != nil {
 			return err
 		}
@@ -598,7 +598,7 @@ func app(state AppState) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\"><button type=\"submit\"><i class=\"search link icon\"></i></button></div></div></div><div class=\"ui main container only-small\">")
+		_, err = templBuffer.WriteString("\"><button type=\"submit\" aria-label=\"Search\"><i class=\"search link icon\"></i></button></div></div></div><div class=\"ui main container only-small\">")
 		if err != nil {
 			return err
 		}
