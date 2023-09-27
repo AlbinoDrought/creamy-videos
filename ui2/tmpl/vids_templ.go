@@ -387,7 +387,7 @@ func page(title string, description string, image string) templ.Component {
 			var_17 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\"><meta name=\"theme-color\" content=\"#1b1b1b\"><link rel=\"icon\" href=\"/favicon.ico\"><title>")
+		_, err = templBuffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\"><meta name=\"theme-color\" content=\"#1b1b1b\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src &#39;self&#39;; img-src &#39;self&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; require-trusted-types-for &#39;script&#39;; base-uri &#39;self&#39;; form-action &#39;self&#39;\"><link rel=\"icon\" href=\"/favicon.ico\"><title>")
 		if err != nil {
 			return err
 		}

@@ -107,6 +107,7 @@ templ page(title string, description string, image string) {
       <meta http-equiv="X-UA-Compatible" content="IE=edge" />
       <meta name="viewport" content="width=device-width,initial-scale=1.0" />
       <meta name="theme-color" content="#1b1b1b" />
+      <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'; require-trusted-types-for 'script'; base-uri 'self'; form-action 'self'" />
       <link rel="icon" href="/favicon.ico" />
       <title>{ title } | creamy-videos</title>
       <meta property="og:type" content="website" />
