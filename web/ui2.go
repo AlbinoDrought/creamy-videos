@@ -21,6 +21,10 @@ import (
 	"golang.org/x/net/xsrftoken"
 )
 
+const (
+	uiVideosPerPage = videosPerPage * 4
+)
+
 type CreamyVideosUI2 interface {
 	Home(w http.ResponseWriter, r *http.Request)
 	Search(w http.ResponseWriter, r *http.Request)
@@ -116,8 +120,8 @@ func (u *cUI2) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	limit := videosPerPage
-	offset := videosPerPage * (pageInt - 1)
+	limit := uiVideosPerPage
+	offset := uiVideosPerPage * (pageInt - 1)
 	if offset < 0 {
 		offset = 0
 	}
@@ -146,7 +150,7 @@ func (u *cUI2) Home(w http.ResponseWriter, r *http.Request) {
 			return fmt.Sprintf("/?page=%v", p)
 		},
 		CurrentPage: pageInt,
-		Pages:       int(pages(count, videosPerPage)),
+		Pages:       int(pages(count, uiVideosPerPage)),
 	}, videos).Render(r.Context(), w)
 }
 
@@ -185,8 +189,8 @@ func (u *cUI2) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	limit := videosPerPage
-	offset := videosPerPage * (pageInt - 1)
+	limit := uiVideosPerPage
+	offset := uiVideosPerPage * (pageInt - 1)
 	if offset < 0 {
 		offset = 0
 	}
@@ -239,7 +243,7 @@ func (u *cUI2) Search(w http.ResponseWriter, r *http.Request) {
 			)
 		},
 		CurrentPage: pageInt,
-		Pages:       int(pages(count, videosPerPage)),
+		Pages:       int(pages(count, uiVideosPerPage)),
 	}, videos).Render(r.Context(), w)
 }
 
