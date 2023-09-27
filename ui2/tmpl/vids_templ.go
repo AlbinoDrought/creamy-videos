@@ -80,7 +80,7 @@ func sortDropdown(direction string, fluid bool) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\" onchange=\"window.cvSubmitNearestForm(this)\"><option value=\"newest\"")
+		_, err = templBuffer.WriteString("\" onchange=\"window.cvSubmitNearestForm(this)\" aria-label=\"Sorting Method\"><option value=\"newest\"")
 		if err != nil {
 			return err
 		}

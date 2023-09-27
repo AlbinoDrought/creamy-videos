@@ -46,7 +46,7 @@ func plural(count int, singular string, plural string) string {
 // components:
 
 templ sortDropdown(direction string, fluid bool) {
-  <select name="sort" class={ classes("sort-dropdown", classIf("fluid", fluid)) } onchange="window.cvSubmitNearestForm(this)">
+  <select name="sort" class={ classes("sort-dropdown", classIf("fluid", fluid)) } onchange="window.cvSubmitNearestForm(this)" aria-label="Sorting Method">
     <option value="newest" selected?={ direction == "newest" }>Sort: Newest</option>
     <option value="oldest" selected?={ direction == "oldest" }>Sort: Oldest</option>
     <option value="az" selected?={ direction == "az" }>Sort: A-Z</option>
