@@ -68,11 +68,12 @@ var sortDirs = map[string]sortDir{
 var defaultSortDir = "newest"
 
 type cUI2 struct {
-	ReadOnly  bool
-	PublicURL tmpl.PublicURLGenerator
-	FS        files.FileSystem
-	Repo      videostore.VideoRepo
-	XSRFKey   []byte
+	ReadOnly       bool
+	PublicRootURL  tmpl.PublicURLGenerator
+	PublicAssetURL tmpl.PublicURLGenerator
+	FS             files.FileSystem
+	Repo           videostore.VideoRepo
+	XSRFKey        []byte
 }
 
 var _ CreamyVideosUI2 = &cUI2{}
@@ -80,7 +81,7 @@ var _ CreamyVideosUI2 = &cUI2{}
 func (u *cUI2) baseAppState() tmpl.AppState {
 	appState := tmpl.AppState{
 		ReadOnly: u.ReadOnly,
-		PUG:      u.PublicURL,
+		PUG:      u.PublicAssetURL,
 	}
 
 	if !appState.ReadOnly {
@@ -536,18 +537,60 @@ func (u *cUI2) Delete(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
+func (u *cUI2) RobotsTXT(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.Write([]byte(fmt.Sprintf(`Sitemap: %v`, u.PublicRootURL("/sitemap.xml"))))
+}
+
+func (u *cUI2) SitemapXML(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/xml")
+	w.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`))
+
+	const limit = 100
+	offset := uint(0)
+	for {
+		videos, err := u.Repo.All(videostore.VideoFilter{
+			SortDirection: videostore.SortDirectionAscending,
+			SortField:     videostore.SortFieldTimeCreated,
+		}, limit, offset)
+		offset += limit
+		if err != nil {
+			log.Print(errors.Wrap(err, "failed during sitemap generation, cleanly aborting"))
+			break
+		}
+		if len(videos) <= 0 {
+			break
+		}
+
+		var sb strings.Builder
+		for _, video := range videos {
+			sb.WriteString(fmt.Sprintf(
+				"<url><loc>%v</loc><lastmod>%v</lastmod></url>",
+				u.PublicRootURL(fmt.Sprintf("/watch/%v", video.ID)),
+				video.TimeUpdated,
+			))
+		}
+
+		w.Write([]byte(sb.String()))
+	}
+
+	w.Write([]byte(`</urlset>`))
+}
+
 func NewWriteableCUI2(
-	publicURL tmpl.PublicURLGenerator,
+	publicRootURL tmpl.PublicURLGenerator,
+	publicAssetURL tmpl.PublicURLGenerator,
 	fs files.FileSystem,
 	repo videostore.VideoRepo,
 	xsrfKey []byte,
 ) http.Handler {
 	u := &cUI2{
-		ReadOnly:  false,
-		PublicURL: publicURL,
-		FS:        fs,
-		Repo:      repo,
-		XSRFKey:   xsrfKey,
+		ReadOnly:       false,
+		PublicRootURL:  publicRootURL,
+		PublicAssetURL: publicAssetURL,
+		FS:             fs,
+		Repo:           repo,
+		XSRFKey:        xsrfKey,
 	}
 
 	r := mux.NewRouter()
@@ -566,6 +609,16 @@ func NewWriteableCUI2(
 	r.HandleFunc(
 		"/",
 		u.Home,
+	).Methods("GET")
+
+	r.HandleFunc(
+		"/robots.txt",
+		u.RobotsTXT,
+	).Methods("GET")
+
+	r.HandleFunc(
+		"/sitemap.xml",
+		u.SitemapXML,
 	).Methods("GET")
 
 	r.HandleFunc(
@@ -608,11 +661,16 @@ func NewWriteableCUI2(
 	return r
 }
 
-func NewReadOnlyCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRepo) http.Handler {
+func NewReadOnlyCUI2(
+	publicRootURL tmpl.PublicURLGenerator,
+	publicAssetURL tmpl.PublicURLGenerator,
+	repo videostore.VideoRepo,
+) http.Handler {
 	u := &cUI2{
-		ReadOnly:  true,
-		PublicURL: publicURL,
-		Repo:      repo,
+		ReadOnly:       true,
+		PublicRootURL:  publicRootURL,
+		PublicAssetURL: publicAssetURL,
+		Repo:           repo,
 	}
 
 	r := mux.NewRouter()
@@ -631,6 +689,16 @@ func NewReadOnlyCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRep
 	r.HandleFunc(
 		"/",
 		u.Home,
+	).Methods("GET")
+
+	r.HandleFunc(
+		"/robots.txt",
+		u.RobotsTXT,
+	).Methods("GET")
+
+	r.HandleFunc(
+		"/sitemap.xml",
+		u.SitemapXML,
 	).Methods("GET")
 
 	r.HandleFunc(

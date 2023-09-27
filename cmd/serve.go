@@ -22,14 +22,17 @@ var serveCmd = &cobra.Command{
 		r := mux.NewRouter()
 
 		// mount api:
-		publicUrlGenerator := func(relativeURL string) string {
+		publicRootUrlGenerator := func(relativeURL string) string {
+			return app.config.AppURL + relativeURL
+		}
+		publicAssetUrlGenerator := func(relativeURL string) string {
 			return app.config.AppURL + app.config.HTTPVideoDirectory + relativeURL
 		}
 		var apiHandler http.Handler
 		if app.config.ReadOnly {
-			apiHandler = web.NewReadOnlyAPI(publicUrlGenerator, app.fs, app.repo)
+			apiHandler = web.NewReadOnlyAPI(publicAssetUrlGenerator, app.fs, app.repo)
 		} else {
-			apiHandler = web.NewWriteableAPI(publicUrlGenerator, app.fs, app.repo)
+			apiHandler = web.NewWriteableAPI(publicAssetUrlGenerator, app.fs, app.repo)
 		}
 		r.PathPrefix("/api/").Handler(apiHandler)
 
@@ -45,9 +48,9 @@ var serveCmd = &cobra.Command{
 		// mount non-SPA UI:
 		var cUI2Handler http.Handler
 		if app.config.ReadOnly {
-			cUI2Handler = web.NewReadOnlyCUI2(publicUrlGenerator, app.repo)
+			cUI2Handler = web.NewReadOnlyCUI2(publicRootUrlGenerator, publicAssetUrlGenerator, app.repo)
 		} else {
-			cUI2Handler = web.NewWriteableCUI2(publicUrlGenerator, app.fs, app.repo, app.config.XSRFKey)
+			cUI2Handler = web.NewWriteableCUI2(publicRootUrlGenerator, publicAssetUrlGenerator, app.fs, app.repo, app.config.XSRFKey)
 		}
 		r.PathPrefix("/").Handler(cUI2Handler)
 
