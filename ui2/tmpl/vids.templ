@@ -55,9 +55,11 @@ templ sortDropdown(direction string, fluid bool) {
 }
 
 templ videoThumbnail(pug PublicURLGenerator, video videostore.Video) {
-  <a cv-boost="true" href={ videoURL(video) } class="ui fluid video card" aria-label="Video Thumbnail">
+  <a cv-boost="true" href={ videoURL(video) } class="ui fluid video card" data-e2e="Video Thumbnail">
     <div class="ui image">
-      <img src={ pug(video.Thumbnail) } />
+      if video.Thumbnail != "" {
+        <img alt={ video.Title + " Thumbnail" } src={ pug(video.Thumbnail) } />
+      }
     </div>
     <div class="content">
       <span class="header">{ video.Title }</span>
@@ -137,7 +139,7 @@ templ app(state AppState) {
     <div class="ui fixed inverted main menu">
       <div class="ui container">
         <a href="/" class="header item">
-          <img class="logo" src="/img/icon.png" />
+          <img alt="Creamy Videos Logo" class="logo" src="/img/icon.png" />
           Creamy Videos
         </a>
         <a href="/" class="item">
@@ -158,13 +160,13 @@ templ app(state AppState) {
           <div class="borderless item">
             <div class="search-input ui inverted transparent icon input">
               <input
-                aria-label="Search"
+                data-e2e="Search"
                 type="text"
                 placeholder="Search..."
                 name="text"
                 value={ state.SearchText }
               />
-                <button type="submit">
+                <button type="submit" aria-label="Search">
                   <i class="search link icon"></i>
                 </button>
             </div>
@@ -376,8 +378,8 @@ templ Watch(state AppState, video videostore.Video) {
           </div>
         </div>
         <div class="ui vertical segment">
-          <span aria-label="Video Title" class="header">{ video.Title }</span>
-          <p aria-label="Video Description" class="description">{ video.Description }</p>
+          <span data-e2e="Video Title" class="header">{ video.Title }</span>
+          <p data-e2e="Video Description" class="description">{ video.Description }</p>
           <div class="ui right floated buttons">
             <a
               class="ui basic inverted icon download button"
@@ -401,7 +403,7 @@ templ Watch(state AppState, video videostore.Video) {
               </a>
             }
           </div>
-          <div aria-label="Video Tags" class="tags">
+          <div data-e2e="Video Tags" class="tags">
             for _, tag := range video.Tags {
               <a class="ui label" href={ tagSearchURL(tag) }>{ tag }</a>&nbsp;
             }

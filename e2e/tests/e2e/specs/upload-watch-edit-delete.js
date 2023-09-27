@@ -18,8 +18,8 @@ describe('Full Video CRUD Flow', () => {
     cy.url().should('contain', '/watch/');
 
     // assert ui
-    cy.contains('[aria-label="Video Title"]', 'doggo_waddling.mp4');
-    cy.contains('[aria-label="Video Tags"]', 'home');
+    cy.contains('[data-e2e="Video Title"]', 'doggo_waddling.mp4');
+    cy.contains('[data-e2e="Video Tags"]', 'home');
 
     // check for buttons
     cy.contains('.download.button', 'Download');
@@ -51,10 +51,10 @@ describe('Full Video CRUD Flow', () => {
     cy.get('.submit.button').click();
 
     cy.url().should('contain', '/watch/');
-    cy.contains('[aria-label="Video Title"]', 'My Waddling Doggo');
-    cy.contains('[aria-label="Video Tags"]', 'home');
-    cy.contains('[aria-label="Video Tags"]', 'doggo');
-    cy.contains('[aria-label="Video Description"]', 'This is a short video of my doggo waddling.');
+    cy.contains('[data-e2e="Video Title"]', 'My Waddling Doggo');
+    cy.contains('[data-e2e="Video Tags"]', 'home');
+    cy.contains('[data-e2e="Video Tags"]', 'doggo');
+    cy.contains('[data-e2e="Video Description"]', 'This is a short video of my doggo waddling.');
 
     // delete it
     cy.get('.delete.button').click();

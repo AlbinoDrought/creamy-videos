@@ -189,15 +189,33 @@ func videoThumbnail(pug PublicURLGenerator, video videostore.Video) templ.Compon
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\" class=\"ui fluid video card\" aria-label=\"Video Thumbnail\"><div class=\"ui image\"><img src=\"")
+		_, err = templBuffer.WriteString("\" class=\"ui fluid video card\" data-e2e=\"Video Thumbnail\"><div class=\"ui image\">")
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(pug(video.Thumbnail)))
-		if err != nil {
-			return err
+		if video.Thumbnail != "" {
+			_, err = templBuffer.WriteString("<img alt=\"")
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString(templ.EscapeString(video.Title + " Thumbnail"))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("\" src=\"")
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString(templ.EscapeString(pug(video.Thumbnail)))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("\">")
+			if err != nil {
+				return err
+			}
 		}
-		_, err = templBuffer.WriteString("\"></div><div class=\"content\"><span class=\"header\">")
+		_, err = templBuffer.WriteString("</div><div class=\"content\"><span class=\"header\">")
 		if err != nil {
 			return err
 		}
@@ -509,7 +527,7 @@ func app(state AppState) templ.Component {
 			var_20 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<div id=\"app\"><div class=\"ui fixed inverted main menu\"><div class=\"ui container\"><a href=\"/\" class=\"header item\"><img class=\"logo\" src=\"/img/icon.png\"> ")
+		_, err = templBuffer.WriteString("<div id=\"app\"><div class=\"ui fixed inverted main menu\"><div class=\"ui container\"><a href=\"/\" class=\"header item\"><img alt=\"Creamy Videos Logo\" class=\"logo\" src=\"/img/icon.png\"> ")
 		if err != nil {
 			return err
 		}
@@ -564,7 +582,7 @@ func app(state AppState) templ.Component {
 				return err
 			}
 		}
-		_, err = templBuffer.WriteString("<div class=\"borderless item\"><div class=\"search-input ui inverted transparent icon input\"><input aria-label=\"Search\" type=\"text\" placeholder=\"Search...\" name=\"text\" value=\"")
+		_, err = templBuffer.WriteString("<div class=\"borderless item\"><div class=\"search-input ui inverted transparent icon input\"><input data-e2e=\"Search\" type=\"text\" placeholder=\"Search...\" name=\"text\" value=\"")
 		if err != nil {
 			return err
 		}
@@ -1213,7 +1231,7 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 				if err != nil {
 					return err
 				}
-				_, err = templBuffer.WriteString("\" controls autoplay></video></div></div><div class=\"ui vertical segment\"><span aria-label=\"Video Title\" class=\"header\">")
+				_, err = templBuffer.WriteString("\" controls autoplay></video></div></div><div class=\"ui vertical segment\"><span data-e2e=\"Video Title\" class=\"header\">")
 				if err != nil {
 					return err
 				}
@@ -1222,7 +1240,7 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 				if err != nil {
 					return err
 				}
-				_, err = templBuffer.WriteString("</span><p aria-label=\"Video Description\" class=\"description\">")
+				_, err = templBuffer.WriteString("</span><p data-e2e=\"Video Description\" class=\"description\">")
 				if err != nil {
 					return err
 				}
@@ -1319,7 +1337,7 @@ func Watch(state AppState, video videostore.Video) templ.Component {
 						return err
 					}
 				}
-				_, err = templBuffer.WriteString("</div><div aria-label=\"Video Tags\" class=\"tags\">")
+				_, err = templBuffer.WriteString("</div><div data-e2e=\"Video Tags\" class=\"tags\">")
 				if err != nil {
 					return err
 				}

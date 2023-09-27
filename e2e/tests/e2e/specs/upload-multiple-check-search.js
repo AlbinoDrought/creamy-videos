@@ -23,11 +23,11 @@ const uploadVideo = (title, tags, description = 'not an empty string', originalF
 }));
 
 const assertVideoIsSeen = (title) => {
-  cy.contains('[aria-label="Video Thumbnail"]', title);
+  cy.contains('[data-e2e="Video Thumbnail"]', title);
 };
 
 const searchForText = (term) => {
-  cy.get('[aria-label="Search"]').clear().type(term).type('{enter}');
+  cy.get('[data-e2e="Search"]').clear().type(term).type('{enter}');
   cy.url().should('contain', term);
 };
 
