@@ -69,10 +69,17 @@ templ videoThumbnail(pug PublicURLGenerator, video videostore.Video) {
 
 templ videoGrid(pug PublicURLGenerator, videos []videostore.Video) {
   <div class="ui stackable grid">
-    for _, video := range videos {
-      <div class="four wide column">
-        @videoThumbnail(pug, video)
-      </div>
+    if len(videos) > 0 {
+      for _, video := range videos {
+        <div class="four wide column">
+          @videoThumbnail(pug, video)
+        </div>
+      }
+    } else {
+      <div
+        data-reason-for-existence="Prevents pagination controls from hiding under navbar"
+        class="four wide column"
+      ></div>
     }
   </div>
 }

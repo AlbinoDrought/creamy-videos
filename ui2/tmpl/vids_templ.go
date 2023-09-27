@@ -252,16 +252,23 @@ func videoGrid(pug PublicURLGenerator, videos []videostore.Video) templ.Componen
 		if err != nil {
 			return err
 		}
-		for _, video := range videos {
-			_, err = templBuffer.WriteString("<div class=\"four wide column\">")
-			if err != nil {
-				return err
+		if len(videos) > 0 {
+			for _, video := range videos {
+				_, err = templBuffer.WriteString("<div class=\"four wide column\">")
+				if err != nil {
+					return err
+				}
+				err = videoThumbnail(pug, video).Render(ctx, templBuffer)
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</div>")
+				if err != nil {
+					return err
+				}
 			}
-			err = videoThumbnail(pug, video).Render(ctx, templBuffer)
-			if err != nil {
-				return err
-			}
-			_, err = templBuffer.WriteString("</div>")
+		} else {
+			_, err = templBuffer.WriteString("<div data-reason-for-existence=\"Prevents pagination controls from hiding under navbar\" class=\"four wide column\"></div>")
 			if err != nil {
 				return err
 			}
