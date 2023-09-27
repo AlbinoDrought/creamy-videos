@@ -17,6 +17,7 @@ import (
 	"github.com/AlbinoDrought/creamy-videos/videostore"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+	"github.com/shurcooL/httpgzip"
 	"golang.org/x/net/xsrftoken"
 )
 
@@ -551,7 +552,12 @@ func NewWriteableCUI2(
 
 	r := mux.NewRouter()
 
-	fileServer := http.FileServer(http.FS(static.FS))
+	fileServer := httpgzip.FileServer(
+		http.FS(static.FS),
+		httpgzip.FileServerOptions{
+			IndexHTML: true,
+		},
+	)
 	r.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Cache-Control", "public, max-age=86400, stale-while-revalidate")
 		fileServer.ServeHTTP(w, r)
