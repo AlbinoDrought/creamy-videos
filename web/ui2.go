@@ -617,7 +617,12 @@ func NewReadOnlyCUI2(publicURL tmpl.PublicURLGenerator, repo videostore.VideoRep
 
 	r := mux.NewRouter()
 
-	fileServer := http.FileServer(http.FS(static.FS))
+	fileServer := httpgzip.FileServer(
+		http.FS(static.FS),
+		httpgzip.FileServerOptions{
+			IndexHTML: true,
+		},
+	)
 	r.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Cache-Control", "public, max-age=86400, stale-while-revalidate")
 		fileServer.ServeHTTP(w, r)
