@@ -58,7 +58,7 @@ templ videoThumbnail(pug PublicURLGenerator, video videostore.Video) {
   <a cv-boost="true" href={ videoURL(video) } class="ui fluid video card" data-e2e="Video Thumbnail">
     <div class="ui image">
       if video.Thumbnail != "" {
-        <img alt={ video.Title + " Thumbnail" } src={ pug(video.Thumbnail) } />
+        <img alt={ video.Title + " Thumbnail" } src={ pug(video.Thumbnail) } loading="lazy" />
       }
     </div>
     <div class="content">

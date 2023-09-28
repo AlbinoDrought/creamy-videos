@@ -210,7 +210,7 @@ func videoThumbnail(pug PublicURLGenerator, video videostore.Video) templ.Compon
 			if err != nil {
 				return err
 			}
-			_, err = templBuffer.WriteString("\">")
+			_, err = templBuffer.WriteString("\" loading=\"lazy\">")
 			if err != nil {
 				return err
 			}
