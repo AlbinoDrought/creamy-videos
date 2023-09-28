@@ -284,3 +284,8 @@ html, body, head {
 #app div.upload label {
   color: rgb(171, 171, 171);
 }
+
+#app .ui.pagination.menu {
+  /* extra room */
+  margin: 1em 0;
+}

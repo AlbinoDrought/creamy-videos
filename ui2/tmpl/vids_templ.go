@@ -297,7 +297,7 @@ func pagingLinks(p Paging) templ.Component {
 			var_11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<div class=\"ui pagination menu\">")
+		_, err = templBuffer.WriteString("<div class=\"ui inverted pagination menu\">")
 		if err != nil {
 			return err
 		}

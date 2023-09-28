@@ -85,7 +85,7 @@ templ videoGrid(pug PublicURLGenerator, videos []videostore.Video) {
 }
 
 templ pagingLinks(p Paging) {
-  <div class="ui pagination menu">
+  <div class="ui inverted pagination menu">
     for _, page := range genPages(p) {
       if page.Disabled {
         <div class="disabled item">{ page.Page }</div>
