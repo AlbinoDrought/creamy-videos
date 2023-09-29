@@ -47,10 +47,19 @@ window.cvReplacePage = function (html) {
 // but I had some issues with videos continuing to play in the background,
 // the page scrolling to the bottom weirdly, etc.
 // the below code works great on my machine:
-window.addEventListener('popstate', function () {
+window.addEventListener('popstate', function (e) {
   // when the user goes back, reload the page from the server
+  if (e.state && e.state.scrollY) {
+    window.sessionStorage.setItem('cvBoostScrollY', e.state.scrollY);
+  }
   window.location.reload();
 });
+var cvBoostScrollY = window.sessionStorage.getItem('cvBoostScrollY');
+if (cvBoostScrollY) {
+  cvBoostScrollY = parseInt(cvBoostScrollY, 10);
+  window.sessionStorage.removeItem('cvBoostScrollY');
+  window.scroll({ top: cvBoostScrollY });
+}
 window.cvPerformBind = function () {
   // fix above user-interaction issue
   document.querySelectorAll('a[cv-boost="true"]').forEach(function (el) {
@@ -67,6 +76,7 @@ window.cvPerformBind = function () {
           return resp.text();
         })
         .then(function (text) {
+          window.history.replaceState({ scrollY: window.scrollY }, '');
           window.history.pushState({}, '', target);
           window.cvReplacePage(text);
         })
