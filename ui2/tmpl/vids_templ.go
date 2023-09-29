@@ -297,7 +297,15 @@ func pagingLinks(p Paging) templ.Component {
 			var_11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<div class=\"ui inverted pagination menu\">")
+		_, err = templBuffer.WriteString("<div class=\"ui inverted pagination menu\" cv-infinite-scroll=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(nextPageLink(p)))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\">")
 		if err != nil {
 			return err
 		}
@@ -623,7 +631,7 @@ func app(state AppState) templ.Component {
 				return err
 			}
 		}
-		_, err = templBuffer.WriteString("</div></form><div class=\"ui main container\">")
+		_, err = templBuffer.WriteString("</div></form><div class=\"ui main container\" cv-infinite-scroll-data>")
 		if err != nil {
 			return err
 		}

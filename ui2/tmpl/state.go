@@ -35,6 +35,13 @@ type paginationPage struct {
 	Page     string
 }
 
+func nextPageLink(p Paging) string {
+	if p.CurrentPage+1 > p.Pages {
+		return ""
+	}
+	return p.URL(p.CurrentPage + 1)
+}
+
 func genPages(p Paging) []paginationPage {
 	const pageRange = 3
 

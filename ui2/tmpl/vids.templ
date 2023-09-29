@@ -85,7 +85,7 @@ templ videoGrid(pug PublicURLGenerator, videos []videostore.Video) {
 }
 
 templ pagingLinks(p Paging) {
-  <div class="ui inverted pagination menu">
+  <div class="ui inverted pagination menu" cv-infinite-scroll={ nextPageLink(p) }>
     for _, page := range genPages(p) {
       if page.Disabled {
         <div class="disabled item">{ page.Page }</div>
@@ -207,7 +207,7 @@ templ app(state AppState) {
       </div>
     </form>
 
-    <div class="ui main container">
+    <div class="ui main container" cv-infinite-scroll-data>
       { children... }
     </div>
   </div>

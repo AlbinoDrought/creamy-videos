@@ -33,29 +33,35 @@ window.cvReplacePage = function (html) {
   doc.close();
 };
 
-if (window.fetch) {
-  // when we're looking at a list of videos
-  // and we click one
-  // the video should automatically play
-  // -----
-  // the reality:
-  // 1. we click a video link
-  // 2. the user-interaction context is lost for the new page
-  // 3. the browser complains and doesn't play the video
-  // -----
-  // the solution: use SPA-style page loading.
-  // I tried using hx-boost (HTMX) originally,
-  // but I had some issues with videos continuing to play in the background,
-  // the page scrolling to the bottom weirdly, etc.
-  // the below code works great on my machine:
-  window.addEventListener('popstate', function () {
-    // when the user goes back, reload the page from the server
-    window.location.reload();
-  });
+// when we're looking at a list of videos
+// and we click one
+// the video should automatically play
+// -----
+// the reality:
+// 1. we click a video link
+// 2. the user-interaction context is lost for the new page
+// 3. the browser complains and doesn't play the video
+// -----
+// the solution: use SPA-style page loading.
+// I tried using hx-boost (HTMX) originally,
+// but I had some issues with videos continuing to play in the background,
+// the page scrolling to the bottom weirdly, etc.
+// the below code works great on my machine:
+window.addEventListener('popstate', function () {
+  // when the user goes back, reload the page from the server
+  window.location.reload();
+});
+window.cvPerformBind = function () {
+  // fix above user-interaction issue
   document.querySelectorAll('a[cv-boost="true"]').forEach(function (el) {
+    if (el.cvBoundBoost) {
+      return;
+    }
+    el.cvBoundBoost = true;
+
     el.addEventListener('click', function (e) {
       e.preventDefault();
-      const target = el.getAttribute('href');
+      var target = el.getAttribute('href');
       fetch(target)
         .then(function (resp) {
           return resp.text();
@@ -75,6 +81,11 @@ if (window.fetch) {
 
   // click a button multiple times to submit a form
   document.querySelectorAll('a[cv-confirm]').forEach(function (el) {
+    if (el.cvBoundConfirm) {
+      return;
+    }
+    el.cvBoundConfirm = true;
+
     var clicks = 0;
     var requiredClicks = 4;
     var timeoutHandle;
@@ -120,22 +131,63 @@ if (window.fetch) {
       }
     });
   });
-}
 
-document.querySelectorAll('input[type="file"][cv-filename-default-to]').forEach(function (el) {
-  var target = document.querySelector(el.getAttribute('cv-filename-default-to'));
-  if (!target) {
-    console.error('cv-filename-default-to element target not found!', el);
-    return;
-  }
-  el.addEventListener('change', function (e) {
-    var file = e.target.files[0];
-    if (!target.value) {
-      target.value = file.name;
+  // if a file input is filled, default a text input to the file's name
+  document.querySelectorAll('input[type="file"][cv-filename-default-to]').forEach(function (el) {
+    if (el.cvBoundFilenameDefault) {
+      return;
     }
-  });
-});
+    el.cvBoundFilenameDefault = true;
 
+    var target = document.querySelector(el.getAttribute('cv-filename-default-to'));
+    if (!target) {
+      console.error('cv-filename-default-to element target not found!', el);
+      return;
+    }
+    el.addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      if (!target.value) {
+        target.value = file.name;
+      }
+    });
+  });
+
+  document.querySelectorAll('[cv-infinite-scroll]').forEach(function (el) {
+    if (el.cvBoundInfiniteScroll) {
+      return;
+    }
+    el.cvBoundInfiniteScroll = true;
+
+    var checkAlmostScrolledIntoView = function () {
+      if (window.scrollY < el.getBoundingClientRect().top - 250) {
+        return;
+      }
+      document.removeEventListener('scroll', checkAlmostScrolledIntoView);
+      
+      var target = el.getAttribute('cv-infinite-scroll');
+      if (!target) {
+        return;
+      }
+      fetch(target)
+        .then(function (resp) {
+          return resp.text();
+        })
+        .then(function (text) {
+          var domParser = new DOMParser();
+          var targetDocument = domParser.parseFromString(text, 'text/html');
+          var targetContainer = targetDocument.querySelector('[cv-infinite-scroll-data]');
+          if (!targetContainer) {
+            throw new Error('Fetched target ' + target + ' but found no [cv-infinite-scroll-data]');
+          }
+          el.after(...targetContainer.children);
+          // re-bind newly inserted elements
+          window.cvPerformBind();
+        })
+    };
+    document.addEventListener('scroll', checkAlmostScrolledIntoView);
+  });
+};
+window.cvPerformBind();
 
 console.log(`
 # AlbinoDrought/creamy-videos
