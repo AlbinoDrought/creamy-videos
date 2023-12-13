@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
+	"github.com/AlbinoDrought/creamy-videos/ui2/tmpl"
 	"github.com/AlbinoDrought/creamy-videos/videostore"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -32,10 +33,13 @@ type CreamyVideosAPI interface {
 	DeleteVideo(w http.ResponseWriter, r *http.Request)
 }
 
-type PublicURLGenerator func(relativeURL string) string
+func writeJSON(w http.ResponseWriter, thing any) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(thing)
+}
 
 type api struct {
-	PublicURL PublicURLGenerator
+	PublicURL tmpl.PublicURLGenerator
 	FS        files.FileSystem
 	Repo      videostore.VideoRepo
 }
@@ -51,12 +55,7 @@ func (a *api) transformVideo(video videostore.Video) videostore.Video {
 func (a *api) ListVideos(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	page := r.URL.Query().Get("page")
-	if len(page) <= 0 {
-		page = "1"
-	}
-	pageInt, err := strconv.Atoi(page)
-
+	pageInt, err := page(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -82,7 +81,7 @@ func (a *api) ListVideos(w http.ResponseWriter, r *http.Request) {
 		transformedVideos[i] = a.transformVideo(video)
 	}
 
-	json.NewEncoder(w).Encode(transformedVideos)
+	writeJSON(w, transformedVideos)
 }
 
 func (a *api) UploadVideo(w http.ResponseWriter, r *http.Request) {
@@ -100,6 +99,9 @@ func (a *api) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	tags := strings.Split(r.FormValue("tags"), ",")
 	for i, tag := range tags {
 		tags[i] = strings.Trim(tag, " ")
+	}
+	if len(tags) == 1 && tags[0] == "" {
+		tags = []string{}
 	}
 
 	file, header, err := r.FormFile("file")
@@ -158,7 +160,7 @@ func (a *api) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	go debug.FreeOSMemory() // hack to request our memory back :'(
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(a.transformVideo(video))
+	writeJSON(w, a.transformVideo(video))
 }
 
 func (a *api) ShowVideo(w http.ResponseWriter, r *http.Request) {
@@ -185,7 +187,7 @@ func (a *api) ShowVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(a.transformVideo(video))
+	writeJSON(w, a.transformVideo(video))
 }
 
 func (a *api) EditVideo(w http.ResponseWriter, r *http.Request) {
@@ -225,7 +227,7 @@ func (a *api) EditVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(a.transformVideo(video))
+	writeJSON(w, a.transformVideo(video))
 }
 
 func (a *api) DeleteVideo(w http.ResponseWriter, r *http.Request) {
@@ -278,14 +280,14 @@ func (a *api) DeleteVideo(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	json.NewEncoder(w).Encode(a.transformVideo(video))
+	writeJSON(w, a.transformVideo(video))
 }
 
-func newAPI(PublicURL PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) CreamyVideosAPI {
+func newAPI(PublicURL tmpl.PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) CreamyVideosAPI {
 	return &api{PublicURL, FS, Repo}
 }
 
-func NewWriteableAPI(PublicURL PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) http.Handler {
+func NewWriteableAPI(PublicURL tmpl.PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) http.Handler {
 	api := newAPI(PublicURL, FS, Repo)
 	r := mux.NewRouter()
 
@@ -317,7 +319,7 @@ func NewWriteableAPI(PublicURL PublicURLGenerator, FS files.FileSystem, Repo vid
 	return r
 }
 
-func NewReadOnlyAPI(PublicURL PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) http.Handler {
+func NewReadOnlyAPI(PublicURL tmpl.PublicURLGenerator, FS files.FileSystem, Repo videostore.VideoRepo) http.Handler {
 	api := newAPI(PublicURL, FS, Repo)
 	r := mux.NewRouter()
 

@@ -1,6 +1,6 @@
 .git
-ui/node_modules
-ui/dist
+e2e/node_modules
+e2e/dist
+e2e/tests/e2e/videos
 dummyvideos
-packrd
-main-packr.go
+ui2/static/source.tar.gz

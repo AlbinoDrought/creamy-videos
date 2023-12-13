@@ -1,0 +1,435 @@
+package tmpl
+
+import (
+  "fmt"
+  "strings"
+  "net/url"
+  "github.com/AlbinoDrought/creamy-videos/videostore"
+)
+
+// formatters:
+
+func classes(c ...string) string {
+  return strings.Join(c, " ")
+}
+
+func classIf(name string, condition bool) string {
+  if condition {
+    return name
+  }
+  return ""
+}
+
+func videoURL(video videostore.Video) templ.SafeURL {
+  return templ.SafeURL(fmt.Sprintf("/watch/%v", video.ID))
+}
+
+func videoEditURL(video videostore.Video) templ.SafeURL {
+  return templ.SafeURL(fmt.Sprintf("/edit/%v", video.ID))
+}
+
+func videoDeleteURL(video videostore.Video) templ.SafeURL {
+  return templ.SafeURL(fmt.Sprintf("/delete/%v", video.ID))
+}
+
+func tagSearchURL(tag string) templ.SafeURL {
+  return templ.SafeURL("/search?tags=" + url.QueryEscape(tag))
+}
+
+func plural(count int, singular string, plural string) string {
+  if count == 1 {
+    return singular
+  }
+  return plural
+}
+
+// components:
+
+templ sortDropdown(direction string, fluid bool) {
+  <select name="sort" class={ classes("sort-dropdown", classIf("fluid", fluid)) } onchange="window.cvSubmitNearestForm(this)" aria-label="Sorting Method">
+    <option value="newest" selected?={ direction == "newest" }>Sort: Newest</option>
+    <option value="oldest" selected?={ direction == "oldest" }>Sort: Oldest</option>
+    <option value="az" selected?={ direction == "az" }>Sort: A-Z</option>
+    <option value="za" selected?={ direction == "za" }>Sort: Z-A</option>
+  </select>
+}
+
+templ videoThumbnail(pug PublicURLGenerator, video videostore.Video) {
+  <a cv-boost="true" href={ videoURL(video) } class="ui fluid video card" data-e2e="Video Thumbnail">
+    <div class="ui image">
+      if video.Thumbnail != "" {
+        <img alt={ video.Title + " Thumbnail" } src={ pug(video.Thumbnail) } loading="lazy" />
+      }
+    </div>
+    <div class="content">
+      <span class="header">{ video.Title }</span>
+    </div>
+  </a>
+}
+
+templ videoGrid(pug PublicURLGenerator, videos []videostore.Video) {
+  <div class="ui stackable grid">
+    if len(videos) > 0 {
+      for _, video := range videos {
+        <div class="four wide column">
+          @videoThumbnail(pug, video)
+        </div>
+      }
+    } else {
+      <div
+        data-reason-for-existence="Prevents pagination controls from hiding under navbar"
+        class="four wide column"
+      ></div>
+    }
+  </div>
+}
+
+templ pagingLinks(p Paging) {
+  <div class="ui inverted pagination menu" cv-infinite-scroll={ nextPageLink(p) }>
+    for _, page := range genPages(p) {
+      if page.Disabled {
+        <div class="disabled item">{ page.Page }</div>
+      } else {
+        <a class={ classes("item", classIf("active", page.Active)) } href={ templ.SafeURL(page.URL) }>
+          { page.Page }
+        </a>
+      }
+    }
+  </div>
+}
+
+templ xsrf(state AppState) {
+  <input
+    type="hidden"
+    name="_xsrf"
+    value={ state.XSRFToken() }
+  />
+}
+
+// wrappers:
+
+templ page(title string, description string, image string) {
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+      <meta name="theme-color" content="#1b1b1b" />
+      <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'; require-trusted-types-for 'script'; base-uri 'self'; form-action 'self'" />
+      <link rel="icon" href="/favicon.ico" />
+      <title>{ title } | creamy-videos</title>
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={ title } />
+      <meta property="twitter:title" content={ title } />
+      if description != "" {
+        <meta name="description" content={ description } />
+        <meta property="og:description" content={ description } />
+        <meta property="twitter:description" content={ description } />
+      }
+      if image != "" {
+        <meta property="og:image" content={ image } />
+        <meta property="twitter:image" content={ image } />
+      }
+      <link href="/css/semantic.min.0.css" rel="stylesheet" />
+      <link href="/css/main.0.css" rel="stylesheet" />
+      <script defer src="/js/main.0.js" type="text/javascript" />
+    </head>
+    <body>
+      { children... }
+    </body>
+  </html>
+}
+
+templ app(state AppState) {
+  <div id="app">
+    <div class="ui fixed inverted main menu">
+      <div class="ui container">
+        <a href="/" class="header item">
+          <img alt="Creamy Videos Logo" class="logo" src="/img/icon.png" />
+          Creamy Videos
+        </a>
+        <a href="/" class="item">
+          Home
+        </a>
+        if !state.ReadOnly {
+          <a href="/upload" class="item">
+            Upload
+          </a>
+        }
+        <form method="GET" action="/search"  class="not-small right menu">
+          if state.Sortable {
+            <div class="borderless item">
+              @sortDropdown(state.SortDirection, false)
+            </div>
+          }
+
+          <div class="borderless item">
+            <div class="search-input ui inverted transparent icon input">
+              <input
+                data-e2e="Search"
+                type="text"
+                placeholder="Search..."
+                name="text"
+                value={ state.SearchText }
+              />
+                <button type="submit" aria-label="Search">
+                  <i class="search link icon"></i>
+                </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <form method="GET" action="/search">
+      <div class="ui only-small fluid fixed inverted menu search">
+        <div class="borderless item">
+          <div class="search-input ui inverted transparent icon input">
+            <input
+              type="text"
+              placeholder="Search..."
+              name="text"
+              value={ state.SearchText }
+            />
+            <button type="submit" aria-label="Search">
+              <i class="search link icon"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="ui main container only-small">
+        if state.Sortable {
+          <div class="only-small mobile-sort-controls">
+            @sortDropdown(state.SortDirection, true)
+          </div>
+        }
+      </div>
+    </form>
+
+    <div class="ui main container" cv-infinite-scroll-data>
+      { children... }
+    </div>
+  </div>
+}
+
+
+// pages:
+
+templ Home(state AppState, paging Paging, videos []videostore.Video) {
+  @page("Home", "The creamiest selfhosted tubesite", "/img/banner.jpg") {
+    @app(state) {
+      @videoGrid(state.PUG, videos)
+      @pagingLinks(paging)
+    }
+  }
+}
+
+templ Search(state AppState, paging Paging, videos []videostore.Video) {
+  @page("Search: " + state.SearchText, fmt.Sprintf("Page %v of %v", paging.CurrentPage, paging.Pages), "/img/banner.jpg") {
+    @app(state) {
+      @videoGrid(state.PUG, videos)
+      @pagingLinks(paging)
+    }
+  }
+}
+
+templ UploadForm(state AppState, videoFormState VideoFormState) {
+  @page("Upload", "Contribute to the creamiest selfhosted tubesite", "/img/banner.jpg") {
+    @app(state) {
+      <div class="upload ui text container">
+        <form method="POST" class="ui form" enctype="multipart/form-data">
+          @xsrf(state)
+          
+          <div class="ui field">
+            <label>Title</label>
+            <input
+              id="txtTitle"
+              type="text"
+              name="title"
+              placeholder="Title"
+              value={ videoFormState.Title }
+            />
+          </div>
+          <div class="ui field">
+            <label>Tags (separated by comma)</label>
+            <input
+              type="text"
+              name="tags"
+              placeholder="educational, computer science, wizardry"
+              value={ videoFormState.Tags }
+            />
+          </div>
+
+          <div class="field">
+            <label>Description</label>
+            <textarea
+              name="description"
+              placeholder="Description"
+            >{ videoFormState.Description }</textarea>
+          </div>
+
+          <div class="field">
+            <label>File</label>
+            <input
+              type="file"
+              name="file"
+              required
+              cv-filename-default-to="#txtTitle"
+            />
+          </div>
+
+          if videoFormState.Error != "" {
+            <div class="ui visible negative message">
+              <div class="header">
+                Video upload failed
+              </div>
+              <p>{ videoFormState.Error }</p>
+            </div>
+          }
+
+          <button type="submit" class="ui submit button">
+            Upload
+          </button>
+        </form>
+      </div>
+    }
+  }
+}
+
+templ EditForm(state AppState, videoFormState VideoFormState, video videostore.Video) {
+  @page(fmt.Sprintf("Edit %v", video.Title), video.Description, state.PUG(video.Thumbnail)) {
+    @app(state) {
+      <div class="upload ui text container">
+        <form method="POST" class="ui form" enctype="multipart/form-data">
+          @xsrf(state)
+          
+          <div class="ui field">
+            <label>Title</label>
+            <input
+              type="text"
+              name="title"
+              placeholder="Title"
+              value={ videoFormState.Title }
+            />
+          </div>
+          <div class="ui field">
+            <label>Tags (separated by comma)</label>
+            <input
+              type="text"
+              name="tags"
+              placeholder="educational, computer science, wizardry"
+              value={ videoFormState.Tags }
+            />
+          </div>
+
+          <div class="field">
+            <label>Description</label>
+            <textarea
+              name="description"
+              placeholder="Description"
+            >{ videoFormState.Description }</textarea>
+          </div>
+
+          if videoFormState.Error != "" {
+            <div class="ui visible negative message">
+              <div class="header">
+                Video edit failed
+              </div>
+              <p>{ videoFormState.Error }</p>
+            </div>
+          }
+
+          <button type="submit" class="ui submit button">
+            Save
+          </button>
+        </form>
+      </div>
+    }
+  }
+}
+
+templ DeleteForm(state AppState, videoFormState VideoFormState, video videostore.Video) {
+  @page(fmt.Sprintf("Delete %v", video.Title), video.Description, state.PUG(video.Thumbnail)) {
+    @app(state) {
+      <div class="upload ui text container">
+        <form method="POST" class="ui form" enctype="multipart/form-data">
+          @xsrf(state)
+          
+          <p>Are you sure you want to delete <strong>{ video.Title }</strong>?</p>
+          if videoFormState.Error != "" {
+            <div class="ui visible negative message">
+              <div class="header">
+                Video delete failed
+              </div>
+              <p>{ videoFormState.Error }</p>
+            </div>
+          }
+
+          <button type="submit" class="ui submit negative button">
+            Delete
+          </button>
+        </form>
+      </div>
+    }
+  }
+}
+
+templ Watch(state AppState, video videostore.Video) {
+  @page(video.Title, video.Description, state.PUG(video.Thumbnail)) {
+    @app(state) {
+      <div class="watch">
+        <div class="ui vertical segment">
+          <div class="ui center aligned fluid video container">
+            <video src={ state.PUG(video.Source) } controls autoplay />
+          </div>
+        </div>
+        <div class="ui vertical segment">
+          <span data-e2e="Video Title" class="header">{ video.Title }</span>
+          <p data-e2e="Video Description" class="description">{ video.Description }</p>
+          <div class="ui right floated buttons">
+            <a
+              class="ui basic inverted icon download button"
+              download={ video.OriginalFileName }
+              href={ templ.SafeURL(state.PUG(video.Source)) }
+            >
+              <i class="download icon" />
+              Download
+            </a>
+            if !state.ReadOnly {
+              <a cv-confirm="#formDelete" class="ui basic red icon delete button" href={ videoDeleteURL(video) }>
+                <i class="trash icon" />
+                Delete
+              </a>
+              <form id="formDelete" method="POST" action={ fmt.Sprintf("/delete/%v", video.ID) }>
+                @xsrf(state)
+              </form>
+              <a class="ui basic yellow icon edit button" href={ videoEditURL(video) }>
+                <i class="edit icon" />
+                Edit
+              </a>
+            }
+          </div>
+          <div data-e2e="Video Tags" class="tags">
+            for _, tag := range video.Tags {
+              <a class="ui label" href={ tagSearchURL(tag) }>{ tag }</a>&nbsp;
+            }
+          </div>
+        </div>
+      </div>
+    }
+  }
+}
+
+templ ErrorPage(state AppState, message string) {
+  @page("Error", "", "/img/banner.jpg") {
+    @app(state) {
+      <div class="ui visible negative message">
+        <div class="header">
+          Something broke
+        </div>
+        <p>{ message }</p>
+      </div>
+    }
+  }
+}

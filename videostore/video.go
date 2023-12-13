@@ -72,6 +72,7 @@ type VideoRepo interface {
 	Save(video Video) (Video, error)
 	FindById(id uint) (Video, error)
 	All(filter VideoFilter, limit uint, offset uint) ([]Video, error)
+	Count(filter VideoFilter) (uint, error)
 	Delete(video Video) error
 }
 

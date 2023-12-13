@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	rice "github.com/GeertJohan/go.rice"
 	"github.com/gorilla/mux"
 
 	"github.com/AlbinoDrought/creamy-videos/files"
@@ -23,14 +22,17 @@ var serveCmd = &cobra.Command{
 		r := mux.NewRouter()
 
 		// mount api:
-		publicUrlGenerator := func(relativeURL string) string {
+		publicRootUrlGenerator := func(relativeURL string) string {
+			return app.config.AppURL + relativeURL
+		}
+		publicAssetUrlGenerator := func(relativeURL string) string {
 			return app.config.AppURL + app.config.HTTPVideoDirectory + relativeURL
 		}
 		var apiHandler http.Handler
 		if app.config.ReadOnly {
-			apiHandler = web.NewReadOnlyAPI(publicUrlGenerator, app.fs, app.repo)
+			apiHandler = web.NewReadOnlyAPI(publicAssetUrlGenerator, app.fs, app.repo)
 		} else {
-			apiHandler = web.NewWriteableAPI(publicUrlGenerator, app.fs, app.repo)
+			apiHandler = web.NewWriteableAPI(publicAssetUrlGenerator, app.fs, app.repo)
 		}
 		r.PathPrefix("/api/").Handler(apiHandler)
 
@@ -42,13 +44,15 @@ var serveCmd = &cobra.Command{
 			),
 		)
 
-		// mount built SPA ui:
-		box, boxError := rice.FindBox("./../ui/dist")
-		if boxError != nil {
-			log.Printf("failed to find SPA box, running in API-only mode: %+v", boxError)
+		// there was previously an SPA UI @ commit 7c6cf4e199ef3baa03dde8cbe16ced4e21251be8
+		// mount non-SPA UI:
+		var cUI2Handler http.Handler
+		if app.config.ReadOnly {
+			cUI2Handler = web.NewReadOnlyCUI2(publicRootUrlGenerator, publicAssetUrlGenerator, app.repo)
 		} else {
-			r.PathPrefix("/").Handler(http.FileServer(files.CreateSPAFileSystem(box.HTTPBox(), "/index.html")))
+			cUI2Handler = web.NewWriteableCUI2(publicRootUrlGenerator, publicAssetUrlGenerator, app.fs, app.repo, app.config.XSRFKey)
 		}
+		r.PathPrefix("/").Handler(cUI2Handler)
 
 		http.Handle("/", r)
 

@@ -92,6 +92,35 @@ func (repo *postgresVideoRepo) All(filter VideoFilter, limit uint, offset uint) 
 	return videos, err
 }
 
+func (repo *postgresVideoRepo) Count(filter VideoFilter) (uint, error) {
+	query := repo.db.Model(&Video{})
+
+	if !filter.Empty() {
+		query = query.Apply(func(q *orm.Query) (*orm.Query, error) {
+			if len(filter.Title) > 0 {
+				q = q.Where("LOWER(title) LIKE LOWER(?)", "%"+filter.Title+"%")
+			}
+
+			if len(filter.Tags) > 0 {
+				q = q.Where("tags \\?& ?", pg.Array(filter.Tags))
+			}
+
+			if len(filter.Any) > 0 {
+				q = q.WhereOr("LOWER(title) LIKE LOWER(?)", "%"+filter.Any+"%")
+				q = q.WhereOr("tags \\?& ?", pg.Array([]string{filter.Any}))
+			}
+
+			return q, nil
+		})
+	}
+
+	count, err := query.Count()
+	if err != nil {
+		return 0, err
+	}
+	return uint(count), nil
+}
+
 func (repo *postgresVideoRepo) Save(video Video) (Video, error) {
 	var err error
 

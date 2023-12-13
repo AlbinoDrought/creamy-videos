@@ -19,16 +19,14 @@
 ### Without Docker
 
 ```
-# build SPA
-cd ui && npm install && npm run build
-
 # install go deps
-go get -d -v
-# install go.rice buildtool for asset embedding
-go get github.com/GeertJohan/go.rice/rice
+go get
 
-# pack SPA for embedding
-cd cmd && rice embed-go && cd ..
+# install templ for template generation
+go install github.com/a-h/templ/cmd/templ@v0.2.334
+
+# generate template changes
+go generate ./...
 
 # build single-file creamy-videos.exe
 go build
@@ -72,6 +70,8 @@ CREAMY_POSTGRES_ADDRESS=localhost:5432 \
 - `CREAMY_POSTGRES_ADDRESS`: Postgres address including port, defaults to `localhost:5432`
 
 - `CREAMY_READ_ONLY`: if `true`, set the API to read-only mode and disable non-read-only routes
+
+- `CREAMY_XSRF_KEY_B64`: Base64-encoded key to use for generating XSRF tokens. If empty, a random one will be generated. It is recommended to set this value.
 
 (all following commands require the same env configuration)
 

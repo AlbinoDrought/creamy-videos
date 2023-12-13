@@ -1,0 +1,291 @@
+html, body, head {
+  background-color: rgb(27, 27, 27);
+  min-height: 100%;
+  line-height: 1.15;
+}
+
+/* App */
+:root {
+  /*
+  // grabbed during runtime
+  */
+  --main-menu-height: 53px;
+  --mobile-search-menu-height: 40px;
+  --base-top-margin: 59px; /* --main-menu-height + 6px */
+  --mobile-top-margin: 99px; /* --base-top-margin + --mobile-search-menu-height */
+}
+
+#app .main.menu {
+  height: var(--main-menu-height);
+}
+
+#app .main.menu .header.item img {
+  margin-right: 10px;
+}
+
+#app>.ui.main.container {
+  /*
+  // the fixed semantic-ui menu doesn't
+  // pad the contents below it.
+  // without this margin-top, some contents
+  // would be obscured
+  */
+  margin-top: var(--base-top-margin);
+}
+
+#app .only-small {
+  display: none;
+}
+
+#app .mobile-sort-controls {
+  margin: 1em 0;
+}
+
+#app .search.menu {
+  top: var(--main-menu-height);
+  height: var(--mobile-search-menu-height);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+@media only screen and (max-width: 767px) {
+  #app .main.menu .item::before {
+    /*
+    // disable semantic-ui "pseudo-borders" in mobile
+    */
+    background: none;
+  }
+
+  #app .main.menu .header.item {
+    /*
+    // align menu items to the right in mobile
+    */
+    flex-grow: 1;
+  }
+
+  #app>.ui.main.container {
+    /*
+    // when we show the mobile search menu,
+    // offset main container contents even more
+    // so nothing is obscured
+    */
+    margin-top: var(--mobile-top-margin);
+  }
+
+  #app .only-small {
+    display: block;
+  }
+
+  #app .not-small {
+    display: none;
+  }
+}
+
+/* Search Input... this just retargets semantic-ui styling to button and icon combo, so it works without JS */
+#app .search-input button {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+}
+#app .search-input button, .search-input i {
+  width: 1.1em;
+  position: absolute;
+  line-height: 1;
+  text-align: center;
+  top: 0;
+  right: 0;
+  margin: 0;
+  height: 100%;
+  border-radius: 0 .28571429rem .28571429rem 0;
+  transition: opacity .3s ease;
+
+  font-size: 1em;
+
+  display: inline-block;
+  font-family: Icons;
+  font-style: normal;
+  font-weight: 400;
+  text-decoration: inherit;
+  backface-visibility: hidden;
+  color: white;
+}
+#app .search-input i {
+  opacity: .5;
+}
+#app .search-input i:hover {
+  opacity: 1;
+}
+
+/* Sort Dropdown */
+#app .sort-dropdown {
+  text-align: right;
+  appearance: none;
+  color: white;
+  border: 0;
+  line-height: 1;
+  outline: 0;
+  background-color: transparent;
+  font-size: 1em;
+  color: rgba(255,255,255,0.6);
+}
+
+#app .sort-dropdown option {
+  color: black;
+  background-color: white;
+}
+
+#app .sort-dropdown.fluid {
+  width: 100%;
+}
+
+/*
+// Chrome (at least the mobile version) does not support
+// right-aligned selects or select options as of 2019-10-01.
+// These worked fine in Firefox and I assumed it worked everywhere.
+
+// This is a semi-hack to force right-aligned selects:
+*/
+#app .sort-dropdown {
+  direction: rtl;
+}
+#app .sort-dropdown option {
+  direction: ltr;
+}
+
+/* Video Card */
+#app .ui.video.card {
+  border: 0px;
+  border-radius: 0px;
+  transition: none;
+  box-shadow: none;
+  background-color: inherit;
+}
+
+#app .ui.video.card .content {
+  padding: 0.5em 0.5em;
+}
+
+#app .ui.video.card .header {
+  color: rgb(171, 171, 171);
+  word-wrap: break-word;
+}
+#app .ui.video.card .header:hover {
+  color: #1e70bf;
+}
+
+#app .ui.video.card>.ui.image, #app .ui.video.card>.ui.image>img {
+    /*
+    // remove semantic-ui border-radius
+    */
+    border-radius: 0px;
+}
+#app .ui.video.card>.ui.image {
+  /*
+  // black background makes it appear
+  // as if the bounding box is an extension
+  // of the actual video thumbnail.
+  */
+  background-color: #000;
+
+  /*
+  // force box to be 16:9
+  // https://css-tricks.com/aspect-ratio-boxes/
+  */
+  width: 100%;
+  padding-bottom: 56.25%;
+  /*
+  // ...and hide anything that sticks out
+  */
+  overflow: hidden;
+}
+#app .ui.video.card>.ui.image>img {
+  /*
+  // make the image take up the full width
+  // of the box
+  */
+  min-width: 100%;
+  height: auto;
+
+  /*
+  // force the image to vertically center itself
+  // https://stackoverflow.com/a/28456704/3649573
+  */
+  position: absolute;
+  top: 50%;
+  left: 0px;
+  transform: translateY(-50%);
+}
+
+/* Watch */
+#app .ui.video.container {
+  background-color: #000;
+  max-height: 100%;
+  margin: 0px;
+}
+
+#app .ui.video.container>video {
+  min-height: 60vh;
+  max-height: 80vh;
+  max-width: 100%;
+}
+
+#app div.watch {
+  color: rgb(171, 171, 171);
+}
+
+#app div.watch>.ui.segment:first-child {
+  /*
+  // force remove semantic-ui segment padding.
+  // without this, top of video does not
+  // match up with top of content on other pages.
+  */
+  padding-top: 0px;
+}
+
+#app div.watch .header {
+  font-weight: bold;
+  font-size: 3em;
+  word-wrap: break-word;
+}
+
+#app div.watch .description {
+  margin-top: 1em;
+  /*
+  // retain original description spacing and linebreaks,
+  // but wrap if required
+  */
+  white-space: pre-wrap;
+}
+
+
+/* Upload Form */
+#app div.upload {
+  color: rgb(171, 171, 171);
+}
+
+/*
+// intended to override semantic-ui defaults:
+*/
+#app div.upload input,
+#app div.upload input:focus,
+#app div.upload textarea,
+#app div.upload textarea:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+#app div.upload textarea {
+  /*
+  // fix a weird issue where the drag-to-resize component was appearing with a white background:
+  */
+  appearance: textarea;
+}
+
+#app div.upload label {
+  color: rgb(171, 171, 171);
+}
+
+#app .ui.pagination.menu {
+  /* extra room */
+  margin: 1em 0;
+}

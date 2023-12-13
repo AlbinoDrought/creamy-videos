@@ -225,3 +225,37 @@ func (repo *dummyVideoRepo) All(filter VideoFilter, limit uint, offset uint) ([]
 
 	return repo.limitVideoSlice(existingVideos, limit, offset), nil
 }
+
+func (repo *dummyVideoRepo) Count(filter VideoFilter) (uint, error) {
+	count := uint(0)
+
+	for _, video := range repo.videos {
+		if !video.Exists() {
+			continue
+		}
+
+		if filter.Empty() {
+			count++
+			continue
+		}
+
+		if len(filter.Title) > 0 && strings.Contains(video.Title, filter.Title) {
+			count++
+			continue
+		}
+
+		if len(filter.Tags) > 0 && videoHasAllTags(video, filter.Tags) {
+			count++
+			continue
+		}
+
+		if len(filter.Any) > 0 {
+			if strings.Contains(video.Title, filter.Any) || videoHasAllTags(video, []string{filter.Any}) {
+				count++
+				continue
+			}
+		}
+	}
+
+	return count, nil
+}

@@ -36,7 +36,7 @@ func makeApp(cfg appConfig) (instance application) {
 	instance.fs = files.TransformFileSystem(
 		files.LocalFileSystem(instance.config.LocalVideoDirectory),
 		func(p []byte) {
-			for i := 0; i < len(p); i++ {
+			for i := range p {
 				p[i] = p[i] ^ instance.config.FilesystemKey
 			}
 		},
