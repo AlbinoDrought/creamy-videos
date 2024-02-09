@@ -69,6 +69,9 @@ window.cvPerformBind = function () {
     el.cvBoundBoost = true;
 
     el.addEventListener('click', function (e) {
+      if (e.ctrlKey) {
+        return; // user is attempting to open this in a new window!
+      }
       e.preventDefault();
       var target = el.getAttribute('href');
       fetch(target)

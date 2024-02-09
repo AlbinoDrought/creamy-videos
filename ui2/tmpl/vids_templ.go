@@ -510,7 +510,7 @@ func page(title string, description string, image string) templ.Component {
 				return err
 			}
 		}
-		_, err = templBuffer.WriteString("<link href=\"/css/semantic.min.0.css\" rel=\"stylesheet\"><link href=\"/css/main.0.css\" rel=\"stylesheet\"><script defer src=\"/js/main.0.js\" type=\"text/javascript\"></script></head><body>")
+		_, err = templBuffer.WriteString("<link href=\"/css/semantic.min.0.css\" rel=\"stylesheet\"><link href=\"/css/main.0.css\" rel=\"stylesheet\"><script defer src=\"/js/main.1.js\" type=\"text/javascript\"></script></head><body>")
 		if err != nil {
 			return err
 		}
